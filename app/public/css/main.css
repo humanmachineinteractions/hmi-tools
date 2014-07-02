@@ -1,0 +1,27 @@
+* {
+    font-family: "nimbus-sans",sans-serif;
+    font-weight: 300;
+    color:#009fff;
+}
+
+body {
+    background-color: #598b35;
+    background-color: #fff;
+    margin:80px;
+}
+
+h1 {
+    font-size:110px;
+}
+
+.x {
+    color: #ccc;
+}
+
+a {
+    text-decoration: none;
+    color: #777;
+}
+a:hover {
+    color: #333;
+}
