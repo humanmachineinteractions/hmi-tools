@@ -4,9 +4,15 @@ form_fields["annotator_field"] = function () {
   var $cel = $$("annotator-controls").data("__obj__", self);
   self.$el = function () { return $el; };
   self.$cel = function () { return $cel; };
+  var schema_fields = [];
   self.init = function(){
     self.form.add_listener('change', function(){
       update_ui();
+    });
+    $$ajax('/schema/'+self.form.data._id).done(function (o) {
+      schema_fields = [];
+      for (var i=0; i< o.fields.length; i++)
+        schema_fields.push(o.fields[i].name);
     });
   };
 
@@ -21,8 +27,6 @@ form_fields["annotator_field"] = function () {
       update_ui();
     }
   });
-
-
 
   function range_index_for_token_index(idx) {
     for (var i=0; i<_ranges.length; i++) {
@@ -92,7 +96,6 @@ form_fields["annotator_field"] = function () {
       update_ui();
     }
 
-    var schema_fields = ['Organization','Person','Greeting'];
     function range_ui(idx){
       var $d = $$('annotation-marker');
       var r = _ranges[idx];
@@ -204,6 +207,8 @@ function select_field(options) {
 
 // text utility
 function tokenize(text) {
+  if (text == null || text == "")
+    return [];
   var tokens = [];
   var s = "";
   for (var i=0; i<text.length; i++) {

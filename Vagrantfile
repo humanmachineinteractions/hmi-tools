@@ -9,6 +9,7 @@ Vagrant::Config.run do |config|
   config.vm.network :hostonly, "10.11.12.24"
 
   config.vm.share_folder "currently13", "/home/currently13", "../currently13"
+  config.vm.share_folder "MITIE", "/home/MITIE", "../MITIE"
   config.vm.share_folder "app", "/home/vagrant/app", "app"
   config.vm.share_folder "deploy", "/home/vagrant/deploy", "deploy"
 

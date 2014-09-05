@@ -18,3 +18,7 @@ apt-get update
 apt-get install -y graphicsmagick
 apt-get install -y nodejs
 apt-get install -y mongodb-10gen
+
+sudo apt-get install build-essential python-dev --no-install-recommends
+sudo apt-get install python-pip
+sudo pip install pymongo

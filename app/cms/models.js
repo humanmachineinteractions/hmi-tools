@@ -91,7 +91,8 @@ exports = module.exports = {
     },
     browse: [
       {name: "name", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
-      {name: "description", cell: "char", filters: ["$regex", "="], order: "asc,desc"}
+      {name: "description", cell: "char", filters: ["$regex", "="], order: "asc,desc"},
+      {name: "modified", cell: "date", filters: ["$gt", "$lt", "="], order: "asc,desc"}
     ],
     form: [
       {name: "name", widget: "input", options: {className: "large"}},
@@ -103,24 +104,21 @@ exports = module.exports = {
   Segment: {
     meta: {
       plural: "Segments",
-      name: "<%= line_number %>: <%= text %>",
+      name: "<%= text %>",
       dashboard: true,
       workflow: true
     },
     schema: {
-      line_number: Number,
       text: String,
       tags: String,
       description: String,
       annotation:  mongoose.Schema.Types.Mixed
     },
     browse: [
-      {name: "line_number", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
       {name: "text", cell: "char", filters: ["$regex", "="], order: "asc,desc"},
       {name: "tags", cell: "char", filters: ["$regex", "="], order: "asc,desc"}
     ],
     form: [
-      {name: "line_number", widget: "input", options: {className: "large"}},
       {name: "text", widget: "input", options: {className: "large"}},
       {name: "annotation", widget: "annotator"},
       {name: "tags", widget: "input"},

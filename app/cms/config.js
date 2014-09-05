@@ -1,6 +1,6 @@
 var config = {
   development: {
-    name: 'HMI',
+    name: 'HMI MetaPoint',
     serverPort: 3002,
     mongoConnectString: 'mongodb://localhost/hmi',
     sessionSecret: 'fdsfdsfdsr2454r5w43tytuyik',

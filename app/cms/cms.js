@@ -22,10 +22,30 @@ if (useCluster && cluster.isMaster) {
 } else {
   var server = express();
   var domain = require('./index');
+
   var cms = new current.Cms(domain);
   server.use(cms.app);
+
   server.set('views', __dirname + '/views');
   server.use(express.static(__dirname + '/public'));
+
+  var Corpus = cms.meta.model("Corpus");
+  var Script = cms.meta.model("Script");
+  var Schema = cms.meta.model("Schema");
+  server.get('/schema/:seg_id', function(req, res, next){
+    Script.find({segments: new mongoose.Types.ObjectId(req.params.seg_id)}).exec(function (err, scripts) {
+      if (err) return next(err);
+      if (!scripts || scripts.length == 0) return next(new Error('no scripts for seg'));
+      Corpus.find({scripts: scripts[0]}).exec(function (err, corpora) {
+        if (err) return next(err);
+        if (!corpora || corpora.length == 0) return next(new Error('no corpora for seg/script'));
+        Schema.findById(corpora[0].scheme).populate('fields').exec(function(err, schema){
+          if (err) return next(err);
+          res.json(schema);
+        })
+      });
+    });
+  });
 
   server.listen(domain.config.serverPort);
 }
