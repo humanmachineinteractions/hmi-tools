@@ -8,6 +8,7 @@ Vagrant::Config.run do |config|
   config.vm.customize ["modifyvm", :id, "--memory", 256]
   config.vm.network :hostonly, "10.11.12.24"
 
+  config.vm.share_folder "currently13", "/home/currently13", "../currently13"
   config.vm.share_folder "app", "/home/vagrant/app", "app"
   config.vm.share_folder "deploy", "/home/vagrant/deploy", "deploy"
 

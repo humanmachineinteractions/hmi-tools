@@ -1,0 +1,21 @@
+
+
+.token {
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    color: #ccc;
+    float:left;
+    padding: 5px;
+    margin: 0 5px 0 0;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.token.select {
+    background-color: #00b3e9;
+}
+
