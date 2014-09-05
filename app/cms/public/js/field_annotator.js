@@ -21,48 +21,69 @@ form_fields["annotator_field"] = function () {
     }
   });
   function update_ui(){
-    var text = self.form.data.text;
-    var tokens = [];
-    var s = "";
-    for (var i=0; i<text.length; i++) {
-      var c = text.charAt(i);
-      if (c == " ")
-      {
-        if (s)
-          tokens.push(s);
-        s = "";
-      } else if (c == "." || c == "," || c == "!" || c == "?") {
-        if (s)
-          tokens.push(s);
-        s = "";
-        tokens.push(c);
-      } else {
-        s += c;
-      }
-    }
-    if (s)
-      tokens.push(s);
+    var tokens = tokenize(self.form.data.text);
     var $x = $$();
-    var selecting = false;
+    var clicked = -1;
+    function $t(idx) {
+      return $($x.children()[idx]);
+    }
+    var over = function (idx) {
+      var range;
+      if (idx < clicked)
+        range = [idx, clicked];
+      else
+        range = [clicked, idx];
+      for (var i=0; i<tokens.length; i++)
+        $t(i).removeClass('select');
+      for (var i=range[0]; i<range[1] + 1; i++)
+        $t(i).addClass('select');
+    };
+
     for (var i=0; i<tokens.length; i++)
     {
-      (function (token) {
+      (function (token, idx) {
         var $s = $$("token");
         $s.text(token);
         $s.mousedown(function () {
-          selecting = true;
-          $s.toggleClass('select');
+          clicked = idx;
+          over(idx);
         });
         $s.mouseover(function(){
-          if (selecting)
-            $s.addClass('select');
+          if (clicked != -1)
+            over(idx);
         });
         $(document).mouseup(function(){
-          selecting = false;
+          clicked = -1;
         });
         $x.append($s);
-      })(tokens[i]);
+      })(tokens[i], i);
     }
     $el.empty().append($x, "<br clear='all'>");
   }
 };
+
+
+// utility
+function tokenize(text) {
+  var tokens = [];
+  var s = "";
+  for (var i=0; i<text.length; i++) {
+    var c = text.charAt(i);
+    if (c == " ")
+    {
+      if (s)
+        tokens.push(s);
+      s = "";
+    } else if (c == "." || c == "," || c == "!" || c == "?") {
+      if (s)
+        tokens.push(s);
+      s = "";
+      tokens.push(c);
+    } else {
+      s += c;
+    }
+  }
+  if (s)
+    tokens.push(s);
+  return tokens;
+}
