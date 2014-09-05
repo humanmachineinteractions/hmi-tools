@@ -1,21 +1,62 @@
 
+.annotator {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 .token {
+    font-size: 20px;
     border-radius: 3px;
-    border: 1px solid #ccc;
-    color: #ccc;
-    float:left;
+    border: 1px solid #888;
+    color: #444;
+    float: left;
     padding: 5px;
-    margin: 0 5px 0 0;
+    margin: 0 5px 5px 0;
     cursor: pointer;
-    -webkit-touch-callout: none;
--webkit-user-select: none;
--khtml-user-select: none;
--moz-user-select: none;
--ms-user-select: none;
-user-select: none;
-}
-.token.select {
-    background-color: #00b3e9;
 }
 
+.token.select {
+    background-color: #5edaff;
+    border: 1px solid #00b3e9;
+}
+
+.token.annotated {
+    background-color: #fff1d3;
+    border: 1px solid #443431;
+}
+
+.annotation-marker {
+    font-size: 10px;
+    border-radius: 2px;
+    background-color: #464646;
+    border: 1px solid #333;
+    color: #fff1d3;
+    float: left;
+    padding: 2px 2px 3px 2px;
+    margin: 0 5px 5px 0;
+    cursor: pointer;
+
+}
+
+.annotation-marker .select {
+    font-size: 14px;
+}
+
+.annotation-marker .ooption {
+}
+
+.annotation-marker .ooption:hover {
+    color: #fff;
+}
+
+.annotation-marker .ooption.selected {
+    color: #ff0000;
+}
+
+.annotation-marker .del {
+    font-size: 14px;
+}
