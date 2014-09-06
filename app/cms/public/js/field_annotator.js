@@ -9,11 +9,20 @@ form_fields["annotator_field"] = function () {
     self.form.add_listener('change', function(){
       update_ui();
     });
-    $$ajax('/schema/'+self.form.data._id).done(function (o) {
-      schema_fields = [];
-      for (var i=0; i< o.fields.length; i++)
-        schema_fields.push(o.fields[i].name);
-    });
+    retry_get_schema_data();
+    function retry_get_schema_data() {
+      if (self.form.data._id != null)
+        get_schema_data();
+      else
+        setTimeout(retry_get_schema_data, 750);
+    }
+    function get_schema_data() {
+      $$ajax('/schema/' + self.form.data._id).done(function (o) {
+        schema_fields = [];
+        for (var i = 0; i < o.fields.length; i++)
+          schema_fields.push(o.fields[i].name);
+      }).error(retry_get_schema_data);
+    }
   };
 
   var _ranges = [];
