@@ -15,14 +15,14 @@ if (useCluster && cluster.isMaster) {
   });
 
 } else {
-  var server = express();
-  server.set('views', __dirname + '/views');
-  server.use(express.static(__dirname + '/public'));
-  server.get('/', function(req, res, next){
-    res.render('index.ejs');
-  });
 
-  server.listen(3002);
+
+
+  express()
+    .use(express.vhost('humanmachineinteractions.com', require('./public').app))
+    .use(express.vhost('www.humanmachineinteractions.com', require('./public').app))
+    .use(express.vhost('helios.humanmachineinteractions.com', require('./helios').app))
+    .listen(80)
 }
 
 //process.on('uncaughtException', function (err) {

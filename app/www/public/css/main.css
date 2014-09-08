@@ -1,7 +1,7 @@
 * {
     font-family: "nimbus-sans",sans-serif;
     font-weight: 300;
-    color:#009fff;
+    color: #00121d;
 }
 
 body {
@@ -11,17 +11,22 @@ body {
 }
 
 h1 {
-    font-size:110px;
+    font-size:50px;
 }
 
 .x {
-    color: #ccc;
+    color: #6d6d6d;
 }
 
 a {
     text-decoration: none;
-    color: #777;
+    color: #aaa;
+    font-size: 30px;
 }
 a:hover {
     color: #333;
+}
+textarea {
+     font-family: "nimbus-sans",sans-serif;
+    font-size: 30px;
 }

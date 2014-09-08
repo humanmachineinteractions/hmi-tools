@@ -1,0 +1,26 @@
+
+<% var title = "HMI, LLC" %>
+<% include head.ejs %>
+<div id="x">
+
+</div>
+
+<script>
+    var $d = $("<div></div>");
+    var $a = $("<textarea></textarea>");
+    var $t = $("<button>TEST</button>");
+    var $r = $("<div></div>");
+    $d.append($a, $t, $r, "<br>");
+    $t.click(function () {
+        $.ajax("/test/" + encodeURIComponent($a.val())).done(function (r) {
+            $r.empty();
+            for (var i = 0; i < r.length; i++) {
+                $r.append("<div><span class='small'>" + r[i].tag + "</span>: <span>" + r[i].text + "</span></div>");
+            }
+        })
+    });
+    $("#x").append($d);
+</script>
+<% include foot.ejs %>
+
+
