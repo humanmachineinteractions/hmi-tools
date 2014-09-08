@@ -48,8 +48,12 @@ class myHandler(BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/json')
         self.end_headers()
 
-
         oid = m['id']
+        if 'delete' in m:
+            if oid in ners:
+                del ners[oid]
+            return
+
         ner = load_ner(oid)
         text = m['text']
         tokens = text.split()

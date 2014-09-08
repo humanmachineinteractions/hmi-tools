@@ -5,6 +5,7 @@ var express = require('express');
 var mongoose = require('mongoose');
 var kue = require('kue');
 var spawn = require('child_process').spawn;
+var http = require('http');
 
 var current = require('../../../currently13/app/modules/cms');
 var useCluster = false;
@@ -45,30 +46,33 @@ if (useCluster && cluster.isMaster) {
       });
     });
   });
+  server.listen(domain.config.serverPort);
 
 
   var test_server = spawn("python", [ "test1.py"], {cwd: __dirname + "/../"});
     test_server.stdout.on('data', function (data) {
-      console.log(data);
+      console.log("ts out> "+ data);
     });
     test_server.stderr.on('data', function (data) {
-      console.log(data);
+      console.log("ts err> "+ data);
     });
     test_server.on('error', function (code) {
-      console.log(code);
+      console.log("ts", code);
     });
     test_server.on('close', function (code) {
-      console.log(code);
+      console.log("ts", code);
     });
 
-
-  server.listen(domain.config.serverPort);
 
   //
   var jobs = kue.createQueue(cms.kueConfigH);
   jobs.on('job complete', function(id,result){
     kue.Job.get(id, function (err, job) {
       if (err) return;
+      Corpus.findById(job.data.id).exec(function (err, corpus) {
+        console.log(corpus)
+      });
+
 //      job.remove(function (err) {
 //        if (err) throw err;
 //        console.log('completed job', job, result);
@@ -76,6 +80,9 @@ if (useCluster && cluster.isMaster) {
     });
   });
 
+//  server.get('/cms/jobs', function(req, res, next){
+//    console.log(jobs.client);
+//  });
 
   server.get('/cms/corpus/:id/train_ner', function (req, res, next) {
     jobs.create('train_ner', {
@@ -85,6 +92,28 @@ if (useCluster && cluster.isMaster) {
     });
   });
 
+  server.get('/cms/corpus/:id/is_trained', function (req, res, next) {
+    fs.exists(__dirname + "/../" + req.params.id + ".dat", function (b) {
+      res.json(b);
+    });
+  });
+
+  server.get('/cms/corpus/:id/test/:text', function (req, res, next) {
+    var options = {
+      host: 'localhost',
+      port: 8080,
+      path: '/cms?id='+req.params.id+"&text="+encodeURIComponent(req.params.text)
+    };
+    http.get(options, function (hres) {
+      console.log("Got response: " + hres.statusCode);
+      hres.on("data", function(chunk) {
+        res.json(JSON.parse(chunk.toString()));
+      });
+    }).on('error', function (e) {
+      console.log("EERR",e)
+      next(e);
+    });
+  });
 
   jobs.process('train_ner', function (job, done) {
     job.log('started ' + job);

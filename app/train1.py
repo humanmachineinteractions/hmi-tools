@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, os
+import sys, os, urllib
 import multiprocessing
 
 parent = os.path.dirname(os.path.realpath(__file__))
@@ -33,6 +33,8 @@ def tokenize(text):
 client = MongoClient('mongodb://localhost/')
 db = client.hmi
 oid = sys.argv[1]
+os.remove(oid + ".dat")
+urllib.urlopen("http://localhost:8080/cms/?id="+oid+"&delete=true")
 corpus = db.corpus.find_one({'_id': ObjectId(oid)})
 print "Training %s" % corpus['name']
 trainer = ner_trainer("../../MITIE/MITIE-models/english/total_word_feature_extractor.dat")
@@ -45,14 +47,13 @@ for script_id in corpus['scripts']:
         #print "    %s" % text
         sample = ner_training_instance(text)
         for item in seg['annotation']:
-            #print "    %s %s %s" % (item['range'][0], item['range'][1], item['type'])
             if 'type' in item and item['type'] is not None:
                 b = item['range'][0]
                 e = item['range'][1] + 1
-                t = ' '.join(text[b:e])
                 sample.add_entity(xrange(b, e), item['type'])
-                print "    %s // %s" % (t, item['type'])
+                print "    %s // %s" % (' '.join(text[b:e]), item['type'])
         trainer.add(sample)
+
 trainer.num_threads = multiprocessing.cpu_count()
 print "TRAINING"
 ner = trainer.train()

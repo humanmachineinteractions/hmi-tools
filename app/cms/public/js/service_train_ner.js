@@ -1,15 +1,35 @@
 form_modules["train_ner"] = function (form) {
+    console.log("X")
   var self = this;
   var $el = mixin_basic_component(self, 'xxx');
   mixin_emitter(self);
   $el.append("<h3>NER Training</h3>");
-  var $b = $("<button>GO</button>")
-  $el.append($b);
-  $el.append("<br>");
-  $b.click(function () {
-    var url = form.app.base_url + '/corpus/' + form.id + '/train_ner';
-    $$ajax(url).done(function (r) {
-      console.log(r);
+  $$ajax("/cms/corpus/"+form.id+"/is_trained").done(function(r){
+    var $b = $("<button>BUILD</button>")
+    var $d = $$('test');
+    $el.append($b, "<br><br>", $d);
+    $b.click(function () {
+      var url = form.app.base_url + '/corpus/' + form.id + '/train_ner';
+      $$ajax(url).done(function (r) {
+        $d.remove();
+        $b.prop('disabled', true);
+      });
     });
-  });
+    if (r){
+      var $a = $("<textarea></textarea>");
+      var $t = $("<button>TEST</button>");
+      var $r = $("<div></div>");
+      $d.append($a, $t, $r, "<br>");
+      $t.click(function(){
+        $$ajax("/cms/corpus/"+form.id+"/test/"+encodeURIComponent($a.val())).done(function(r){
+          $r.empty();
+          for (var i=0; i< r.length; i++) {
+            $r.append("<div><span class='small'>"+r[i].tag+"</span>: <span>"+r[i].text+"</span></div>");
+          }
+        })
+      })
+    }
+  })
+
+
 };
