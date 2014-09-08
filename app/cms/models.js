@@ -74,7 +74,12 @@ exports = module.exports = {
       {name: "description", widget: "rich_text", options: {collapsable: true, collapsed: true}},
       {name: "scheme", widget: "choose_create", options: {type: "Schema", array: false, create: false}},
       {name: "scripts", widget: "choose_create", options: {type: "Script", array: true}}
-    ]
+    ],
+    formModules: [
+      {name: "Train NER", widget: "train_ner", options: {}, async: true}
+    ],
+    includes: ["/js/service_train_ner.js"]
+
   },
 
   Script: {

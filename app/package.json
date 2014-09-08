@@ -5,7 +5,7 @@
   "private": true,
   "dependencies": {
     "express": "3.4.7",
-    "kue": "0.7.5",
+    "kue": "^0.7.5",
     "mongoose": "3.8.7",
     "gridfs-stream": "0.4.1",
     "cloudinary": "1.0.7",
