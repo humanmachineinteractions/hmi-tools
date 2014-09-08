@@ -128,11 +128,13 @@ form_fields["annotator_field"] = function () {
           selected = -1;
           self.emit('change');
         });
+        s.add_listener('change', function(){
+          r.type = schema_fields[s.data];
+          selected = -1;
+          self.emit('change');
+        });
         $dx.click(function(){
           r.type = schema_fields[s.data];
-//          $t.text(r.type);
-//          $t.show();
-//          $s.remove();
           selected = -1;
           self.emit('change');
        });
@@ -190,7 +192,6 @@ function select_field(options) {
     },
     set: function (n) {
       if (n == null || n < 0 || n > options.options.length) n = -1;
-      console.log(n);
       _sel_idx = n;
       update_ui();
     }
