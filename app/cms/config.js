@@ -5,7 +5,7 @@ var config = {
     mongoConnectString: 'mongodb://localhost/hmi',
     sessionSecret: 'fdsfdsfdsr2454r5w43tytuyik',
 
-    kueConfig: {
+    kueConfigH: {
       redis: {
         port: 6379,
         host: '127.0.0.1'
@@ -21,7 +21,7 @@ var config = {
     mongoConnectString: 'mongodb://localhost/hmi',
     sessionSecret: 'j8o453nufsekunfsdhj',
 
-    kueConfig: {
+    kueConfigH: {
       redis: {
         port: 6379,
         host: '127.0.0.1'

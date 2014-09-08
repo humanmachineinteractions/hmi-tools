@@ -48,14 +48,14 @@ if (useCluster && cluster.isMaster) {
   server.listen(domain.config.serverPort);
 
   //
-  var jobs = kue.createQueue(cms.kueConfig);
+  var jobs = kue.createQueue(cms.kueConfigH);
   jobs.on('job complete', function(id,result){
     kue.Job.get(id, function (err, job) {
       if (err) return;
-      job.remove(function (err) {
-        if (err) throw err;
-        console.log('completed job', job, result);
-      });
+//      job.remove(function (err) {
+//        if (err) throw err;
+//        console.log('completed job', job, result);
+//      });
     });
   });
 
@@ -63,11 +63,33 @@ if (useCluster && cluster.isMaster) {
   server.get('/cms/corpus/:id/train_ner', function (req, res, next) {
     jobs.create('train_ner', {
       id: req.params.id
-    }).attempts(1).save();
+    }).attempts(1).save(function(){
+      res.json("ok");
+    });
   });
 
+
+  var spawn = require('child_process').spawn;
   jobs.process('train_ner', function (job, done) {
-    setTimeout(done("something"), 1000);
+    job.log('started ' + job);
+    var err = null;
+    var train_process    = spawn("python", [ "train1.py", job.data.id], {cwd: __dirname + "/../"});
+    train_process.stdout.on('data', function (data) {
+      job.log('stdout: ' + data);
+      console.log('stdout: ' + data);
+    });
+    train_process.stderr.on('data', function (data) {
+      job.log('stderr: ' + data);
+      console.log('stderr: ' + data);
+    });
+    train_process.on('error', function (code) {
+      job.log('errrrrrror ' + code);
+      err = code;
+    });
+    train_process.on('close', function (code) {
+      job.log('child process exited with code ' + code);
+      done(err);
+    });
   });
 
   kue.app.listen(3004);

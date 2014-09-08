@@ -7,24 +7,46 @@ sys.path.append(parent + '/../../MITIE/mitielib')
 from mitie import *
 
 from pymongo import MongoClient
+from bson.objectid import ObjectId
+
+def tokenize(text):
+    if text is None or text == "":
+        return []
+    tokens = []
+    s = ""
+    for c in text:
+        if c == " ":
+            if s:
+                tokens.append(s)
+            s = ""
+        elif c == "." or c == "," or c == "!" or c == "?":
+            if s:
+                tokens.append(s)
+            s = ""
+            tokens.append(c)
+        else:
+            s += c
+    if s:
+        tokens.append(s)
+    return tokens
+
 client = MongoClient('mongodb://localhost/')
 db = client.hmi
-corpora = db.corpus.find({})
-for c in corpora:
-    print c
-
-def do_train3():
-    # ... should contain the file name for a saved mitie::total_word_feature_extractor.
-    # The total_word_feature_extractor is MITIE's primary method for analyzing words and
-    # is created by the tool in the MITIE/tools/wordrep folder.  The wordrep tool analyzes...
-    trainer = ner_trainer("../../MITIE/MITIE-models/english/total_word_feature_extractor.dat")
-
-    for s in samples:
-        r, p = tokenize(s)
-        sample = ner_training_instance(r)
-        for e in p:
-            print ' '.join([r[i] for i in range(e[1],e[2])]), e[0]
-            sample.add_entity(xrange(e[1], e[2]), e[0])
+corpus = db.corpus.find_one({'_id': ObjectId(sys.argv[1])})
+print "Training %s" % corpus['name']
+trainer = ner_trainer("../../MITIE/MITIE-models/english/total_word_feature_extractor.dat")
+for script_id in corpus['scripts']:
+    script = db.scripts.find_one({'_id': script_id})
+    print "  Script %s" % script['name']
+    for seg_id in script['segments']:
+        seg = db.segments.find_one({'_id': seg_id})
+        text = tokenize(seg['text'])
+        print "    %s" % text
+        sample = ner_training_instance(text)
+        for item in seg['annotation']:
+            print "    %s %s %s" % (item['range'][0], item['range'][1], item['type'])
+            if item['type'] is not None:
+                sample.add_entity(xrange(item['range'][0], item['range'][1]+1), item['type'])
         trainer.add(sample)
 
 
@@ -75,6 +97,7 @@ def do_train2():
             entity_text = " ".join(tokens[i] for i in range)
             print "    " + tag + ": " + entity_text
         print "\n"
+
 
 
 
