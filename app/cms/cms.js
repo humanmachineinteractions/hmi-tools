@@ -4,6 +4,7 @@ var cluster = require('cluster');
 var express = require('express');
 var mongoose = require('mongoose');
 var kue = require('kue');
+var spawn = require('child_process').spawn;
 
 var current = require('../../../currently13/app/modules/cms');
 var useCluster = false;
@@ -45,6 +46,22 @@ if (useCluster && cluster.isMaster) {
     });
   });
 
+
+  var test_server = spawn("python", [ "test1.py"], {cwd: __dirname + "/../"});
+    test_server.stdout.on('data', function (data) {
+      console.log(data);
+    });
+    test_server.stderr.on('data', function (data) {
+      console.log(data);
+    });
+    test_server.on('error', function (code) {
+      console.log(code);
+    });
+    test_server.on('close', function (code) {
+      console.log(code);
+    });
+
+
   server.listen(domain.config.serverPort);
 
   //
@@ -69,7 +86,6 @@ if (useCluster && cluster.isMaster) {
   });
 
 
-  var spawn = require('child_process').spawn;
   jobs.process('train_ner', function (job, done) {
     job.log('started ' + job);
     var err = null;

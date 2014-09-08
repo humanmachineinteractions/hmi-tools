@@ -11,9 +11,9 @@ var config = {
         host: '127.0.0.1'
       }
     },
-
-    storage: "cloudinary",
-    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
+//
+//    storage: "cloudinary",
+//    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
   },
   production: {
     name: 'HMI',
@@ -29,8 +29,8 @@ var config = {
       }
     },
 
-    storage: "cloudinary",
-    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
+//    storage: "cloudinary",
+//    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
   }
 }
 
