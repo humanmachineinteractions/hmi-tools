@@ -28,5 +28,41 @@ a:hover {
 }
 textarea {
      font-family: "nimbus-sans",sans-serif;
-    font-size: 30px;
+    font-size: 38px;
+    width: 400px;
+    height: 200px;
+    padding: 10px;
+}
+
+button {
+    font-weight: bold;
+    background-color: #39474f;
+    padding: 4px 9px 5px 8px;
+    margin: 2px 6px 0 0;
+    color: #fff;
+    cursor: pointer;
+    border: 0;
+    border-radius: 2px;
+}
+
+button:hover:enabled {
+    background-color: #021e35;
+}
+
+button:disabled {
+    opacity: .4;
+}
+
+#x {
+    font-size: 38px;
+    padding: 23px;
+}
+#x span {
+    padding-right:5px;
+}
+#x .small {
+    border: 1px solid #999;
+    font-size:12px;
+    -webkit-border-radius: 3px;
+    padding: 3px;
 }

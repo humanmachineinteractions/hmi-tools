@@ -7,19 +7,51 @@
 
 <script>
     var $d = $("<div></div>");
-    var $a = $("<textarea></textarea>");
+    var $a = $("<textarea>Hi, Ralph, how are you?</textarea>");
     var $t = $("<button>TEST</button>");
+    $d.append($a, "<br>", $t);
+    var $e = $("<div>Working...</div>");
+    $e.hide();
     var $r = $("<div></div>");
-    $d.append($a, $t, $r, "<br>");
+    var $rt = $("<div></div>");
+    var $rb = $("<button>Try again</button>");
+    $r.append($rt, $rb);
+    $r.hide();
     $t.click(function () {
+        $t.hide();
+        $a.prop('disabled', true);
+        $e.show();
         $.ajax("/test/" + encodeURIComponent($a.val())).done(function (r) {
-            $r.empty();
-            for (var i = 0; i < r.length; i++) {
-                $r.append("<div><span class='small'>" + r[i].tag + "</span>: <span>" + r[i].text + "</span></div>");
+            $d.hide();
+            $e.hide();
+            $r.show();
+            $rt.empty();
+            for (var t=0; t< r.tokens.length; t++) {
+                var p = false;
+                for (var i = 0; i < r.annotations.length; i++) {
+                    var rr = r.annotations[i];
+                    var in_range = rr.range.indexOf(t);
+                    if (in_range == 0) {
+                        $rt.append("<span class='small'>" + rr.tag + "</span><span class='classified'>" + rr.text + "</span> ");
+                        p = true;
+                    } else if (in_range != -1) {
+                        p = true;
+                    }
+                }
+                if (!p)
+                 $rt.append("<span class='none'>" +r.tokens[t]+"</span>");
             }
+
         })
     });
-    $("#x").append($d);
+    $rb.click(function(){
+        $r.hide();
+        $d.show();
+        $a.prop('disabled', false);
+        $a.val("");
+        $t.show();
+    });
+    $("#x").append($d, $e, $r);
 </script>
 <% include foot.ejs %>
 

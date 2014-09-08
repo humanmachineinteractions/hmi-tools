@@ -19,7 +19,26 @@ def load_ner(oid):
     return ner
 
 
-
+def tokenize(text):
+    if text is None or text == "":
+        return []
+    tokens = []
+    s = ""
+    for c in text:
+        if c == " ":
+            if s:
+                tokens.append(s)
+            s = ""
+        elif c == "." or c == "," or c == "!" or c == "?":
+            if s:
+                tokens.append(s)
+            s = ""
+            tokens.append(c)
+        else:
+            s += c
+    if s:
+        tokens.append(s)
+    return tokens
 
 
 #!/usr/bin/python
@@ -56,7 +75,7 @@ class myHandler(BaseHTTPRequestHandler):
 
         ner = load_ner(oid)
         text = m['text']
-        tokens = text.split()
+        tokens = tokenize(text)
 
         entities = ner.extract_entities(tokens)
 
@@ -64,10 +83,11 @@ class myHandler(BaseHTTPRequestHandler):
         for e in entities:
             range = e[0]
             tag = e[1]
+            nums = [i for i in range]
             entity_text = " ".join(tokens[i] for i in range)
-            v.append({"tag": tag, "text": entity_text})
+            v.append({"tag": tag, "text": entity_text, "range": nums})
             print "    " + tag + ": " + entity_text
-        self.wfile.write(json.dumps(v))
+        self.wfile.write(json.dumps({"tokens": tokens, "annotations": v}))
         return
 
 try:
