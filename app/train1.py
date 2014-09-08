@@ -33,7 +33,8 @@ def tokenize(text):
 client = MongoClient('mongodb://localhost/')
 db = client.hmi
 oid = sys.argv[1]
-os.remove(oid + ".dat")
+if os.path.isfile(oid + ".dat"):
+    os.remove(oid + ".dat")
 urllib.urlopen("http://localhost:8080/cms/?id="+oid+"&delete=true")
 corpus = db.corpus.find_one({'_id': ObjectId(oid)})
 print "Training %s" % corpus['name']
