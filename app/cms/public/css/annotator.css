@@ -66,3 +66,20 @@
     background-color:#fff;
     color: #111;
 }
+
+.train_ner .small {
+    font-size: 10px;
+    border-radius: 2px;
+    background-color: #fff;
+    border: 1px solid #999;
+    color: #777;
+    padding: 2px 2px 3px 2px;
+    margin: 0 5px 5px 0;
+    cursor: pointer;
+}
+.train_ner .none {
+    color: #999;
+}
+.train_ner .classified {
+    color: #333;
+}
