@@ -37,8 +37,9 @@ textarea {
 button {
     font-weight: bold;
     background-color: #39474f;
-    padding: 4px 9px 5px 8px;
-    margin: 2px 6px 0 0;
+    padding: 8px 16px;
+    margin: 6px 0;
+    font-size: 12px;
     color: #fff;
     cursor: pointer;
     border: 0;
@@ -58,11 +59,22 @@ button:disabled {
     padding: 23px;
 }
 #x span {
-    padding-right:5px;
+    padding: 15px 5px 0 0;
+    position:relative;
 }
 #x .small {
-    border: 1px solid #999;
+    position: absolute;
     font-size:12px;
-    -webkit-border-radius: 3px;
-    padding: 3px;
+    -webkit-border-radius: 2px;
+    padding: 2px;
+    background-color: #999;
+    color: #fff;
+}
+#x .classified {
+    line-height: 110px;
+    color: #00218F;
+}
+#x .none {
+    color: #999;
+    line-height: 110px;
 }
