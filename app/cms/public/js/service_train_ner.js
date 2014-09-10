@@ -7,13 +7,16 @@ form_modules["train_ner"] = function (form) {
     var $b = $("<button>BUILD</button>")
     var $d = $$('test');
     $el.append($b, "<br><br>", $d);
-    $b.click(function () {
-      var url = form.app.base_url + '/corpus/' + form.id + '/train_ner';
-      $$ajax(url).done(function (r) {
-        $d.remove();
-        $b.prop('disabled', true);
+    confirm_inline($b, 'Really build?', function(){
+        var url = form.app.base_url + '/corpus/' + form.id + '/train_ner';
+        $$ajax(url).done(function (r) {
+          $d.remove();
+          $b.show();
+          $b.prop('disabled', true);
+          $b.text("WORKING...");
+        });
       });
-    });
+
     if (r){
       var $a = $("<textarea></textarea>");
       var $t = $("<button>TEST</button>");
