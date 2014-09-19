@@ -1,6 +1,6 @@
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
-
+var utils = require('../utils');
 
 
 /**
@@ -12,7 +12,7 @@ function CmuDict() {
   var self = this;
   self.entries = {};
   self.numberOfEntries = 0;
-  readLines(__dirname + '/data/cmudict.0.7a', function (data) {
+  utils.readLines(__dirname + '/data/cmudict.0.7a', function (data) {
     if (data.indexOf(";;;") == 0 || data.indexOf("#") == 0)
       return;
     var s = data.split(" ");
@@ -92,28 +92,6 @@ CmuDictEntry.prototype.size = function () {
 }
 
 
-// UTILITY
-
-function readLines(filepath, func, done) {
-  var rs = fs.createReadStream(filepath);
-  var remaining = '';
-  rs.on('data', function (data) {
-    remaining += data;
-    var index = remaining.indexOf('\n');
-    while (index > -1) {
-      var line = remaining.substring(0, index);
-      remaining = remaining.substring(index + 1);
-      func(line);
-      index = remaining.indexOf('\n');
-    }
-  });
-  rs.on('end', function () {
-    if (remaining.length > 0) {
-      func(remaining);
-    }
-    done();
-  });
-}
 
 function removePunc(word) {
   return word.replace(/[\!|\.|\,|\?|\"]/g, "");
