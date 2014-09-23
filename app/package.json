@@ -6,7 +6,8 @@
   "dependencies": {
     "cloudinary": "1.0.7",
     "connect-mongo": "0.4.0",
-    "csv": "0.3.7",
+    "crawler": "^0.2.7",
+    "csv-parse": "0.0.6",
     "diff": "1.0.8",
     "ejs": "0.8.5",
     "express": "3.4.7",
@@ -20,6 +21,7 @@
     "lodash": "^2.4.1",
     "mailgun": "0.4.2",
     "mime": "1.2.11",
+    "mongodb": "^1.4.12",
     "mongoose": "3.8.7",
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.0",
@@ -27,8 +29,10 @@
     "prompt": "0.2.12",
     "request": "^2.44.0",
     "tmp": "0.0.23",
+    "unfluff": "^0.8.0",
     "winston": "0.7.2",
     "winston-mongodb": "0.4.3",
+    "xlsjs": "^0.7.1",
     "xml2js": "^0.4.4"
   },
   "devDependencies": {

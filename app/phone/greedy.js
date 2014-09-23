@@ -30,7 +30,7 @@ if (fs.existsSync(file + ".json")) {
         });
       });
       if (d % 10 == 0)
-        console.log('transcribed '+d+' of '+c);
+        console.log('transcribed ' + d + ' of ' + c);
       if (c == d) { // got as many transcriptions as lines...
         fs.writeFile(file + ".json", JSON.stringify(lines), function (err) {
           if (err)  console.log(err);
@@ -46,7 +46,7 @@ function forNPhone(n, phones, next) {
   for (var i = 0; i < phones.length - (n - 1); i++) {
     var nphone = '';
     var aphone = [];
-    for (var j = 0; j < n; j++){
+    for (var j = 0; j < n; j++) {
       nphone += phones[i + j];
       aphone.push(phones[i + j]);
     }
@@ -54,7 +54,7 @@ function forNPhone(n, phones, next) {
   }
 }
 
-function forBiPhone(phones, next){
+function forBiPhone(phones, next) {
   forNPhone(2, phones, next);
 }
 
@@ -109,7 +109,7 @@ function doGreedy() {
     // Step 8: Repeat from Step 2 to 7 until the biphone list is empty.
     var biphone_count = 0;
     _.each(unique_biphones, function (p) {
-      biphone_count ++;
+      biphone_count++;
     });
     console.log(biphone_count, lines.length, " ---------------------");
     if (biphone_count == 0) {
@@ -120,17 +120,18 @@ function doGreedy() {
     }
     step_2_through_7();
   }
+
   step_2_through_7();
 
 }
 
 /* more docs
 
-Algorithm works step−by−step: a first sentence is selected
-according to a criterion; the sentence is added to the cover,
-and the covered units are removed from the set of units to
-cover. The process starts again: the second sentence, in this
-example, contains a maximum of non−already covered
-units. The process stops when all units are covered.
+ Algorithm works step−by−step: a first sentence is selected
+ according to a criterion; the sentence is added to the cover,
+ and the covered units are removed from the set of units to
+ cover. The process starts again: the second sentence, in this
+ example, contains a maximum of non−already covered
+ units. The process stops when all units are covered.
 
  */

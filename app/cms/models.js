@@ -133,6 +133,40 @@ exports = module.exports = {
 
   },
 
+  Content: {
+    meta: {
+      plural: "Content",
+      name: "<%= uri %>",
+      dashboard: true
+    },
+    schema: {
+      state: String,
+      uri: String,
+      body: String,
+      title: String,
+      image: String,
+      lang: String,
+      indexed: Date
+    },
+    browse: [
+      {name: "state", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "uri", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "title", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "lang", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "indexed", cell: "date", filters: ["$gt", "$lt", "$gte", "$lte"], order: "asc,desc"},
+    ],
+    form: [
+      {name: "state", widget: "input"},
+      {name: "uri", widget: "input"},
+      {name: "title", widget: "input"},
+      {name: "image", widget: "input"},
+      {name: "lang", widget: "input"},
+      {name: "body", widget: "rich_text", options: {collapsable: true, collapsed: true}},
+      {name: "indexed", widget: "date"}
+    ]
+
+  },
+
   /* news */
   News: {
     meta: {

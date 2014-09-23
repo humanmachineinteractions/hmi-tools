@@ -1,20 +1,30 @@
-Vagrant::Config.run do |config|
+Vagrant.configure("2") do |config|
+  #config.omnibus.chef_version = '11.16'
+  #config.berkshelf.enabled = true
 
-  config.vm.box = "precise32"
-  
-  config.vm.box_url = "http://files.vagrantup.com/precise32.box"
+  config.vm.box = "precise64"
 
-  config.vm.forward_port 3002, 3002
-  config.vm.customize ["modifyvm", :id, "--memory", 4196]
-  config.vm.customize ["modifyvm", :id, "--cpus", 4]
-  config.vm.customize ["modifyvm", :id, "--cpuexecutioncap", 100]
-  config.vm.network :hostonly, "10.11.12.24"
+  config.vm.provider "virtualbox" do |v|
+      v.memory = 3120
+      v.cpus = 4
+      v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
+      v.gui = true
+    end
 
-  config.vm.share_folder "currently13", "/home/currently13", "../currently13"
-  config.vm.share_folder "MITIE", "/home/MITIE", "../MITIE"
-  config.vm.share_folder "app", "/home/vagrant/app", "app"
-  config.vm.share_folder "deploy", "/home/vagrant/deploy", "deploy"
+
+  #config.ssh.insert_key = true
+  #config.ssh.forward_agent = true
+  config.ssh.password = "vagrant"
+
+  config.vm.network "private_network", ip: "10.11.12.25"
+
+  config.vm.synced_folder "app", "/home/vagrant/app"
+  config.vm.synced_folder "deploy", "/home/vagrant/deploy"
+  config.vm.synced_folder "../MITIE", "/home/MITIE"
+  config.vm.synced_folder "../currently13", "/home/currently13"
+  #config.vm.synced_folder "../test-voice-data", "/home/vagrant/test-voice-data"
 
   config.vm.provision :shell, :path => "deploy/provision.sh"
 
 end
+

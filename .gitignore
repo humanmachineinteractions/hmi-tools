@@ -28,3 +28,4 @@ node_modules
 .idea
 .vagrant
 *.dat
+app/build/data/test*

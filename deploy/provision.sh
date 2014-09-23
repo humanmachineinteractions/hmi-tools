@@ -16,3 +16,8 @@ apt-get install -y nodejs
 apt-get install -y mongodb-10gen
 sudo apt-get install python-pip
 sudo pip install pymongo
+
+
+#checkout MITIE & build
+#checkout marytts & build
+#run mary external/check_install.sh (HTS, HDecode in this dir)
