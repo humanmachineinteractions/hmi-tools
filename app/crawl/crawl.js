@@ -1,35 +1,34 @@
+var cluster = require("cluster");
+var useCluster = true;
 var _ = require('lodash');
 var extractor = require('unfluff');
 var url = require('url');
 var config = require('./config');
 var utils = require('../utils');
-var current = require('../../../currently13/app/modules/cms');
-var domain = require('../cms/index');
-var cms = new current.Cms(domain);
-var Content = cms.meta.model("Content");
 
-Content.remove({}, function (err, ct) {
-  console.log('removed',ct);
-  addPageStub('http://www.nytimes.com/', function(err, c){
-    crawl();
+
+
+
+var Content;
+
+if (useCluster && cluster.isMaster) {
+  var cpuCount = require('os').cpus().length;
+  for (var i = 0; i < cpuCount; i += 1) {
+    cluster.fork();
+  }
+  cluster.on('exit', function (worker) {
+    console.log('Worker ' + worker.id + ' died');
+    cluster.fork();
   });
-});
+} else {
+  var current = require('../../../currently13/app/modules/cms');
+  var domain = require('../cms/index');
+  var cms = new current.Cms(domain);
+  Content = cms.meta.model("Content");
+  console.log('worker init')
+  crawl();
+}
 
-//var cluster = require("cluster");
-//var useCluster = true;
-//function start_crawler(){
-//  if (useCluster && cluster.isMaster) {
-//  var cpuCount = require('os').cpus().length;
-//  for (var i = 0; i < cpuCount; i += 1) {
-//    cluster.fork();
-//  }
-//  cluster.on('exit', function (worker) {
-//    console.log('Worker ' + worker.id + ' died');
-//    cluster.fork();
-//  });
-//} else {
-//  }
-//}
 
 var request = require('request');
 var jsdom = require('jsdom');
@@ -38,15 +37,15 @@ var jsdom = require('jsdom');
 function crawl() {
   var current_content = null;
 
-  function do_request() {
-    console.log(current_content.url)
+  function do_request(complete) {
+    console.log('http://' + current_content.host +  current_content.path)
     jsdom.env({
-      url: current_content.url,
+      url: 'http://'+ current_content.host + current_content.path,
       //scripts: ["http://code.jquery.com/jquery.js"],
       done: function (errors, window) {
         if (errors) {
           console.log("ERRRRR", errors, current_content);
-          Content.findOneAndUpdate({url: current_content.url}, {
+          Content.findOneAndUpdate({host: current_content.host, path: current_content.path }, {
               $set: {
                 state: "crawled_error",
                 body: errors[0].message
@@ -55,15 +54,15 @@ function crawl() {
             function (err, p) {
               if (err) console.log("crawl db err", err);
               else console.log("saved w/ err", p);
-              queue_one();
+              complete();
             });
         }
         else {
-          addPage(current_content.url, window.document.body.outerHTML, function () {
+          addPage(current_content.host, current_content.path, window.document.title,  window.document.body.innerHTML, function () {
             utils.forEach(window.document.getElementsByTagName('A'), function (a, next) {
               addPageStub(a.getAttribute("href"), next)
             }, function () {
-              queue_one();
+              complete();
             });
           });
         }
@@ -74,9 +73,18 @@ function crawl() {
 
   function queue_one() {
     setTimeout(function() {
-      Content.findOne({state: "init"}).exec(function (err, content) {
-        current_content = content;
-        do_request();
+      Content.find({state: "init"}).exec(function (err, results) {
+        if (err || results == null || results.length == 0) {
+          setTimeout(function () {
+            console.log(' ... retry')
+            queue_one();
+          }, 2000);
+          return;
+        }
+        current_content = results[Math.floor(Math.random()*results.length)];
+        do_request(function(){
+          queue_one();
+        });
       });
     }, 100);
   }
@@ -84,30 +92,27 @@ function crawl() {
   queue_one();
 }
 
-function clean(url) {
-  var hash_idx = url.indexOf("#");
-  if (hash_idx == -1)
-    return url;
-  else
-    return url.substring(0, hash_idx);
-//  var s = url.parse(urlStr);
-//  console.log(s);
-//  return s.protocoll
+function clean(urlStr) {
+//  var hash_idx = url.indexOf("#");
+//  if (hash_idx == -1)
+//    return url;
+//  else
+//    return url.substring(0, hash_idx);
+  var s = url.parse(urlStr);
+  return {host: s.host, path: s.path};
 }
 
-function addPage(url, body, complete) {
-  console.log("ADD", url)
-  var data = extractor(body);
-//  var data = {text:body,title:'',image:'',lang:''};
-  url = clean(url); //data.canonicalUri
-  Content.findOneAndUpdate({url: url},
+function addPage(host, path, title, body, complete) {
+  var data = extractor.lazy(body, 'en');
+  Content.findOneAndUpdate({host: host, path: path},
     {
       state: "crawled",
-      url: url,
-      body: data.text,
-      title: data.title,
-      image: data.image,
-      lang: data.lang,
+      host: host,
+      path: path,
+      body: data.text(),
+      title: title,
+      image: data.image(),
+      lang: data.lang(),
       indexed: new Date(),
       $inc: {
         hits: 1
@@ -115,7 +120,8 @@ function addPage(url, body, complete) {
     }, {upsert: true},
     function (err, p) {
       if (err) return complete(err);
-      return complete();
+   console.log("ADD", p)
+     return complete();
     });
 }
 
@@ -125,20 +131,21 @@ function addPageStub(url, complete) {
     return complete();
   url = clean(url);
   for (var i = 0; i < nofollowpaths.length; i++) {
-    if (url.indexOf(nofollowpaths[i]) != -1)
+    if (url.path.indexOf(nofollowpaths[i]) != -1)
       return complete();
   }
-  Content.findOne({url: url}, function (err, page) {
+  Content.findOne({host: url.host, path: url.path}, function (err, page) {
     if (err) throw err;
     if (page) {
       return complete();
     } else {
       var c = new Content({
-        url: url,
+        host: url.host,
+        path: url.path,
         state: "init"
       });
       c.save(function (err, p) {
-        console.log('stub', err, p)
+        //console.log('stub', err, p)
         return complete();
       });
     }

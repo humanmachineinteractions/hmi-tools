@@ -6,6 +6,8 @@ var file = process.argv[2];
 var lines = [];
 var c = 0;
 var d = 0;
+var out = fs.createWriteStream(file + "-ranked.txt")
+
 if (fs.existsSync(file + ".json")) {
   fs.readFile(file + ".json", function (err, file) {
     lines = JSON.parse(file);
@@ -59,6 +61,7 @@ function forBiPhone(phones, next) {
 }
 
 function doGreedy() {
+
   console.log("// The greedy selection algorithm (Santen and Buchsbaum, 1997)");
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.
@@ -98,10 +101,12 @@ function doGreedy() {
     });
     // Step 5: Select the highest scored sentence.
     lines.sort(function (a, b) {
-      return  a.score - b.score
+      return  b.score - a.score
     });
     // Step 6: Delete the selected sentence from the corpus.
     var deleted = lines.shift();
+    console.log(deleted.line, deleted.score);
+    out.write(deleted.line+"\n")
     // Step 7: Delete all the biphones found in the selected sentence from the biphone list.
     forBiPhone(deleted.phones, function (biphone) {
       delete unique_biphones[biphone];

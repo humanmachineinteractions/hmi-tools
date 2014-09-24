@@ -141,7 +141,8 @@ exports = module.exports = {
     },
     schema: {
       state: String,
-      url: String,
+      host: String,
+      path: String,
       body: String,
       title: String,
       image: String,
@@ -150,14 +151,16 @@ exports = module.exports = {
     },
     browse: [
       {name: "state", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
-      {name: "url", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "host", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
+      {name: "path", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
       {name: "title", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
       {name: "lang", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
       {name: "indexed", cell: "date", filters: ["$gt", "$lt", "$gte", "$lte"], order: "asc,desc"},
     ],
     form: [
       {name: "state", widget: "input"},
-      {name: "url", widget: "input"},
+      {name: "host", widget: "input"},
+      {name: "path", widget: "input"},
       {name: "title", widget: "input"},
       {name: "image", widget: "input"},
       {name: "lang", widget: "input"},
