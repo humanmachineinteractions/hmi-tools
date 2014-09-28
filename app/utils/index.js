@@ -2,7 +2,7 @@ exports.forEach = function(list, target, complete, concurrent)
 {
   if (!list || list.length == 0)
   {
-    complete();
+    if (complete) complete();
     return;
   }
   var c = concurrent ? concurrent : 1;
@@ -19,7 +19,7 @@ exports.forEach = function(list, target, complete, concurrent)
       i++;
       if (k < list.length)
         ff();
-      else
+      else if (complete)
         complete();
     });
   }
@@ -223,4 +223,31 @@ exports.expand_functions = function(ctx, list)
     }
   }
   return ff;
+}
+
+
+
+
+var fs = require('fs');
+// UTILITY
+
+exports.readLines = function(filepath, func, done) {
+  var rs = fs.createReadStream(filepath);
+  var remaining = '';
+  rs.on('data', function (data) {
+    remaining += data;
+    var index = remaining.indexOf('\n');
+    while (index > -1) {
+      var line = remaining.substring(0, index);
+      remaining = remaining.substring(index + 1);
+      func(line);
+      index = remaining.indexOf('\n');
+    }
+  });
+  rs.on('end', function () {
+    if (remaining.length > 0) {
+      func(remaining);
+    }
+    done();
+  });
 }

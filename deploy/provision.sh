@@ -2,7 +2,7 @@
 sudo su
 apt-get update
 apt-get install -y git
-apt-get install build-essential python-dev python-software-propertie --no-install-recommends
+apt-get install build-essential python-dev python-software-properties --no-install-recommends
 apt-get install -y redis-server --no-install-recommends
 apt-get install -y openjdk-7-jdk maven
 #update-alternatives --config java
@@ -16,8 +16,19 @@ apt-get install -y nodejs
 apt-get install -y mongodb-10gen
 sudo apt-get install python-pip
 sudo pip install pymongo
-
-
+sudo apt-get install -y openjdk-7-jdk maven
+sudo update-alternatives --config java
 #checkout MITIE & build
 #checkout marytts & build
+cd /home/vagrant
+git clone https://github.com/marytts/marytts.git
+cd marytts
+mvn install
 #run mary external/check_install.sh (HTS, HDecode in this dir)
+#stanford nlp
+cd /home/vagrant
+wget http://nlp.stanford.edu/software/stanford-corenlp-full-2014-06-16.zip
+unzip stanford-corenlp-full-2014-06-16.zip
+mv stanford-corenlp-full-2014-06-16 corenlp
+wget http://nlp.stanford.edu/software/stanford-corenlp-models-current.jar
+mv stanford-corenlp-models-current.jar corenlp/

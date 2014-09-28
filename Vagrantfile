@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
 
   config.vm.provider "virtualbox" do |v|
-      v.memory = 3120
+      v.memory = 8000
       v.cpus = 4
       v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
       #v.gui = true

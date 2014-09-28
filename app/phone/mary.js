@@ -1,8 +1,10 @@
+var fs = require('fs');
 var util = require('util');
 var forever = require('forever-monitor');
 var request = require('request');
 var xml2js = require('xml2js');
 var _ = require('lodash');
+var utils = require('../utils');
 
 var maryServer;
 exports.startMaryServer = function (complete) {
@@ -45,6 +47,31 @@ exports.transcribe = function (s, complete) {
       });
     })
 };
+
+exports.transcribeFile = function (input, output, complete) {
+  var out = fs.createWriteStream(output)
+  var lines = [];
+  utils.readLines(input, function (line) {
+    lines.push(line);
+    console.log(line);
+  }, function () {
+    utils.forEach(lines, function (line, n) {
+      exports.transcribe(line, function (err, pt) {
+        var s = '';
+        for (var i = 0; i < pt.length; i++) {
+          if (pt[i] && pt[i].transcription) {
+            var r = pt[i].transcription.split(" ");
+            s += r.join('') + ' ';
+          }
+        }
+        console.log(line, s);
+        out.write(s + '\n');
+        n();
+      })
+
+    }, complete);
+  });
+}
 
 function test() {
   exports.transcribe("Different languages are, in fact, different, and I don't think there's an answer to the question you're asking. You could ask about specific languages, or what language would be best for that sort of manipulation. –  David Thornley Jun 17 '10 at 17:23");

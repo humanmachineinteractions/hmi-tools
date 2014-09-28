@@ -3,7 +3,6 @@ var useCluster = true;
 var _ = require('lodash');
 var extractor = require('unfluff');
 var url = require('url');
-var config = require('./config');
 var utils = require('../utils');
 
 
@@ -12,7 +11,7 @@ var utils = require('../utils');
 var Content;
 
 if (useCluster && cluster.isMaster) {
-  var cpuCount = require('os').cpus().length;
+  var cpuCount = 1;//require('os').cpus().length;
   for (var i = 0; i < cpuCount; i += 1) {
     cluster.fork();
   }
@@ -37,34 +36,42 @@ var jsdom = require('jsdom');
 function crawl() {
   var current_content = null;
 
+  function err(msg, complete) {
+    console.log("ERRRRR", msg, current_content);
+    Content.findOneAndUpdate({host: current_content.host, path: current_content.path }, {
+        $set: {
+          state: "crawled_error",
+          body: msg
+        }
+      }, {upsert: true},
+      function (err, p) {
+        if (err) console.log("crawl db err", err);
+        else console.log("saved w/ err", p);
+        complete();
+      });
+  }
+
   function do_request(complete) {
-    console.log('http://' + current_content.host +  current_content.path)
+    //console.log('http://' + current_content.host +  current_content.path)
     jsdom.env({
       url: 'http://'+ current_content.host + current_content.path,
       //scripts: ["http://code.jquery.com/jquery.js"],
       done: function (errors, window) {
         if (errors) {
-          console.log("ERRRRR", errors, current_content);
-          Content.findOneAndUpdate({host: current_content.host, path: current_content.path }, {
-              $set: {
-                state: "crawled_error",
-                body: errors[0].message
-              }
-            }, {upsert: true},
-            function (err, p) {
-              if (err) console.log("crawl db err", err);
-              else console.log("saved w/ err", p);
-              complete();
-            });
+          err(errors[0].message, complete);
         }
         else {
-          addPage(current_content.host, current_content.path, window.document.title,  window.document.body.innerHTML, function () {
-            utils.forEach(window.document.getElementsByTagName('A'), function (a, next) {
-              addPageStub(a.getAttribute("href"), next)
-            }, function () {
-              complete();
+          try {
+            addPage(current_content.host, current_content.path, window.document.title, window.document.body.innerHTML, function () {
+              utils.forEach(window.document.getElementsByTagName('A'), function (a, next) {
+                addPageStub(a.getAttribute("href"), next)
+              }, function () {
+                complete();
+              });
             });
-          });
+          } catch (e) {
+            err('error ' + e, complete);
+          }
         }
       }
     });
@@ -106,21 +113,24 @@ function addPage(host, path, title, body, complete) {
   var data = extractor.lazy(body, 'en');
   Content.findOneAndUpdate({host: host, path: path},
     {
-      state: "crawled",
-      host: host,
-      path: path,
-      body: data.text(),
-      title: title,
-      image: data.image(),
-      lang: data.lang(),
-      indexed: new Date(),
-      $inc: {
-        hits: 1
+      $set: {
+        state: "crawled",
+        host: host,
+        path: path,
+        body: data.text(),
+        title: title,
+        image: data.image(),
+        lang: data.lang(),
+        indexed: new Date()
       }
+//      $inc: {
+//        hits: 1
+//      }
     }, {upsert: true},
     function (err, p) {
+      console.log(err);
       if (err) return complete(err);
-   console.log("ADD", p)
+   console.log("***ADD", p)
      return complete();
     });
 }
