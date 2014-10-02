@@ -3,6 +3,7 @@ var util = require('util');
 var forever = require('forever-monitor');
 var request = require('request');
 var xml2js = require('xml2js');
+var sax = require('sax');
 var _ = require('lodash');
 var utils = require('../utils');
 
@@ -29,12 +30,52 @@ exports.transcribe = function (s, complete) {
     }},
     function (err, response, body) {
       if (err) return complete(err);
+      if (response.statusCode != 200)
+        return complete(response.statusCode);
+      var p = [];
+      var get_text = false;
+      var parser = sax.parser(true);
+      parser.onerror = function (e) {
+        console.log("ERROR",e);
+      };
+      parser.ontext = function (t) {
+        t = t.trim();
+        if (p.length != 0 && get_text) {
+          p[p.length - 1].original = t;
+          get_text = false;
+        }
+      };
+      parser.onopentag = function (node) {
+        if (node.name == 't' && node.attributes.ph != null) {
+          p.push({pos: node.attributes.pos, original: null, transcription: node.attributes.ph});
+          get_text = true;
+        }
+      };
+//      parser.onattribute = function (attr) {};
+      parser.onend = function () {
+        complete(null, p);
+      };
+      parser.write(body).close();
+    });
+};
+
+exports.transcribe0 = function (s, complete) {
+  request.post('http://localhost:59125/process', {form: {
+      INPUT_TEXT: s,
+      INPUT_TYPE: "TEXT",
+      OUTPUT_TYPE: "PHONEMES",//"ALLOPHONES",
+      LOCALE: "en_US"
+    }},
+    function (err, response, body) {
+      if (err) return complete(err);
       if (response.statusCode != 200) return complete(response.statusCode);
       xml2js.parseString(body, function (err, data) {
         if (err) return complete(err);
         var root = data.maryxml.p[0].voice[0].s; // seems to be the root... todo verify
         var p = [];
+        //console.log(root);
         _.each(root, function (s) {
+          //console.log(s);
           _.each(s.t, function (t) {
             var orig = t._.trim();
             var transcription = t.$.ph;
@@ -64,14 +105,14 @@ exports.transcribeFile = function (input, output, complete) {
             s += r.join('') + ' ';
           }
         }
-        console.log(line, s);
+        console.log(line.split(" ").length, s.split(" ").length);
         out.write(s + '\n');
         n();
       })
 
     }, complete);
   });
-}
+};
 
 function test() {
   exports.transcribe("Different languages are, in fact, different, and I don't think there's an answer to the question you're asking. You could ask about specific languages, or what language would be best for that sort of manipulation. –  David Thornley Jun 17 '10 at 17:23");
@@ -80,3 +121,8 @@ function test() {
   exports.transcribe("Note: I always keep something like Sublime Text or Atom installed for quick editing, most of the time I don’t open Netbeans if it is only to edit a comma or to add a brake line.");
   exports.transcribe("Are you using Netbeans or another IDE? Share your experience in a comment!");
 }
+
+
+exports.transcribe("The magic number 7 is here!", function(err, p){
+  console.log(">", p);
+});
