@@ -4,7 +4,7 @@ var _ = require('lodash');
 var extractor = require('unfluff');
 var url = require('url');
 var utils = require('../utils');
-
+var franc = require('franc');
 
 
 
@@ -110,6 +110,7 @@ function clean(urlStr) {
 }
 
 function addPage(host, path, title, body, complete) {
+  // var lng = franc(body)
   var data = extractor.lazy(body, 'en');
   Content.findOneAndUpdate({host: host, path: path},
     {

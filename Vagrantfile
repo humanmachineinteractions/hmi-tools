@@ -5,10 +5,10 @@ Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
 
   config.vm.provider "virtualbox" do |v|
-      v.memory = 8000
+      v.memory = 5000
       v.cpus = 4
       v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
-      #v.gui = true
+      v.gui = true
     end
 
 
@@ -18,7 +18,9 @@ Vagrant.configure("2") do |config|
 
   config.vm.network "private_network", ip: "10.11.12.25"
 
-  config.vm.synced_folder "app", "/home/vagrant/app"
+  # nfs mounted app!
+  config.vm.synced_folder "app", "/home/vagrant/app", :nfs => true, id: "app"
+
   config.vm.synced_folder "deploy", "/home/vagrant/deploy"
   config.vm.synced_folder "../MITIE", "/home/MITIE"
   config.vm.synced_folder "../currently13", "/home/currently13"

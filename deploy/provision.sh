@@ -14,10 +14,11 @@ apt-get update
 apt-get install -y graphicsmagick
 apt-get install -y nodejs
 apt-get install -y mongodb-10gen
-sudo apt-get install python-pip
-sudo pip install pymongo
-sudo apt-get install -y openjdk-7-jdk maven
-sudo update-alternatives --config java
+apt-get install python-pip
+pip install pymongo
+apt-get install -y openjdk-7-jdk maven
+update-alternatives --config java
+apt-get install speech-tools
 #checkout MITIE & build
 #checkout marytts & build
 cd /home/vagrant
