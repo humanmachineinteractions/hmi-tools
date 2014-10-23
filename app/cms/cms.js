@@ -7,7 +7,7 @@ var kue = require('kue');
 var spawn = require('child_process').spawn;
 var http = require('http');
 
-var current = require('../../../currently13/app/modules/cms');
+var current = require('../../../currentcms');
 var useCluster = false;
 if (useCluster && cluster.isMaster) {
   var cpuCount = require('os').cpus().length;

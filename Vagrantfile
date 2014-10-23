@@ -23,7 +23,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.synced_folder "deploy", "/home/vagrant/deploy"
   config.vm.synced_folder "../MITIE", "/home/MITIE"
-  config.vm.synced_folder "../currently13", "/home/currently13"
+  config.vm.synced_folder "../currentcms", "/home/currentcms"
   #config.vm.synced_folder "../test-voice-data", "/home/vagrant/test-voice-data"
 
   config.vm.provision :shell, :path => "deploy/provision.sh"

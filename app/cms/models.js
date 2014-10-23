@@ -1,6 +1,6 @@
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Schema.Types.ObjectId;
-var cms_models = require("../../../currently13/app/modules/cms/models");
+var CmsModels = require('../../../currentcms/lib/models');
 
 
 exports = module.exports = {
@@ -196,8 +196,8 @@ exports = module.exports = {
     ]
   },
 
-  Resource: cms_models.ResourceInfo(),
-  User: cms_models.UserInfo()
+  Resource: CmsModels.ResourceInfo(),
+  User: CmsModels.UserInfo()
 
 }
 
