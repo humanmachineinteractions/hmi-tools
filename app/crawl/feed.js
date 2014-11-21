@@ -42,27 +42,31 @@ function check_feeds() {
 function get_feed_content(url, done) {
   console.log("get_feed_content ", url);
   var feedparser = new FeedParser();
-  var req = request(url);
-  req.on('error', done);
-  req.on('response', function (res) {
-    var stream = this;
-    if (res.statusCode != 200)
-      return this.emit('error', new Error('Bad status code'));
-    stream.pipe(feedparser);
-  });
+  try {
+    var req = request(url);
+    req.on('error', done);
+    req.on('response', function (res) {
+      var stream = this;
+      if (res.statusCode != 200)
+        return this.emit('error', new Error('Bad status code'));
+      stream.pipe(feedparser);
+    });
 
-  feedparser.on('readable', function () {
-    var stream = this, meta = this.meta, item;
-    while (item = stream.read()) {
-      jobs.create('save_content', {
-        source: meta.title,
-        url: item.origlink ? item.origlink : item.link
-      }).save(function (err) {
-      });
-    }
-  });
-  feedparser.on('error', done);
-  feedparser.on('end', done);
+    feedparser.on('readable', function () {
+      var stream = this, meta = this.meta, item;
+      while (item = stream.read()) {
+        jobs.create('save_content', {
+          source: meta.title,
+          url: item.origlink ? item.origlink : item.link
+        }).save(function (err) {
+        });
+      }
+    });
+    feedparser.on('error', done);
+    feedparser.on('end', done);
+  } catch (e) {
+    done(e);
+  }
 }
 
 
@@ -144,8 +148,9 @@ var app = express();
 app.use(bodyParser.urlencoded({extended: false}))
 // app.use(express.static(__dirname + '/public'));
 
-app.get('/content/:date', function (req, res, next) {
-  Content.find({date: {$gt: moment(req.params.date)}}, null, {date: -1}).exec(function (err, c) {
+app.get('/content', function (req, res, next) {
+  var last = moment().subtract(12, 'hours');
+  Content.find({date: {$gt: last}}, null, {date: -1}).exec(function (err, c) {
     if (err) return next(err);
     res.json(c)
   });
@@ -164,7 +169,7 @@ app.listen(cms.config.serverPort);
 
 // LATER
 
-var sched = later.parse.text('every 2 min');
+var sched = later.parse.text('every 10 min');
 var timer = later.setInterval(check_feeds, sched);
 
 
