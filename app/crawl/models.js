@@ -14,6 +14,7 @@ exports = module.exports = {
     schema: {
       host: String,
       path: String,
+      source: String,
       title: String,
       text: String,
       image: String,
