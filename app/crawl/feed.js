@@ -150,7 +150,7 @@ app.use(bodyParser.urlencoded({extended: false}))
 
 app.get('/content', function (req, res, next) {
   var last = moment().subtract(12, 'hours');
-  Content.find({date: {$gt: last}}, null, {date: -1}).exec(function (err, c) {
+  Content.find({date: {$gt: last.toDate()}}, null, {date: 1}).exec(function (err, c) {
     if (err) return next(err);
     res.json(c)
   });
