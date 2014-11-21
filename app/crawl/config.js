@@ -28,6 +28,7 @@ var config = {
         // for production: {  disableSearch: true }
       }
     },
+    resourcePath: '/root/media/'
 
 //    storage: "cloudinary",
 //    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }

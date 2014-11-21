@@ -36,8 +36,7 @@ function check_feeds() {
         }
       });
     }
-
-  })
+  });
 }
 
 function get_feed_content(url, done) {
@@ -151,8 +150,11 @@ app.get('/content/:date', function (req, res, next) {
     res.json(c)
   });
 });
-app.get('/s', function (req, res, next) {
-  check_feeds();
+//app.get('/s', function (req, res, next) {
+//  check_feeds();
+//});
+app.get('/audio/:id', function (req, res, next) {
+    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.wav');
 })
 
 app.use(cms.app);
@@ -163,7 +165,7 @@ app.listen(cms.config.serverPort);
 // LATER
 
 var sched = later.parse.text('every 2 min');
-var timer = later.setTimeout(check_feeds, sched);
+var timer = later.setInterval(check_feeds, sched);
 
 
 
