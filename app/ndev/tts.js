@@ -9,18 +9,17 @@ var default_headers = {
 };
 
 
-exports.render = function(text, output, voice, complete) {
-  if (!voice) 
-  	voice = "Zoe";
+exports.render = function (text, output, voice, complete) {
   var file = fs.createWriteStream(output);
   request({
-    url: default_url + '?' + default_key + '&id=57349abd2390&voice='+voice,//&ttsLang=en_US',
+    url: default_url + '?' + default_key + '&id=57349abd2390&voice=' + voice,//&ttsLang=en_US',
     headers: default_headers,
     method: 'POST',
     body: text
   }).pipe(file).on('close', function () {
-    if (complete)
-    	complete();
+      complete();
+  }).on('error', function (e) {
+      complete(e)
   });
 
 }

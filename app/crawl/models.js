@@ -19,7 +19,7 @@ exports = module.exports = {
       text: String,
       image: String,
       date: Date,
-      audio: {Zoe: String}
+      audio: {Zoe: Boolean}
     }
   },
 

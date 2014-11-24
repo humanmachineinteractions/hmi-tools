@@ -7,6 +7,7 @@ var moment = require('moment');
 var uuid = require('uuid');
 var mongoose = require('mongoose');
 var later = require('later');
+var ffmpeg = require('fluent-ffmpeg');
 var tts = require('../ndev/tts');
 var current = require('../../../currentcms');
 var reader = {
@@ -20,7 +21,7 @@ var Content = cms.meta.model('ReaderContent');
 var Feed = cms.meta.model('ReaderFeed');
 
 function check_feeds() {
-  console.log('checking...')
+  console.log('checking...');
   Feed.find({}).exec(function (err, feeds) {
     if (err) {
       console.log(err);
@@ -30,10 +31,7 @@ function check_feeds() {
       jobs.create('get_feed', {
         url: feeds[i].url
       }).save(function (err) {
-        if (err) {
-          console.log(err);
-          return;
-        }
+        if (err) console.log(err);
       });
     }
   });
@@ -59,6 +57,7 @@ function get_feed_content(url, done) {
           source: meta.title,
           url: item.origlink ? item.origlink : item.link
         }).save(function (err) {
+          if (err) console.log(err);
         });
       }
     });
@@ -90,8 +89,8 @@ function save_one(source, origlink, complete) {
       }).save(function (err, c) {
           if (err) return complete(err);
           console.log("***ADD", c.title)
-          var job = jobs.create('render_audio', {
-            id: c._id
+          jobs.create('render_tts_wav', { //var job =
+            id: c._id, voice: 'Zoe'
           }).save(function (err) {
             if (err) return complete(err);
             return complete();
@@ -102,22 +101,64 @@ function save_one(source, origlink, complete) {
 }
 
 
-function render(cid, complete) {
+function render_tts_wav(cid, voice, complete) {
   console.log('rendering', cid);
   Content.findOne({_id: cid}).exec(function (err, content) {
     if (err) return complete(err);
     if (!content) return complete(new Error('no content'));
     var text = content.title + ' from ' + content.source + '. ' + content.text;
-    var file = 'Zoe-' + cid + '.wav';
-    tts.render(text, cms.config.resourcePath + file, 'Zoe', function () {
-      content.audio = {Zoe: file};
+    var wav_file = voice + '-' + cid + '.wav';
+    tts.render(text, cms.config.resourcePath + wav_file, voice, function (err) {
+      if (err) return complete(err);
+      content.audio = {Zoe: true};
       content.save(function (err, c2) {
         if (err) return complete(err);
-        return complete();
+        jobs.create('convert_to_aac', {
+          source: wav_file,
+          dest: voice + '-' + cid + '.m4a'
+        }).save(function (err) {
+          if (err) return complete(err);
+          return complete();
+        });
       });
     });
   });
 }
+
+function convert_to_aac(job, source, dest, done) {
+  console.log('converting to aac', source);
+  var dir = cms.config.resourcePath;
+  new ffmpeg({source: dir + source})
+    .withAudioCodec('libfdk_aac') // libmp3lame
+    .withAudioBitrate('64k') // :-) mp3 196k
+    .withAudioChannels(1) // :-o
+    .on('end', function () {
+      done();
+    })
+    .on('error', function (err) {
+      console.log('encode error: ' + err.message);
+      job.log('encode error: ' + err.message);
+      done(err);
+    })
+    .on('progress', function (progress) {
+      job.progress(progress.percent, 100);
+    })
+    .saveToFile(dir + dest);
+}
+
+// ffmpeg info
+// The 'progress' event is emitted every time FFmpeg
+// reports progress information. 'progress' contains
+// the following information:
+// - 'frames': the total processed frame count
+// - 'currentFps': the framerate at which FFmpeg is currently processing
+// - 'currentKbps': the throughput at which FFmpeg is currently processing
+// - 'targetSize': the current size of the target file in kilobytes
+// - 'timemark': the timestamp of the current frame in seconds
+// - 'percent': an estimation of the progress
+
+
+
 
 
 // KUE
@@ -125,16 +166,20 @@ function render(cid, complete) {
 var kue = require('kue')
   , jobs = kue.createQueue();
 
-jobs.process('get_feed', 6, function (job, done) {
+jobs.process('get_feed', 8, function (job, done) {
   get_feed_content(job.data.url, done);
 });
 
-jobs.process('save_content', function (job, done) {
+jobs.process('save_content', 1, function (job, done) {
   save_one(job.data.source, job.data.url, done);
 });
 
-jobs.process('render_audio', 2, function (job, done) {
-  render(job.data.id, done);
+jobs.process('render_tts_wav', 2, function (job, done) {
+  render_tts_wav(job.data.id, job.data.voice, done);
+});
+
+jobs.process('convert_to_aac', 2, function (job, done) {
+  convert_to_aac(job, job.data.source, job.data.dest, done);
 });
 
 kue.app.listen(3009);
@@ -158,11 +203,13 @@ app.get('/content', function (req, res, next) {
     res.json(c)
   });
 });
-//app.get('/s', function (req, res, next) {
-//  check_feeds();
-//});
+
+app.get('/admin/refresh', function (req, res, next) {
+    check_feeds();
+})
+
 app.get('/audio/:id', function (req, res, next) {
-    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.wav');
+    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.m4a');
 })
 
 app.use(cms.app);
