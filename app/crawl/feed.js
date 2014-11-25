@@ -99,12 +99,15 @@ function save_one(feed_id, source, origlink, complete) {
       Content.findOne({host: s.host, path: s.path}).exec(function (err, c) {
         if (err) return complete(err);
         if (c) return complete();
+        var title = data.title();
+        var text = data.text();
+        if (!title || !text) return complete();
         new Content({
           feed: f,
           host: s.host,
           path: s.path,
-          text: data.text(),
-          title: data.title(),
+          text: text,
+          title: title,
           source: source,
           image: data.image(),
           date: new Date()
