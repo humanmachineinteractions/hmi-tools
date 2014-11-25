@@ -12,6 +12,7 @@ exports = module.exports = {
       workflow: false
     },
     schema: {
+      feed: {type: ObjectId, ref: 'ReaderFeed'},
       host: String,
       path: String,
       source: String,
@@ -32,7 +33,23 @@ exports = module.exports = {
     },
     schema: {
       name: String,
-      url: String
+      url: String,
+      image: {type: ObjectId, ref: 'Resource'},
+      channel: {type: ObjectId, ref: 'Channel'}
+    }
+  },
+
+  Channel: {
+    meta: {
+      plural: "Channels",
+      name: "<%= name %>",
+      dashboard: true,
+      workflow: false
+    },
+    schema: {
+      name: String,
+      description: String,
+      image: {type: ObjectId, ref: 'Resource'}
     }
   },
 

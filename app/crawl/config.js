@@ -4,16 +4,14 @@ var config = {
     serverPort: 3010,
     mongoConnectString: 'mongodb://localhost/hmi',
     sessionSecret: 'fdsfdsfdsr2454r5w43tytuyik',
-    resourcePath: '/tmp/media/',
     kueConfigH: {
       redis: {
         port: 6379,
         host: '127.0.0.1'
       }
     },
-//
-//    storage: "cloudinary",
-//    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
+    resourcePath: '/tmp/media/',
+    storage: "local"
   },
   production: {
     name: 'HMI Reader',
@@ -28,10 +26,8 @@ var config = {
         // for production: {  disableSearch: true }
       }
     },
-    resourcePath: '/root/media/'
-
-//    storage: "cloudinary",
-//    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
+    resourcePath: '/root/media/',
+    storage: "local"
   }
 }
 
