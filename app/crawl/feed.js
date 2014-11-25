@@ -126,11 +126,11 @@ function render_tts_wav(cid, voice, complete) {
 }
 
 function convert_to_aac(job, source, dest, done) {
-  console.log('converting to aac', source);
+  console.log('converting to mp3', source);
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
-    .withAudioCodec('libfdk_aac') // libmp3lame
-    .withAudioBitrate('64k') // :-) mp3 196k
+    .withAudioCodec('libmp3lame') // libmp3lame // libfdk_aac
+    .withAudioBitrate('128k') // :-) mp3 196k // 64k
     .withAudioChannels(1) // :-o
     .on('end', function () {
       done();
