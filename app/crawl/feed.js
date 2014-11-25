@@ -113,9 +113,9 @@ function render_tts_wav(cid, voice, complete) {
       content.audio = {Zoe: true};
       content.save(function (err, c2) {
         if (err) return complete(err);
-        jobs.create('convert_to_aac', {
+        jobs.create('convert_to_mp3', {
           source: wav_file,
-          dest: voice + '-' + cid + '.m4a'
+          dest: voice + '-' + cid + '.mp3'
         }).save(function (err) {
           if (err) return complete(err);
           return complete();
@@ -125,7 +125,7 @@ function render_tts_wav(cid, voice, complete) {
   });
 }
 
-function convert_to_aac(job, source, dest, done) {
+function convert_to_mp3(job, source, dest, done) {
   console.log('converting to mp3', source);
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
@@ -178,8 +178,8 @@ jobs.process('render_tts_wav', 2, function (job, done) {
   render_tts_wav(job.data.id, job.data.voice, done);
 });
 
-jobs.process('convert_to_aac', 2, function (job, done) {
-  convert_to_aac(job, job.data.source, job.data.dest, done);
+jobs.process('convert_to_mp3', 2, function (job, done) {
+  convert_to_mp3(job, job.data.source, job.data.dest, done);
 });
 
 kue.app.listen(3009);
@@ -209,7 +209,7 @@ app.get('/admin/refresh', function (req, res, next) {
 })
 
 app.get('/audio/:id', function (req, res, next) {
-    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.m4a');
+    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.mp3');
 })
 
 app.use(cms.app);
