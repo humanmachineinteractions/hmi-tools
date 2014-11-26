@@ -19,9 +19,31 @@ exports = module.exports = {
       title: String,
       text: String,
       image: String,
+      use_image: Boolean,
       date: Date,
       audio: {Zoe: Boolean}
-    }
+    },
+    browse: [
+      { name: 'source', cell: 'char', filters: [ '$regex', '=' ], order: 'asc,desc,default' },
+      { name: 'title', cell: 'char', filters: [ '$regex', '=' ], order: 'asc,desc,default' },
+      { name: 'text', cell: 'char', filters: [ '$regex', '=' ], order: 'asc,desc,default' },
+      { name: 'date', cell: 'char', filters: [ '$regex', '=' ], order: 'asc,desc,default' },
+      { name: 'audio.Zoe', cell: 'char', filters: [ '$regex', '=' ], order: 'asc,desc,default' }
+    ],
+    form: [
+      { name: 'source', widget: 'input' },
+      { name: 'title', widget: 'input' },
+      { name: 'image', widget: 'image_url' },
+      { name: 'use_image', widget: 'boolean' },
+      { name: 'text', widget: 'code', options: {lineWrapping: true, lineNumbers: true} },
+      { name: 'date', widget: 'datetime' },
+      { name: 'feed', widget: 'choose_create', options: { type: 'ReaderFeed', array: false } },
+      { name: 'host', widget: 'input' },
+      { name: 'path', widget: 'input' },
+      { name: 'audio.Zoe', widget: 'input' }
+    ],
+    includes: ["/js/field_image_url.js"]
+
   },
 
   ReaderFeed: {
