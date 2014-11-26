@@ -230,7 +230,7 @@ app.get('/content/:datetime', function (req, res, next) {
     date: {$gt: last.toDate()},
     audio: {$ne: null},
     feed: {$ne: null}
-  }, null, {sort: {date: -1}}).exec(function (err, contents) {
+  }).sort({date: -1}).limit(20).exec(function (err, contents) {
     if (err) return next(err);
     contents = _.map(contents, function (c) {
       var feed = _feeds[c.feed];
