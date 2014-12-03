@@ -196,7 +196,7 @@ jobs.process('get_feed', 8, function (job, done) {
   get_feed_content(job.data._id, job.data.url, done);
 });
 
-jobs.process('save_content', 1, function (job, done) {
+jobs.process('save_content', 8, function (job, done) {
   save_one(job.data.feed_id, job.data.source, job.data.url, done);
 });
 
@@ -213,7 +213,7 @@ jobs.on('job complete', function (id, result) {
     if (err) return;
     job.remove(function (err) {
       if (err) throw err;
-      console.log('removed completed job #%d', job.id);
+     //console.log('removed completed job #%d', job.id);
     });
   });
 });
