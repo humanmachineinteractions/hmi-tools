@@ -218,7 +218,7 @@ jobs.on('job complete', function (id, result) {
   });
 });
 
-kue.app.listen(3009);
+//kue.app.listen(3009);
 
 
 // EXPRESS
