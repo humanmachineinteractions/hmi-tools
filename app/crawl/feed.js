@@ -27,8 +27,8 @@ var _channels = {};
 
 function check_feeds() {
   console.log('checking...');
+  _feeds = {};
   Feed.find({}).exec(function (err, feeds) {
-    _feeds = {};
     if (err) {
       console.log(err);
       return;
@@ -38,15 +38,16 @@ function check_feeds() {
       var feed = feeds[i];
       jobs.create('get_feed', {
         _id: feed._id,
-        url: feed.url
+        url: feed.url,
+        source: feed.name
       }).save(function (err) {
         if (err) console.log(err);
       });
     }
   });
   // for the fe
+  _channels = {};
   Channel.find({}).exec(function (err, channels) {
-    _channels = {};
     if (err) {
       console.log(err);
       return;
@@ -55,7 +56,7 @@ function check_feeds() {
   });
 }
 
-function get_feed_content(_id, url, done) {
+function get_feed_content(_id, url, source, done) {
   console.log("get_feed_content ", url);
   var feedparser = new FeedParser();
   try {
@@ -73,7 +74,8 @@ function get_feed_content(_id, url, done) {
       while (item = stream.read()) {
         jobs.create('save_content', {
           feed_id: _id,
-          source: meta.title,
+          //source: meta.title,
+          source: source,
           url: item.origlink ? item.origlink : item.link
         }).save(function (err) {
           if (err) console.log(err);
@@ -193,7 +195,7 @@ var kue = require('kue')
   , jobs = kue.createQueue();
 
 jobs.process('get_feed', 8, function (job, done) {
-  get_feed_content(job.data._id, job.data.url, done);
+  get_feed_content(job.data._id, job.data.url, job.data.source, done);
 });
 
 jobs.process('save_content', 8, function (job, done) {
