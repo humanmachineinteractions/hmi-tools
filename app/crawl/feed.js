@@ -115,13 +115,16 @@ function save_one(feed_id, source, origlink, complete) {
           date: new Date()
         }).save(function (err, c) {
             if (err) return complete(err);
-            console.log("***ADD", c.title)
-            jobs.create('render_tts_wav', { //var job =
-              id: c._id, voice: 'Zoe'
-            }).save(function (err) {
-              if (err) return complete(err);
+            console.log("***ADD", c.title);
+            if (true)
               return complete();
-            });
+            else
+              jobs.create('render_tts_wav', { //var job =
+                id: c._id, voice: 'Zoe'
+              }).save(function (err) {
+                if (err) return complete(err);
+                return complete();
+              });
           })
       });
     });
@@ -239,7 +242,7 @@ app.get('/content', function (req, res, next) {
 app.get('/content/:datetime', function (req, res, next) {
   var last = moment(req.params.datetime);
   Content.find({
-    date: {$gt: last.toDate()},
+    //date: {$gt: last.toDate()},
     audio: {$ne: null},
     feed: {$ne: null}
   }).sort({date: -1}).limit(20).exec(function (err, contents) {
