@@ -243,7 +243,8 @@ app.get('/content/:datetime', function (req, res, next) {
   var last = moment(req.params.datetime);
   Content.find({
     //date: {$gt: last.toDate()},
-    audio: {$ne: null},
+    //audio: {$ne: null},
+    audio: {Zoe: true},
     feed: {$ne: null}
   }).sort({date: -1}).limit(20).exec(function (err, contents) {
     if (err) return next(err);
