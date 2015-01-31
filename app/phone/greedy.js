@@ -65,7 +65,6 @@ function forTriphone(phones, next) {
 }
 
 function doGreedy() {
-
   console.log("// The greedy selection algorithm (Santen and Buchsbaum, 1997)");
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.

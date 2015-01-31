@@ -24,8 +24,10 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "deploy", "/home/vagrant/deploy"
   config.vm.synced_folder "../MITIE", "/home/MITIE"
   config.vm.synced_folder "../currentcms", "/home/currentcms"
+  config.vm.synced_folder "../dfki-spike-data", "/home/dfki-spike-data"
   #config.vm.synced_folder "../test-voice-data", "/home/vagrant/test-voice-data"
-
+  #config.vm.synced_folder "/Users/posttool/Desktop/zoe-readings", "/home/vagrant/zoe-readings"
+  #config.vm.synced_folder "/Users/posttool/Desktop/zoe-readings-1", "/home/vagrant/zoe-readings-1"
   config.vm.provision :shell, :path => "deploy/provision.sh"
 
 end

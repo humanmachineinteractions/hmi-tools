@@ -40,7 +40,10 @@
     "winston": "0.7.2",
     "winston-mongodb": "0.4.3",
     "xlsjs": "^0.7.1",
-    "xml2js": "^0.4.4"
+    "xml2js": "^0.4.4",
+    "iconv-lite": "0.4.6",
+    "groove": "^2.2.7",
+    "natural": "^0.2.0"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

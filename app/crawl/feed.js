@@ -1,4 +1,3 @@
-
 var FeedParser = require('feedparser');
 var request = require('request');
 var extractor = require('unfluff');
@@ -158,7 +157,7 @@ function convert_to_mp3(job, source, dest, done) {
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
     .withAudioCodec('libmp3lame') // libmp3lame // libfdk_aac
-    .withAudioBitrate('128k') // :-) mp3 196k // 64k
+    .withAudioBitrate('64k') // :-) mp3 196k // 64k
     .withAudioChannels(1) // :-o
     .on('end', function () {
       done();
@@ -226,9 +225,9 @@ jobs.on('job complete', function (id, result) {
 // EXPRESS
 
 var express = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
 var app = express();
-app.use(bodyParser.urlencoded({extended: false}))
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(__dirname + '/public'));
 
 app.get('/content', function (req, res, next) {

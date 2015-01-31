@@ -3,23 +3,28 @@ var path = require("path");
 var csvparse = require('csv-parse');
 var sox = require('sox');
 var utils = require('../utils')
+var iconv = require('iconv-lite');
+iconv.extendNodeEncodings();
 
-var r = path.join(__dirname, 'data', 'test-1-src');
-var dest = path.join(__dirname, 'data', 'test-1');
-fs.readdir(r, function (err, list) {
+var mlf_src = path.join(__dirname, 'data', 'test-3', 'mlf');
+var pcm_src = path.join(__dirname, 'data', 'test-3', 'pcm');
+var dest = path.join(__dirname, 'data', 'test-3');
+
+fs.readdir(pcm_src, function (err, list) {
   if (err)  throw err;
-  list.forEach(function (file) {
-    var r1 = path.join(r, file);
-    fs.readdir(r1, function (err, list) {
-      if (list)
-        utils.forEach(list, function (file, next) {
-          var ext = path.extname(file);
-          if (ext == '.txt')
-            parse(r1, file, next);
-        }, function () {
-          console.log("DONE")
-        });
+  utils.forEach(list, function (file, next) {
+    var pcm = path.join(pcm_src, file);
+    var bname = path.basename(pcm, '.pcm');
+    var mlf = path.join(mlf_src, bname + '.mlf');
+    fs.readFile(mlf, 'cp437', function (err, data) {
+      if (err) throw new Error(err);
+      var d = data.split("\n");
+      for (var i=0; i< d.length; i++)
+      console.log(i,d[i]);
+      next();
     });
+  }, function () {
+    console.log("done")
   });
 });
 
