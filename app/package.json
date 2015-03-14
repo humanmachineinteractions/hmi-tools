@@ -12,7 +12,7 @@
     "ejs": "0.8.5",
     "express": "3.4.7",
     "feedparser": "^0.19.2",
-    "fluent-ffmpeg": "^1.6.0",
+    "fluent-ffmpeg": "^2.0.0",
     "forever-monitor": "^1.3.0",
     "formidable": "1.0.14",
     "gm": "1.14.2",
@@ -43,7 +43,8 @@
     "xml2js": "^0.4.4",
     "iconv-lite": "0.4.6",
     "groove": "^2.2.7",
-    "natural": "^0.2.0"
+    "natural": "^0.2.0",
+    "clj-fuzzy": "0.1.8"
   },
   "devDependencies": {
     "grunt": "~0.4.2",

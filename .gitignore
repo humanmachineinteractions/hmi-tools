@@ -29,3 +29,5 @@ node_modules
 .vagrant
 *.dat
 app/build/data/test*
+app/build/data/voice-dv
+app/build/data

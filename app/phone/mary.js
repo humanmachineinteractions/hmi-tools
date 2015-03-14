@@ -30,8 +30,10 @@ exports.transcribe = function (s, complete) {
     }},
     function (err, response, body) {
       if (err) return complete(err);
-      if (response.statusCode != 200)
+      if (response.statusCode != 200) {
+        console.log(response)
         return complete(response.statusCode);
+      }
       var p = [];
       var get_text = false;
       var parser = sax.parser(true);
