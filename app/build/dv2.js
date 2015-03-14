@@ -19,7 +19,10 @@ function t2() {
 }
 
 function ta() {
-  lab2tg.convert( dir + '/dv-2-voc/phonelab', dir + '/dv-2-voc/tg', function (err) {
+  //lab2tg.convert( dir + '/dv-2-voc/phonelab', dir + '/dv-2-voc/tg', function (err) {
+  //  if (err) console.log(err);
+  //});
+  lab2tg.convert( dir + '/dv-2-voc/htk/lab', dir + '/dv-2-voc/tg', function (err) {
     if (err) console.log(err);
   });
 }
