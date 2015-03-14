@@ -10,7 +10,7 @@ var utils = require('../utils');
 var maryServer;
 exports.startMaryServer = function (complete) {
   if (maryServer) return complete();
-  maryServer = forever.start([ 'sh', '/home/vagrant/marytts/target/marytts-5.2-SNAPSHOT/bin/marytts-server.sh'], {
+  maryServer = forever.start(['sh', '/home/vagrant/marytts/target/marytts-5.2-SNAPSHOT/bin/marytts-server.sh'], {
     max: 1,
     silent: true
   });
@@ -22,12 +22,14 @@ exports.startMaryServer = function (complete) {
 }
 
 exports.transcribe = function (s, complete) {
-  request.post('http://localhost:59125/process', {form: {
-      INPUT_TEXT: s,
-      INPUT_TYPE: "TEXT",
-      OUTPUT_TYPE: "PHONEMES",//"ALLOPHONES",
-      LOCALE: "en_US"
-    }},
+  request.post('http://localhost:59125/process', {
+      form: {
+        INPUT_TEXT: s,
+        INPUT_TYPE: "TEXT",
+        OUTPUT_TYPE: "PHONEMES",//"ALLOPHONES",
+        LOCALE: "en_US"
+      }
+    },
     function (err, response, body) {
       if (err) return complete(err);
       if (response.statusCode != 200) {
@@ -38,7 +40,7 @@ exports.transcribe = function (s, complete) {
       var get_text = false;
       var parser = sax.parser(true);
       parser.onerror = function (e) {
-        console.log("ERROR",e);
+        console.log("ERROR", e);
       };
       parser.ontext = function (t) {
         t = t.trim();
@@ -62,12 +64,14 @@ exports.transcribe = function (s, complete) {
 };
 
 exports.transcribe0 = function (s, complete) {
-  request.post('http://localhost:59125/process', {form: {
-      INPUT_TEXT: s,
-      INPUT_TYPE: "TEXT",
-      OUTPUT_TYPE: "PHONEMES",//"ALLOPHONES",
-      LOCALE: "en_US"
-    }},
+  request.post('http://localhost:59125/process', {
+      form: {
+        INPUT_TEXT: s,
+        INPUT_TYPE: "TEXT",
+        OUTPUT_TYPE: "PHONEMES",//"ALLOPHONES",
+        LOCALE: "en_US"
+      }
+    },
     function (err, response, body) {
       if (err) return complete(err);
       if (response.statusCode != 200) return complete(response.statusCode);
@@ -116,7 +120,7 @@ exports.transcribeFile = function (input, output, complete) {
   });
 };
 
-function test() {
+function testServerAndTranscription() {
   exports.transcribe("Different languages are, in fact, different, and I don't think there's an answer to the question you're asking. You could ask about specific languages, or what language would be best for that sort of manipulation. –  David Thornley Jun 17 '10 at 17:23");
   exports.transcribe("We are the world's largest and most comprehensive directory and search engine for acronyms, abbreviations and initialisms on the Internet. Abbreviations.com holds hundreds of thousands of entries organized by a large variety of categories from computing and the Web to governmental, medicine and business and it is maintained and expanded by a large community of passionate editors. Read more about our awards and press coverage.");
   exports.transcribe("I have been using Netbeans for a while now, and I every now and then I discover new things, it is a very sophisticated piece of code that never ceases to amaze me.");
@@ -124,7 +128,3 @@ function test() {
   exports.transcribe("Are you using Netbeans or another IDE? Share your experience in a comment!");
 }
 
-
-exports.transcribe("The magic number 7 is here!", function(err, p){
-  console.log(">", p);
-});
