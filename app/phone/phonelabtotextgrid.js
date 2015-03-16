@@ -25,15 +25,17 @@ function convert(input_dir, output_dir, done) {
           read_prompt_allophones(labphones, path.join(input_dir, '../prompt_allophones', name + '.xml'), function (err, sylls, pos) {
             if (err) console.error(err);
             // write text grid
-            var tg = praat_header(lab_length, 4) + praat_level_1n2(lab_length, '../wav/' + name + '.wav', text);
+            // var wav_path = '../wav/' + name + '.wav';
+            var tg = praat_header(lab_length) + praat_level_1(lab_length, text);
             for (var i = 0; i < sylls.length; i++) {
               var syll = sylls[i];
-              var s = '! syllables: \n3 ' + syll.begin + ' ' + syll.end + '\n"' + syll.text + '"\n\n';
+              var xx = syll.accent ? '* ' : '';
+              var s = '! syllables: \n2 ' + syll.begin + ' ' + syll.end + '\n"' + xx + syll.text + '"\n\n';
               tg += s;
             }
             for (var i = 0; i < labphones.length; i++) {
               var ph = labphones[i];
-              var s = '! phones: \n4 ' + ph.begin + ' ' + ph.end + '\n"' + ph.phone + '"\n\n';
+              var s = '! phones: \n3 ' + ph.begin + ' ' + ph.end + '\n"' + ph.phone + '"\n\n';
               tg += s;
             }
             fs.writeFile(path.join(output_dir, name) + '.TextGrid', tg, function (err) {
@@ -52,24 +54,19 @@ function convert(input_dir, output_dir, done) {
   });
 }
 
-function praat_header(l, t) {
+function praat_header(l) {
   var s = '"Praat chronological TextGrid text file"\n\
 0 ' + l + '  ! Time domain.\n\
-' + t + ' ! Number of tiers.\n\
-"IntervalTier" "prompts" 0 ' + l + '\n\
+3 ! Number of tiers.\n\
 "IntervalTier" "utterances" 0 ' + l + '\n\
 "IntervalTier" "syllables" 0 ' + l + '\n\
 "IntervalTier" "phones" 0 ' + l + '\n\n';
   return s;
 }
 
-function praat_level_1n2(l, wav, txt) {
-  var s = '! prompts:\n\
+function praat_level_1(l, txt) {
+  var s = '! utterances:\n\
 1 0 ' + l + '\n\
-"' + wav + '"\n\n\
-\
-! utterances:\n\
-2 0 ' + l + '\n\
 "' + txt + '"\n\n';
   return s;
 }
@@ -100,8 +97,9 @@ function read_prompt_allophones(phones, file, complete) {
   function add_syll(node) {
     var e = get_end();
     if (last_syll.text)
-      sylls.push({text: last_syll.text, begin: last_syll.time, end: e});
+      sylls.push({text: last_syll.text, accent: last_syll.accent, begin: last_syll.time, end: e});
     if (node) {
+      last_syll.accent = node.attributes.accent;
       last_syll.text = node.attributes.ph;
       last_syll.time = e;
     }
@@ -116,8 +114,8 @@ function read_prompt_allophones(phones, file, complete) {
     if (last_pos.text)
       pos.push({text: last_pos.text, pos: last_pos.pos, begin: last_pos.time, end: e});
     if (node) {
-      last_pos.text = node.attributes.ph;
       last_pos.pos = node.attributes.pos;
+      last_pos.text = node.attributes.ph;
       last_pos.time = e;
     }
   }
