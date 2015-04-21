@@ -227,9 +227,10 @@ exports.expand_functions = function(ctx, list)
 
 
 
+// (FILE READING) UTILITIES
 
 var fs = require('fs');
-// UTILITY
+var xml2js = require('xml2js');
 
 exports.readLines = function(filepath, func, done) {
   var rs = fs.createReadStream(filepath);
@@ -251,3 +252,14 @@ exports.readLines = function(filepath, func, done) {
     done();
   });
 }
+
+
+function read_xml(file, complete) {
+  var parser = new xml2js.Parser();
+  fs.readFile(file, function (err, data) {
+    parser.parseString(data, function (err, result) {
+      complete(err, result);
+    });
+  });
+}
+exports.readXml = read_xml;
