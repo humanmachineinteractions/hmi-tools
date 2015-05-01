@@ -14,7 +14,7 @@ function convert_to_mp3(source, dest, done) {
 //}
 
 function convert(sources, dests, options, done) {
-  console.log('convert', sources, dests, options);
+  //console.log('convert', sources);
   var c = new ffmpeg();
   for (var i = 0; i < sources.length; i++)
     c.input(sources[i]);
@@ -55,18 +55,20 @@ function parseEnd(b) {
   };
 }
 
-function convert_dir(dir, dest_dir, name_options, convert_options) {
+function convert_dir(dir, dest_dir, name_options, convert_options, complete) {
   fs.readdir(dir, function (err, files) {
-
     function convert_one(i) {
-      if (i >= files.length) return;
+      if (i >= files.length) {
+        if (complete) complete();
+        return;
+      }
       var file = files[i];
       var fext = path.extname(file);
       if (fext != name_options.inputExt)
         return convert_one(++i);
       var fname = path.basename(file, fext);
-      if (name_options.namef instanceof Function)
-        fname = name_options.namef(fname);
+      if (name_options.name instanceof Function)
+        fname = name_options.name(fname);
       convert([dir + file], [dest_dir + fname + name_options.outputExt], convert_options, function (err, info) {
         convert_one(++i);
       });

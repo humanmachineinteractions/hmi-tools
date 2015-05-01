@@ -8,7 +8,7 @@ function t1() {
     {
       inputExt: '.wav',
       outputExt: '.wav',
-      namef: function (n) {
+      name: function (n) {
         return 'X_' + n.substring(9);
       }
     },
