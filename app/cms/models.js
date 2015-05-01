@@ -170,31 +170,6 @@ exports = module.exports = {
 
   },
 
-  /* news */
-  News: {
-    meta: {
-      plural: "News",
-      name: "<%= title %>",
-      dashboard: true
-    },
-    schema: {
-      title: String,
-      subtitle: String,
-      body: String,
-      release_date: Date
-    },
-    browse: [
-      {name: "title", cell: "char", filters: ["$regex", "="], order: "asc,desc,default"},
-      {name: "release_date", cell: "date", filters: ["$gt", "$lt", "$gte", "$lte"], order: "asc,desc"},
-      {name: "modified", cell: "int", filters: ["$gt", "$lt", "$gte", "$lte"], order: "asc,desc"}
-    ],
-    form: [
-      {name: "title", widget: "input"},
-      {name: "subtitle", widget: "input"},
-      {name: "body", widget: "rich_text", options: {collapsable: true, collapsed: true}},
-      {name: "release_date", widget: "date"}
-    ]
-  },
 
   Resource: CmsModels.ResourceInfo(),
   User: CmsModels.UserInfo()
