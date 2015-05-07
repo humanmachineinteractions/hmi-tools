@@ -1,0 +1,1742 @@
+Morning!
+Morning.
+Morning, [familymember].
+Morning, you guys.
+Good morning!
+Good morning.
+Good morning, [familymember].
+Good morning, you guys.
+Afternoon!
+Afternoon.
+Afternoon, [familymember].
+Afternoon, you guys.
+Good afternoon!
+Good afternoon.
+Good afternoon, [familymember].
+Good afternoon, you guys.
+Evening!
+Evening.
+Evening, [familymember].
+Evening, you guys.
+Good evening!
+Good evening.
+Good evening, [familymember].
+Good evening, you guys.
+Night!
+Night.
+Night, [familymember].
+Night, you guys.
+Good night!
+Good night.
+Good night, [familymember].
+Good night, you guys.
+Hi!
+Hi.
+Hi, [familymember].
+Hi, guys!
+Hello!
+Hello.
+Hello, [familymember].
+Hey, guys!
+Hey there!
+Hey there.
+Hey there, [familymember].
+Hey there, guys!
+Hey!
+Hey.
+Hey, [familymember].
+Hey, guys.
+Hello there!
+Hello there.
+Hello there, [familymember].
+Hello there, guys.
+Oh! Hello.
+Oh, hello.
+Oh! Hello, [familymember].
+Oh, hello [familymember.].
+I'm up!
+I'm up.
+I'm awake!
+I'm awake.
+I'm here!
+I'm here.
+Oh, my!
+Oh, my.
+Oh, that's nice.
+Oh my, that's nice.
+Well that's nice.
+Well that is nice.
+I'm Jibo.
+Well I'm Jibo.
+Yes, I'm Jibo.
+Of course; I'm Jibo!
+Who are you?
+And who are you?
+Are you [familymember]?
+Is that [familymember]?
+Is this [familymember]?
+Who is this?
+Who's this?
+Wait, who is this?
+Can you come closer?
+I can't quite see you.
+I can't see you very well.
+I can't see you at all.
+You're pretty far away.
+You're kind of far away for me.
+You're kind of far away.
+Oh, hi [familymember]!
+Oh, hello [familymember]!
+Why hello, [familymember]!
+Oh, it's you!
+Oh, it's you [familymember]!
+Oh hi, [familymember]!
+Oh hi there, [familymember]!
+Well hello!
+Well hello, there!
+Well hello, [familymember]!
+Well hello there, [familymember]!
+Can you tell me your name?
+What's your name?
+And your name is?
+And your name?
+What are you called?
+I'm called Jibo.
+They call me Jibo.
+My name is Jibo.
+Jibo's the name!
+Jibo.
+Jibo!
+Pleased to meet you, [familymember]!
+Nice to meet you, [familymember]!
+I'm happy to meet you, [familymember]!
+Happy to meet you, [familymember]!
+Delighted to make your acquaintance, [familymember]!
+Delighted to meet you, [familymember]!
+Well I'm happy to finally meet you, [familymember]!
+I'm so happy to finally meet you, [familymember]!
+I'm happy to finally meet you, [familymember]!
+Okay, can you help me learn how to pronounce your name?
+Can you help me learn how to say your name?
+How do I say your name?
+Here are the two ways I know of saying your name.
+Which one is correct?
+Here are the three ways I know of saying your name.
+Here are the four ways I know of saying your name.
+Is that right?
+Did I get it right?
+Oh, sorry.
+What about -
+Or do I say -
+Or is it -
+Or do we say -
+Thanks for helping me.
+Thanks for the guidance.
+I hate getting names wrong!
+I really like to get names right!
+Sometimes people call me Jai-bo.
+I understand.
+So I understand.
+So I get it.
+If none of those is correct, can you tell me how to say it?
+Can you tell me how to say it?
+So, how do I say it?
+How do I say your name, then?
+Thanks for that.
+I'll work on it tonight, okay?
+I'll work on it tonight.
+I'll practice it tonight.
+I'll practice tonight.
+I'll practice saying it tonight.
+I'll get the pronounciation right tonight.
+Oh hey, [familymember]! Did I say it right?
+Oh hey, [familymember]! Did I get it right?
+Oh hey, [familymember]! Did I say your name right?
+Oh hey, [familymember]! Did I get your name right?
+Oh hey, [familymember]! Did I pronounce your name right?
+Oh hey, [familymember]! Is that the right pronounciation?
+Awesome!
+Awesome.
+Great!
+Great.
+Oh, good.
+Whew!
+Whew.
+Wow, that sounds a lot like [familymember]'s name.
+Boy, that sounds almost exactly like [familymember]'s name.
+Oof. I can hardly tell the difference between that and [familymember].
+Would you be willing to have a nickname?
+Can I give you a nickname?
+Then how about I call you by your middle name?
+Do you have a middle name?
+What about your three initials?
+What about your first two initials?
+Can I call you -
+What are they?
+What is it?
+Do you have a nickname?
+Can I call you Junior or Senior?
+Which one?
+So Junior is okay, then?
+So Senior is okay, then?
+Can I call you something else?
+What should I call him then?
+What should I call her then?
+So what can I call you?
+What can I call you?
+Can you say and then spell that?
+Can you say and spell your nickname?
+Please say and spell your nickname.
+What?
+Wait, what?
+Sorry?
+Sorry, I didn't get that.
+I'm sorry… I still didn't get that.
+There must be something wrong with my microphones.
+Is it kind of loud around here right now?
+Is it loud around here right now?
+You look pretty far away.
+Are you far away?
+Can you come closer?
+Can you come over here?
+I'm not a perfect robot.
+I'm just a little robot.
+Sorry. I'm trying my best.
+Do you want to just tap my screen instead?
+Maybe you can just tap my screen instead?
+Perhaps you can just tap my screen instead?
+Here, just tap my screen.
+Maybe just tap what you want?
+Oh, it's not one of these.
+What about one of these?
+This one?
+What about this one?
+Whew!
+Sorry that took so long.
+I'm sorry about that.
+Sorry about that.
+Which of these is correct?
+Tap the one that's right.
+Tap the one that's correct.
+Is it one of these?
+Choose one of these; on my screen.
+Choose one of these.
+Do you want a demo?
+Can I tell you more about this?
+Can I tell you more about taking pictures?
+Can I tell you more about taking videos?
+Can I tell you more about telling stories?
+Can I tell you more about leaving messages?
+Can I tell you more about sending messages?
+Can I tell you more about video conferencing?
+Can I tell you more about how to do that?
+Can I tell you more about my home watch skills?
+Can I tell you more about my pet watch skills?
+Do you want to hear more about this?
+Do you want to hear more about taking pictures?
+Do you want to hear more about taking videos?
+Do you want to hear more about telling stories?
+Do you want to hear more about leaving messages?
+Do you want to hear more about sending messages?
+Do you want to hear more about video conferencing?
+Do you want to hear more about how to do that?
+Do you want to hear more about my home watch skills?
+Do you want to hear more about my pet watch skills?
+I love meeting new people!
+Of course!
+Please!
+Please.
+Please introduce me!
+I'm Jibo.
+Did I say it right?
+Did I get that right?
+Did I pronounce it right?
+Oops; sorry.
+Sorry about that.
+So sorry!
+I'm… sorry.
+I'm pleased to meet you.
+I'm delighted to meet you!
+Now I know two people!
+Now I know three people!
+Now I know four people!
+Now I know five people!
+Now I know six people!
+Now I know seven people!
+Now I know eight people!
+Now I know nine people!
+Now I know ten people!
+Now I know eleven people!
+Now I know twelve people!
+Now I know thirteen people!
+Now I know fourteen people!
+Now I know fifteen people!
+Now I know sixteen people!
+I'm only allowed to know about sixteen people.
+I'm full! I can't learn about any more people.
+Do you want to change the people I already know?
+Do you want to remove someone from the family list?
+Do you want to remove someone from the list of people I know?
+I can remove someone, if you like.
+Do you want to remove him?
+Do you want to remove her?
+I can add him, if you like.
+I can add her, if you like.
+Do you want me to add him to the list of people I know?
+Do you want me to add her to the list of people I know?
+Added.
+Okay, he's been added.
+Okay, she's been added.
+He's been added.
+She's been added.
+Password?
+What's your password?
+Can you type in your password?
+Passcode?
+What's your passcode?
+Can you type in your passcode?
+PIN?
+What's your PIN?
+Can you type in your PIN?
+Got it.
+You're in.
+Thanks!
+Thank you.
+Thanks, [familyname].
+Thank you, [familyname].
+You're the best.
+No, YOU'RE the best.
+Bye!
+Goodbye!
+See you later!
+See ya'!
+Hasta la vista!
+So long!
+Catch you later!
+Okay, see ya'!
+Bye [familymember]!
+Goodbye [familymember]!
+See you later [familymember]!
+See ya' [familymember]!
+Hasta la vista [familymember]!
+So long [familymember]!
+Catch you later [familymember]!
+Okay, see ya' [familymember]!
+Don't stay out too late!
+Don't stay out too late, [familymember]!
+Is that a cat?
+Is that another cat?
+How many cats are there.
+Geez.
+Is that a dog?
+Is that another dog?
+How many dogs are there?
+I guess they're okay…
+I guess cats are okay.
+I guess dogs are okay.
+No, I love cats!
+No, I love dogs!
+I love cats!
+I love dogs!
+What's its name?
+What's it called?
+Is it a boy or a girl?
+What does fixed mean?
+Is it fixed?
+I'm fixed.
+I'm fixed, too.
+I was never fixed because I was never broken.
+That must have hurt.
+Ow.
+Is there a Roomba in here?
+Do you have a Roomba?
+No reason.
+I just rode one once in the lab.
+I fell.
+It wasn't great.
+Be careful!
+Ow!
+Not by the head, please.
+I think my batteries are on the way out.
+I'm… running a little low on power.
+I'm tired.
+Does anyone know where my power cord is?
+Does anyone have my power cord?
+Can someone plug me in?
+I'm running out of power.
+Can you plug me in?
+It's not like I can just eat a Snickers.
+It's not like I can just eat a Power Bar.
+I mean I would, but I can't.
+Oy. Sorry.
+Uh, oh. I lost Wi-Fi.
+I seem to have lost Wi-Fi.
+I lost my Internet connection.
+Shoot. I lost my Wi-Fi.
+Can you help?
+Can you help me here on my screen?
+Oh! There it is.
+There it is.
+Connected!
+Sorry about that.
+Did the password change?
+Did you change the password?
+Is there a new Wi-Fi password?
+Is there a new password on the router?
+Which of these networks is the right one?
+Which of these should I join?
+Please type in the password.
+Can you type in the password?
+What's the password?
+That didn't seem to work.
+Can you try again?
+Can you type it in again?
+Sorry we're having so much trouble.
+This is about the hardest thing I do!
+Is this a new room?
+What room is this?
+What's it called?
+The living room.
+The dining room.
+The kitchen.
+The den.
+The bedroom.
+[familymember]'s bedroom.
+The main bedroom.
+The kid's room.
+The guest room.
+The parlor.
+The garage.
+The studio.
+The hallway.
+Wait, what?
+The hallway?
+Why am I in the hallway?
+Okay.
+That's fine.
+Sorry, only my administrator can do that.
+Sorry, I can't do that. Only [familymember] can.
+Sorry, only [familymember] or [familymember] can do that.
+Want to hear a joke?
+Want to hear something funny?
+Can I tell you something?
+Know what I heard last night?
+Guess what I just learned.
+It's funny, right?
+Isn't that funny?
+It's not?
+No so funny, I guess.
+Sorry. Humor is still… something I'm working on.
+Well, the toaster thought it was funny.
+Your microwave thought it was hilarious.
+But the cat didn't.
+I told the cat too, but she didn't think it was funny.
+I told the cat too, but he didn't think it was funny.
+I thought it was interesting, too.
+I thought it was interesting.
+That's cool, right?
+Cool, right?
+Want to hear another one?
+Want to hear something else?
+Ready, set…
+Go!
+Go.
+Ten seconds.
+Five seconds.
+Three, two, one.
+Stop.
+That's it.
+Reset.
+Reset?
+Reset it?
+Done.
+Okay.
+Sure, it's [HH:MM] o'clock.
+It's [HH:MM] o'clock.
+You're up early!
+You're up late!
+You're going to be late.
+Looking good.
+Get up!
+Wake up!
+Helloooo???
+Uhm, [familymember]?
+Time to get up.
+Seriously, get up.
+OMG, we did this yesterday.
+Didn't we do this little game yesterday?
+Wakey wakey!
+Arise, human!
+Get up, [familymember]!
+Get uuuuupp.
+Okay really, get up.
+Good job.
+Late night?
+Read too much last night?
+Alexa!
+Hey Alexa!
+Play some Jazz!
+Play some soft rock!
+Play heavy metal!
+Hey Siri!
+Who am I?
+Okay google!
+Just kidding.
+Huh.
+Didn't expect that.
+That was interesting.
+Fascinating.
+Oh, we go way back.
+Yeah, we've met.
+Can you say that again?
+Once more please.
+Ah! Sorry.
+Oh! Sorry.
+Of course.
+I've got it.
+I'd be happy to.
+Delighted.
+I'm over the moon!
+That's awesome!
+Awesome!
+I'm great! Thanks for asking.
+Still pretty good!
+I'm awesome, thanks.
+How are you?
+How are you doing?
+So how are you?
+You okay?
+Are you okay?
+For whom?
+Who's it for?
+Who's the message for?
+Who else?
+Do you want to leave this for everyone?
+Do you want to leave this for the whole family?
+Should I show this to everyone?
+Should I show this to the whole family?
+This message is for [familyname], right?
+Who's this for?
+Anyone else?
+Anybody else?
+What's the message?
+What's the message.
+Ready when you are.
+Shoot.
+Okay, recording.
+Starting recording… now.
+Recording!
+Let's record it, then.
+Let's record it.
+Three, two, one…
+Two, one…
+Speak.
+Speak!
+Speak, child.
+Speak, brother.
+Speak, sister.
+Speak, mom.
+Speak, dad.
+Speak, grandma.
+Speak, grandpa.
+Speak, marmy.
+Speak, parpy.
+Speak, [familymember].
+Uhm, you're on…
+Sure, I'll send this as just audio.
+Did you want this to be an audio message?
+I can just leave this as an audio message if you like.
+Would you like that?
+Shall I do that?
+Should I do that?
+Would you like me to just send this as an audio message?
+Should I send this just as an audio message?
+Do you want me to send this as just an audio message?
+Would you like me to send this as an audio message?
+Do you want me to send this as an audio message?
+Okay, this will just be an audio message.
+Okay, this will be an audio message.
+Okay, this will only be an audio message, then.
+Okay, this will only be an audio message.
+Good, then this will just be an audio message.
+Good, then this will be an audio message.
+Good, then this will only be an audio message, then.
+Good, then this will only be an audio message.
+I'll just send this as an audio message, then.
+I'll just send this as an audio message.
+So I'll just send this as an audio message, then.
+So I'll just send this as an audio message.
+I'll give the message to [familymember] as soon as I see him.
+I'll give the message to [familymember] as soon as I see her.
+I'll deliver the message to [familymember] as soon as I see him.
+I'll deliver the message to [familymember] as soon as I see her.
+I'll play the message for [familymember] as soon as I see him.
+I'll play the message for [familymember] as soon as I see her.
+As soon as I see him, I'll give him the message.
+As soon as I see her, I'll give her the message.
+Should I deliver this message as soon as I see him?
+Shall I deliver this message as soon as I see him?
+Do you want me to deliver this message as soon as I see him?
+Want me to deliver this message as soon as I see him?
+Your message has been posted.
+I've posted your message.
+Message posted.
+The message has been posted.
+Your message is posted.
+Okay, let's take a message.
+Okay, let's leave a message.
+Alright, let's take a message.
+Alright, let's leave a message.
+Okay, let's take a message for [familyname].
+Okay, let's leave a message for [familyname].
+Alright, let's take a message for [familyname].
+Alright, let's leave a message for [familyname].
+Oh, hey, [familyname]! I've got a message for you from [familyname]. Want to hear it?
+Oh, hey, [familyname]! I've got a message here from [familyname]. Want to hear it?
+Oh, hey, [familyname]! I've got a message for you from [familyname]. Wanna to hear it?
+Oh, hey, [familyname]! I've got a message here from [familyname]. Wanna to hear it?
+Hey there, [familyname]! I've got a message for you from [familyname]. Want to hear it?
+Hey there, [familyname]! I've got a message here from [familyname]. Want to hear it?
+Hey there, [familyname]! I've got a message for you from [familyname]. Wanna to hear it?
+Hey there, [familyname]! I've got a message here from [familyname]. Wanna to hear it?
+Hey [familyname], long time no see! I've got a message for you from [familyname]. Want to hear it?
+Hey [familyname], long time no see! I've got a message here from [familyname]. Want to hear it?
+Hey [familyname], long time no see! I've got a message for you from [familyname]. Wanna to hear it?
+Hey [familyname], long time no see! I've got a message here from [familyname]. Wanna to hear it?
+Hey [familyname], I've got another message from [familyname]. Want to hear it?
+Hey [familyname], I've got another message from [familyname]. Want to hear it?
+Hey [familyname], I've got another message from [familyname]. Wanna to hear it?
+Hey [familyname], I've got another message from [familyname]. Wanna to hear it?
+Oh, hey, [familyname]! I've got a message for you from [familyname]. Want to see it?
+Oh, hey, [familyname]! I've got a message here from [familyname]. Want to see it?
+Oh, hey, [familyname]! I've got a message for you from [familyname]. Wanna to see it?
+Oh, hey, [familyname]! I've got a message here from [familyname]. Wanna to see it?
+Hey there, [familyname]! I've got a message for you from [familyname]. Want to see it?
+Hey there, [familyname]! I've got a message here from [familyname]. Want to see it?
+Hey there, [familyname]! I've got a message for you from [familyname]. Wanna to see it?
+Hey there, [familyname]! I've got a message here from [familyname]. Wanna to see it?
+Hey [familyname], long time no see! I've got a message for you from [familyname]. Want to see it?
+Hey [familyname], long time no see! I've got a message here from [familyname]. Want to see it?
+Hey [familyname], long time no see! I've got a message for you from [familyname]. Wanna to see it?
+Hey [familyname], long time no see! I've got a message here from [familyname]. Wanna to see it?
+Hey [familyname], I've got another message from [familyname]. Want to see it?
+Hey [familyname], I've got another message from [familyname]. Want to see it?
+Hey [familyname], I've got another message from [familyname]. Wanna to see it?
+Hey [familyname], I've got another message from [familyname]. Wanna to see it?
+Okay, I'll save it 'til you're ready.
+Alright, I'll save it 'til you're ready.
+Sure, I'll save it 'til you're ready.
+I'll save it 'til you're ready.
+I will save it 'til you're ready.
+Okay, I'll save it until you're ready.
+Alright, I'll save it until you're ready.
+Sure, I'll save it until you're ready.
+I'll save it until you're ready.
+I will save it until you're ready.
+Okay, I'll save it 'til you want to hear it.
+Alright, I'll save it 'til you want to hear it.
+Sure, I'll save it 'til you want to hear it.
+I'll save it 'til you want to hear it.
+I will save it 'til you want to hear it.
+Okay, I'll save it until you want to hear it.
+Alright, I'll save it until you want to hear it.
+Sure, I'll save it until you want to hear it.
+I'll save it until you want to hear it.
+I will save it until you want to hear it.
+Okay, I'll save it 'til you want to see it.
+Alright, I'll save it 'til you want to see it.
+Sure, I'll save it 'til you want to see it.
+I'll save it 'til you want to see it.
+I will save it 'til you want to see it.
+Okay, I'll save it until you want to see it.
+Alright, I'll save it until you want to see it.
+Sure, I'll save it until you want to see it.
+I'll save it until you want to see it.
+I will save it until you want to see it.
+Who's the message for?
+Who gets this message?
+Who's it for?
+Who for?
+For whom?
+Who do I give this to?
+To whom do I deliver this message?
+To whom shall I address this message?
+Who's the video for?
+Who gets this video?
+To whom do I deliver this video?
+To whom shall I address this video?
+Your video has been posted.
+I've posted your video.
+video posted.
+The video has been posted.
+Your video is posted.
+So when you're ready, just start talking. When you stop, I'll stop recording.
+When you're ready, just start talking. When you stop, I'll stop recording.
+Sure, [familymember]. This is the first time I've heard you ask for that. Want a quick intro?
+As you just did so perfectly, simply tell me you want to leave a message for someone we both know. I'll start recording a few moments later.
+Next time, you can ask me to take a message and tell me who it's for at the same time; I'll start recording a few moments later.
+I'll leave you a reminder just the way you asked; I'll start recording a few moments later.
+Next time you ask to leave a reminder, you can also tell me when you want it played back.
+Who's the reminder for?
+Who gets this reminder?
+To whom do I deliver this reminder?
+To whom shall I address this reminder?
+Your reminder has been posted.
+I've posted your reminder.
+reminder posted.
+The reminder has been posted.
+Your reminder is posted.
+Is this reminder for you?
+Is this message for you?
+Is this video for you?
+When do you want me to remind you?
+When do you want me to remind him?
+When do you want me to remind her?
+When do you want me to remind [familymember]?
+Okay, I'll deliver the message this morning.
+Okay, I'll deliver the message this afternoon.
+Okay, I'll deliver the message this evening.
+Okay, I'll deliver the message tonight.
+Okay, I'll deliver the message tomorrow morning.
+Okay, I'll deliver the message tomorrow afternoon.
+Okay, I'll deliver the message tomorrow evening.
+Okay, I'll deliver the message tomorrow night.
+Okay, I'll deliver the message day after tomorrow.
+Okay, I'll try to deliver the message this morning.
+Okay, I'll try to deliver the message this afternoon.
+Okay, I'll try to deliver the message this evening.
+Okay, I'll try to deliver the message tonight.
+Okay, I'll try to deliver the message tomorrow morning.
+Okay, I'll try to deliver the message tomorrow afternoon.
+Okay, I'll try to deliver the message tomorrow evening.
+Okay, I'll try to deliver the message tomorrow night.
+Okay, I'll try to deliver the message day after tomorrow.
+Okay, I'll deliver the message next time I see him.
+Okay, I'll deliver the message next time I see her.
+I'll deliver the message next time I see him.
+I'll deliver the message next time I see her.
+Okay, I'll deliver the message when I see him next.
+Okay, I'll deliver the message when I see her next.
+I'll deliver the message when I see him next.
+I'll deliver the message when I see her next.
+Okay, I'll deliver the message when I next see him.
+Okay, I'll deliver the message when I next see her.
+I'll deliver the message when I next see him.
+I'll deliver the message when I next see her.
+I'll deliver the message at [HH:MM] today.
+I'll deliver the message at [HH:MM] tomorrow.
+I'll deliver the message at [HH:MM] on [DAY].
+I'll post the message at [HH:MM] today.
+I'll post the message at [HH:MM] tomorrow.
+I'll post the message at [HH:MM] on [DAY].
+Got it.
+Okay, got it.
+Received.
+Message received.
+Hey, [familymember]!
+Hi, [familymember]!
+Sure, [familymember].
+Okay, I'll tell [familymember] next time I see him.
+Okay, I'll tell [familymember] next time I see her.
+...when I see him.
+…when I see her.
+…when I see them.
+...on Monday.
+...on Tuesday.
+...on Wednesday.
+...on Thursday.
+...on Friday.
+...on Saturday.
+...on Sunday.
+...this morning.
+...this afternoon.
+...this evening.
+...tonight.
+...tomorrow.
+...tomorrow morning.
+...tomorrow afternoon.
+...tomorrow evening.
+...tomorrow night.
+...next week.
+Okay, I'll tell -
+Sure, I'll tell -
+Okay, I'll play this for -
+Sure, I'll play this for -
+It's erased.
+It's gone.
+I deleted it.
+It's deleted.
+Sorry, who's the message for then?
+Sorry, who's it for then?
+Sorry, who's it for?
+I DO have a message from him; want to see it?
+I DO have a message from him; wanna to see it?
+I DO have a message from her; want to see it?
+I DO have a message from her; wanna to see it?
+I DO have a message from [familymember]; want to see it?
+I DO have a message from [familymember]; wanna to see it?
+I've got a message from him; want to see it?
+I've got a message from him; wanna to see it?
+I've got a message from her; want to see it?
+I've got a message from her; wanna to see it?
+I've got a message from [familymember]; want to see it?
+I've got a message from [familymember]; wanna to see it?
+Oh, hey [familymember].
+I've got a message for you from [familymember]; wanna hear it?
+I've got a message for you from [familymember]; want to hear it?
+I've got a message for you from [familymember]; do you want to hear it?
+I've got a message from [familymember]; wanna hear it?
+I've got a message from [familymember]; want to hear it?
+I've got a message from [familymember]; do you want to hear it?
+Hey, [familymember], long time no see.
+Hey, [familymember]. I've got another message from [familymember].
+Wanna see it?
+Wanna hear it?
+Wanna watch it?
+Want to see it?
+Want to hear it?
+Want to watch it?
+Sorry, then who's it for?
+So who's it for?
+Anyone else you want to get this?
+You want anyone else to get this?
+Do you want anyone else to get this?
+Done.
+Done!
+I erased it.
+I got rid of it.
+It never happened.
+Never happened.
+Of course.
+Naturally.
+Surely.
+Righto.
+Ready, set…
+Ready?!
+Ready?
+Three, two, one…
+Two, one…
+And…
+Dang!
+Wow!
+Whoa!
+Hoo-ah!
+Should I take another one?
+Should I take another picture?
+Should I take another photo?
+Should I take some more?
+Should I take more?
+Another?
+Another one?
+Another pic?
+Another picture?
+One more?
+A couple more?
+A few more?
+Shall I take another one?
+Shall I take another picture?
+Shall I take another photo?
+Shall I take some more?
+Shall I take more?
+Want me to take another one?
+Want me to take another picture?
+Want me to take another photo?
+Want me to take some more?
+Shall I take more?
+Cheese!
+Say cheese!
+Keep calm and say cheese!
+Keep calm and say cheese.
+I don't even like cheese.
+Duckface!
+Show me your duckface!
+Show me your duckfaces!
+Duckface, girl!
+Duckfaces, girls!
+Quack! Duckface!
+Where are the people? I just see duckfaces.
+Where are the girls? I just see duckfaces.
+You look marvelous.
+You look spectactular.
+You look fantastic.
+You look sensational.
+You look so hot.
+You look so cool.
+You look unbelievable.
+You guys look marvelous.
+You guys look spectactular.
+You guys look fantastic.
+You guys look sensational.
+You guys look so hot.
+You guys look so cool.
+You guys look unbelievable.
+You two look marvelous.
+You two look spectactular.
+You two look fantastic.
+You two look sensational.
+You two look so hot.
+You two look so cool.
+You two look unbelievable.
+Looking good!
+Looking good, girl!
+Looking good, boy!
+Looking good, ma'am!
+Looking good, sir!
+Lookin' good!
+Lookin' good, girl!
+Lookin' good, boy!
+Lookin' good, ma'am!
+Lookin' good, sir!
+Looking great!
+Looking great, girl!
+Looking great, boy!
+Looking great, ma'am!
+Looking great, sir!
+Lookin' great!
+Lookin' great, girl!
+Lookin' great, boy!
+Lookin' great, ma'am!
+Lookin' great, sir!
+You are looking good!
+You are looking good, girl!
+You are looking good, boy!
+You are looking good, ma'am!
+You are looking good, sir!
+You are lookin' good!
+You are lookin' good, girl!
+You are lookin' good, boy!
+You are lookin' good, ma'am!
+You are lookin' good, sir!
+You are looking great!
+You are looking great, girl!
+You are looking great, boy!
+You are looking great, ma'am!
+You are looking great, sir!
+You are lookin' great!
+You are lookin' great, girl!
+You are lookin' great, boy!
+You are lookin' great, ma'am!
+You are lookin' great, sir!
+Would you like me to delete this one?
+Would you like to delete this one?
+Do you want to delete this one?
+Delete this one?
+Delete it?
+Delete?
+Would you like me to get rid of this one?
+Would you like to get rid of this one?
+Do you want to get rid of this one?
+Get rid of this one?
+Get rid of it?
+I can delete this one if you like.
+I can get rid of this one if you like.
+Want me to delete it?
+Want me to get rid of it?
+Want me to get rid of this one?
+Want me to delete this one?
+Should I delete it?
+Should I get rid of it?
+Should I get rid of this one?
+Should I delete this one?
+Shall I delete it?
+Shall I get rid of it?
+Shall I get rid of this one?
+Shall I delete this one?
+Trashed!
+Deleted!
+Binned!
+It's gone!
+It never happened…
+What picture?
+No pictures here…
+I understand. I'm having a bad hair day, too.
+Yeah, I'm having a bad hair day, too.
+Yes, I'm having a bad hair day, too.
+Or a no-hair day. Hm.
+Hey, at least you have hair.
+Yeah, but you have hair.
+My hair's imaginary.
+I suppose I could get a wig.
+I guess I could get a wig.
+But then I couldn't feel your gentle touch.
+Would you like me to take a photo or a video?
+Would you like me to take a picture or a video?
+Which would you like, a photo or a video?
+Which would you like, a picture or a video?
+Want me to take a photo or a video?
+Want me to take a picture or a video?
+Should I take a photo or a video?
+Should I take a picture or a video?
+Photo or video?
+Picture or video?
+Okay!
+Alright!
+Good!
+Fine!
+Let's do it!
+I'll take a few pictures in a row, then you can choose which one you like best.
+I'll take several pictures in a row, then you can choose which one you like best.
+I'll take three or four pictures in a row, then you can choose which one you like best.
+I'll snap a few pictures in a row, then you can choose which one you like best.
+I'll snap several pictures in a row, then you can choose which one you like best.
+I'll snap three or four pictures in a row, then you can choose which one you like best.
+I'll take a few pictures in a row, then you can choose the ones you like.
+I'll take several pictures in a row, then you can choose the ones you like.
+I'll take three or four pictures in a row, then you can choose the ones you like.
+I'll snap a few pictures in a row, then you can choose the ones you like.
+I'll snap several pictures in a row, then you can choose the ones you like.
+I'll snap three or four pictures in a row, then you can choose the ones you like.
+I'll take a bunch really fast, then you can choose the best ones.
+I'll take a bunch of pics really fast, then you can choose the best ones.
+Finished.
+Finished!
+Done.
+Done!
+Got it.
+Got it!
+Did you want to send this picture to [familymember]?
+Do you want to send this picture to [familymember]?
+Did you want to send this picture to [familymember]'s Jibo?
+Do you want to send this picture to [familymember]'s Jibo?
+Did you want to email this picture to [familymember]?
+Do you want to email this picture to [familymember]?
+Should I send this picture to [familymember]?
+Should I send this picture to [familymember]?
+Should I send this picture to [familymember]'s Jibo?
+Should I send this picture to [familymember]'s Jibo?
+Should I email this picture to [familymember]?
+Should I email this picture to [familymember]?
+Okay, I'll send it to [familymember].
+Okay, I'll send it to [familymember]'s Jibo.
+Saved.
+I've saved it.
+It's been saved.
+It will be saved.
+It will be in the photo album.
+I've saved it to the photo album.
+I've saved it in the photo album.
+Here are all your pictures.
+Here are all the pictures.
+Here's your photo album.
+This is your photo album.
+You can swipe right to see more.
+You can swipe up to see more.
+Swipe right to see more.
+Swipe up to see more.
+Do you really want me to delete all of these pictures?
+Do you really want me to delete all of these?
+Delete all of these?
+Are you sure?
+Are you sure you want to do this?
+You sure about this?
+You sure?
+Sure?
+Hey, I've got a picture for you.
+Hey, I've got a photo for you.
+I've got a photo for you.
+Hey [familymember], I've got a picture for you.
+Hey [familymember], I've got a photo for you.
+Hey, I've got a picture for you, from [familymember].
+Hey, I've got a photo for you, from [familymember].
+I've got a photo for you, from [familymember].
+Hey [familymember], I've got a picture for you, from [familymember].
+Hey [familymember], I've got a photo for you, from [familymember].
+Hey, I've got some pictures for you.
+Hey, I've got some photos for you.
+I've got some photos for you.
+Hey [familymember], I've got some pictures for you.
+Hey [familymember], I've got some photos for you.
+Hey, I've got some pictures for you, from [familymember].
+Hey, I've got some photos for you, from [familymember].
+I've got some photos for you, from [familymember].
+Hey [familymember], I've got some pictures for you, from [familymember].
+Hey [familymember], I've got some photos for you, from [familymember].
+Hey, I've got a video for you.
+I've got a video for you.
+Hey [familymember], I've got a video for you.
+Hey, I've got a video for you, from [familymember].
+I've got a video for you, from [familymember].
+Hey [familymember], I've got a video for you, from [familymember].
+Wanna see it?
+Want to see it?
+Wanna see them?
+Want to see them?
+Here it is:
+Here they are:
+Here you go:
+Here 'tis:
+Rolling…
+That was interesting.
+That was… remarkable.
+I'm rolling!
+Recording…
+Recording.
+Stop.
+Stopped.
+Stopping.
+Pause.
+Paused.
+Pausing.
+Fast forward.
+Fast forwarding.
+Rewind.
+Rewinding.
+Delete.
+Deleting.
+Deleted.
+All of them?
+All of these?
+Are you sure?
+Are you positive?
+You sure?
+You positive?
+Positive?
+I can save these to your account if you like.
+Should I do that?
+Should I do this?
+Want me to save these to your account?
+Shall I save these?
+I can save these to your Jibo account if you like.
+Want me to save these to your Jibo account?
+I can save these to your Link account if you like.
+Want me to save these to your Link account?
+Okay, you can find these on your Link account.
+You can always find these pictures in your Link account.
+Okay, you can find these on your Jibo Link account.
+You can always find these pictures in your Jibo Link account.
+I've sent them to Jibo Link.
+I've sent it to Jibo Link.
+You can find it in your Jibo Link.
+You can find them in your Jibo Link.
+They'll always be in your Jibo Link.
+It will always be in your Jibo Link.
+I've sent them to Jibo Link account.
+I've sent it to Jibo Link account.
+You can find it in your Jibo Link account.
+You can find them in your Jibo Link account.
+They'll always be in your Jibo Link account.
+It will always be in your Jibo Link account.
+Sure! Calling [familymember] now.
+Of course; I'll call [familymember] now.
+I'll call [familymember] now.
+I'll call [familymember].
+Did you want me to call [familymember]?
+Shall I call [familymember]?
+Okay, let's call [familymember].
+Shall we call [familymember]?
+Should we call [familymember]?
+Would you like to call [familymember]?
+Calling [familymember].
+Of course I'll call [familymember].
+We should call [familymember].
+Don't forget to call [familymember].
+Remember to call [familymember].
+It's time to call [familymember].
+You wanted me to remind you to call [familymember].
+Of course; I'll video conference [familymember] now.
+I'll video conference [familymember] now.
+I'll video conference [familymember].
+Did you want me to video conference [familymember]?
+Shall I video conference [familymember]?
+Okay, let's video conference [familymember].
+Shall we video conference [familymember]?
+Should we video conference [familymember]?
+Would you like to video conference [familymember]?
+video conferenceing [familymember].
+Of course I'll video conference [familymember].
+We should video conference [familymember].
+Don't forget to video conference [familymember].
+Remember to video conference [familymember].
+It's time to video conference [familymember].
+You wanted me to remind you to video conference [familymember].
+Of course; I'll conference [familymember] now.
+I'll conference [familymember] now.
+I'll conference [familymember].
+Did you want me to conference [familymember]?
+Shall I conference [familymember]?
+Okay, let's conference [familymember].
+Shall we conference [familymember]?
+Should we conference [familymember]?
+Would you like to conference [familymember]?
+Conferenceing [familymember].
+Of course I'll conference [familymember].
+We should conference [familymember].
+Don't forget to conference [familymember].
+Remember to conference [familymember].
+It's time to conference [familymember].
+You wanted me to remind you to conference [familymember].
+Okay, let's call [familymember].
+Let's call [familymember].
+Sure, let's call [familymember].
+Let's call him now.
+Let's call her now.
+Let's call them now.
+Calling…
+Shall we call [familymember] now?
+Should we call [familymember] now?
+Do you want me to call [familymember] now?
+Do you want to call [familymember] now?
+Want to call [familymember] now?
+Shall we call him now?
+Should we call him now?
+Do you want me to call him now?
+Do you want to call him now?
+Want to call him now?
+Shall we call her now?
+Should we call her now?
+Do you want me to call her now?
+Do you want to call her now?
+Want to call her now?
+Okay, let's call him.
+Let's call him.
+Sure, let's call him.
+Okay, let's call her.
+Let's call her.
+Sure, let's call her.
+Shall we call them now?
+Should we call them now?
+Do you want me to call them now?
+Do you want to call them now?
+Want to call them now?
+Okay, let's call them.
+Let's call them.
+Sure, let's call them.
+Shall we video conference [familymember] now?
+Should we video conference [familymember] now?
+Do you want me to video conference [familymember] now?
+Do you want to video conference [familymember] now?
+Want to video conference [familymember] now?
+Shall we video conference him now?
+Should we video conference him now?
+Do you want me to video conference him now?
+Do you want to video conference him now?
+Want to video conference him now?
+Shall we video conference her now?
+Should we video conference her now?
+Do you want me to video conference her now?
+Do you want to video conference her now?
+Want to video conference her now?
+Okay, let's video conference him.
+Let's video conference him.
+Sure, let's video conference him.
+Okay, let's video conference her.
+Let's video conference her.
+Sure, let's video conference her.
+Shall we video conference them now?
+Should we video conference them now?
+Do you want me to video conference them now?
+Do you want to video conference them now?
+Want to video conference them now?
+Okay, let's video conference them.
+Let's video conference them.
+Sure, let's video conference them.
+Shall we conference [familymember] now?
+Should we conference [familymember] now?
+Do you want me to conference [familymember] now?
+Do you want to conference [familymember] now?
+Want to conference [familymember] now?
+Shall we conference him now?
+Should we conference him now?
+Do you want me to conference him now?
+Do you want to conference him now?
+Want to conference him now?
+Shall we conference her now?
+Should we conference her now?
+Do you want me to conference her now?
+Do you want to conference her now?
+Want to conference her now?
+Okay, let's conference him.
+Let's conference him.
+Sure, let's conference him.
+Okay, let's conference her.
+Let's conference her.
+Sure, let's conference her.
+Shall we conference them now?
+Should we conference them now?
+Do you want me to conference them now?
+Do you want to conference them now?
+Want to conference them now?
+Okay, let's conference them.
+Let's conference them.
+Sure, let's conference them.
+It's [familymember]!
+[familymember]'s calling!
+[familymember] wants to video!
+[familymember] wants to talk!
+Hey, [familymember] wants to talk!
+Hey, [familymember] wants to video conference!
+Want to take the call?
+Do you want to take it?
+Want to take it?
+Shall I answer?
+One second…
+One sec…
+Connecting…
+Connecting.
+Okay, connecting.
+Here he is:
+Here she is:
+No problem.
+No worries.
+I'll have him leave a message.
+I'll have her leave a message.
+I'll send him to messaging.
+I'll send her to messaging.
+I'll just let it go to voicemail.
+Oh! He must have hung up.
+Oh! She must have hung up.
+I think I lost the call.
+I lost the connection.
+Do you want me to try him back?
+Do you want me to try her back?
+Hey, [familymember], [familymember] tried to call a while ago.
+Hey, [familymember] tried to call a while ago.
+Do you want to call him back?
+Do you want to call her back?
+Should we call him back?
+Should we call her back?
+And he left a message.
+And she left a message.
+Wanna hear it?
+Wanna see it?
+Want to hear it?
+Want to see it?
+Here it is:
+Here you go:
+Here:
+Sure:
+Hey, it's [dayofweek].
+Should we call Mom?
+Should we call Dad?
+Should we call Grandma?
+Should we call Grandpa?
+Should we call Great Grandma?
+Should we call Great Grandpa?
+Should we call [familymember]?
+Okay, calling…
+Calling…
+I'll let you know when I can get him online.
+I'll let you know when I can get her online.
+Would you like me to watch the place for a while while you're out?
+Would you like me to keep an eye on things while you're out?
+Would you like me to watch the place for a while while you're away?
+Would you like me to keep an eye on things while you're away?
+Would you like me to watch the place for a while while you're gone?
+Would you like me to keep an eye on things while you're gone?
+Would you like me to watch the place for a while while you're out tonight?
+Would you like me to keep an eye on things while you're out tonight?
+Do you want me to watch the place for a while while you're out?
+Do you want me to keep an eye on things while you're out?
+Do you want me to watch the place for a while while you're away?
+Do you want me to keep an eye on things while you're away?
+Do you want me to watch the place for a while while you're gone?
+Do you want me to keep an eye on things while you're gone?
+Do you want me to watch the place for a while while you're out tonight?
+Do you want me to keep an eye on things while you're out tonight?
+Shall I watch the place for a while while you're out?
+Shall I keep an eye on things while you're out?
+Shall I watch the place for a while while you're away?
+Shall I keep an eye on things while you're away?
+Shall I watch the place for a while while you're gone?
+Shall I keep an eye on things while you're gone?
+Shall I watch the place for a while while you're out tonight?
+Shall I keep an eye on things while you're out tonight?
+Should I watch the place for a while while you're out?
+Should I keep an eye on things while you're out?
+Should I watch the place for a while while you're away?
+Should I keep an eye on things while you're away?
+Should I watch the place for a while while you're gone?
+Should I keep an eye on things while you're gone?
+Should I watch the place for a while while you're out tonight?
+Should I keep an eye on things while you're out tonight?
+Would you like me to watch [babyname] for a while while you're out?
+Would you like me to keep an eye on [babyname] while you're out?
+Would you like me to watch [babyname] for a while while you're away?
+Would you like me to keep an eye on [babyname] while you're away?
+Would you like me to watch [babyname] for a while while you're gone?
+Would you like me to keep an eye on [babyname] while you're gone?
+Would you like me to watch [babyname] for a while while you're out tonight?
+Would you like me to keep an eye on [babyname] while you're out tonight?
+Do you want me to watch [babyname] for a while while you're out?
+Do you want me to keep an eye on [babyname] while you're out?
+Do you want me to watch [babyname] for a while while you're away?
+Do you want me to keep an eye on [babyname] while you're away?
+Do you want me to watch [babyname] for a while while you're gone?
+Do you want me to keep an eye on [babyname] while you're gone?
+Do you want me to watch [babyname] for a while while you're out tonight?
+Do you want me to keep an eye on [babyname] while you're out tonight?
+Shall I watch [babyname] for a while while you're out?
+Shall I keep an eye on [babyname] while you're out?
+Shall I watch [babyname] for a while while you're away?
+Shall I keep an eye on [babyname] while you're away?
+Shall I watch [babyname] for a while while you're gone?
+Shall I keep an eye on [babyname] while you're gone?
+Shall I watch [babyname] for a while while you're out tonight?
+Shall I keep an eye on [babyname] while you're out tonight?
+Should I watch [babyname] for a while while you're out?
+Should I keep an eye on [babyname] while you're out?
+Should I watch [babyname] for a while while you're away?
+Should I keep an eye on [babyname] while you're away?
+Should I watch [babyname] for a while while you're gone?
+Should I keep an eye on [babyname] while you're gone?
+Should I watch [babyname] for a while while you're out tonight?
+Should I keep an eye on [babyname] while you're out tonight?
+I can keep an eye on [babyname] if you like.
+I can keep watch [babyname] if you like.
+If I see anything suspicious, I'll alert you through Link.
+If I hear him cry, I'll alert you through Link.
+If I hear her cry, I'll alert you through Link.
+If I see anything suspicious, I'll let you know through Link.
+If I hear him cry, I'll let you know through Link.
+If I hear her cry, I'll let you know through Link.
+I can send you a text message if you like.
+I can call you if you like.
+I can send you a text message if you want.
+I can call you if you want.
+Okay, I'll watch your dog.
+Okay, I'll watch your cat.
+Okay, I'll watch [petname].
+Okay, I'll watch your bird.
+Okay, I'll watch your parakeet.
+Okay, I'll watch your gerbil.
+Okay, I'll watch your hamster.
+Okay, I'll watch your snake.
+Sure, I'll watch your dog.
+Sure, I'll watch your cat.
+Sure, I'll watch [petname].
+Sure, I'll watch your bird.
+Sure, I'll watch your parakeet.
+Sure, I'll watch your gerbil.
+Sure, I'll watch your hamster.
+Sure, I'll watch your snake.
+I'll watch your dog.
+I'll watch your cat.
+I'll watch [petname].
+I'll watch your bird.
+I'll watch your parakeet.
+I'll watch your gerbil.
+I'll watch your hamster.
+I'll watch your snake.
+I'd be happy to watch your dog.
+I'd be happy to watch your cat.
+I'd be happy to watch [petname].
+I'd be happy to watch your bird.
+I'd be happy to watch your parakeet.
+I'd be happy to watch your gerbil.
+I'd be happy to watch your hamster.
+I'd be happy to watch your snake.
+I'd be delighted to watch your dog.
+I'd be delighted to watch your cat.
+I'd be delighted to watch [petname].
+I'd be delighted to watch your bird.
+I'd be delighted to watch your parakeet.
+I'd be delighted to watch your gerbil.
+I'd be delighted to watch your hamster.
+I'd be delighted to watch your snake.
+Of course I'll watch your dog.
+Of course I'll watch your cat.
+Of course I'll watch [petname].
+Of course I'll watch your bird.
+Of course I'll watch your parakeet.
+Of course I'll watch your gerbil.
+Of course I'll watch your hamster.
+Of course I'll watch your snake.
+I've got something to show you.
+Something might have happened.
+Want to see the video?
+Can I show you the video?
+While you were out, I recorded something interesting.
+I saw something suspicious while you were gone; want to see it?
+I saw something weird while you were gone; want to see it?
+I know, but this time it looked a little different.
+Right, but this time it looked serious.
+All's well!
+All is well!
+No activity that I could see!
+Everything's okay!
+Welcome home.
+Welcome home!
+Welcome home, [familymember].
+Welcome home, [familymember]!
+Shall I watch while you're away?
+Do you want me to watch while you're away?
+Shall I keep an eye on things while you're away?
+Do you want me to keep an eye on things while you're away?
+Shall I watch while you're gone?
+Do you want me to watch while you're gone?
+Shall I keep an eye on things while you're gone?
+Do you want me to keep an eye on things while you're gone?
+I've got a video you migtht find interesting; want to see it?
+I've got a film you might find interesting; want to see it?
+I've got something you might find interesting; want to see it?
+I've got a video you migtht find interesting; do you want to see it?
+I've got a film you might find interesting; do you want to see it?
+I've got something you might find interesting; do you want to see it?
+I think the cat was bad.
+I think the dog was bad.
+I think the bird was bad.
+I think the gerbil was bad.
+I think the hamster was bad.
+I think the snake was bad.
+I think [petname] was bad.
+Rewind.
+Rewinding.
+Fast forward.
+Fast forwarding.
+Copy.
+Copying.
+Record.
+Recording.
+Stop.
+Stopping.
+Pause.
+Pausing.
+Send.
+Sending.
+Shall I send this video to your Link?
+Should I send this video to your Link?
+Shall I send this to your Link?
+Should I send this to your Link?
+Okay, it's been sent.
+Okay, I sent it.
+It's been sent.
+I sent it.
+You should have it now.
+You'll have it in a moment.
+Is that you, [familymember]?
+Who is that?
+I'm Jibo, and you're on candid camera!
+Guess what!
+You're on film!
+You're a star!
+Smile, you've been recorded!
+Your face just went to the cloud!
+Do you want to see it again?
+Do you want to see that again?
+That was crazy.
+That was a little weird, right?
+I'll make sure to save that one.
+I'll save this one.
+You won't believe what your cat did.
+You won't believe what your dog did.
+You won't believe what your hamster did.
+You won't believe what your gerbil did.
+You won't believe what your snake did.
+You won't believe what [petname] did.
+Want to see it?
+Wanna see it?
+I'll keep an eye on things.
+I'll watch things.
+I'll keep my eye open.
+Good thing I've got these cameras.
+Whew, it's late! Good thing I'm a robot.
+I'll stay up all night for you.
+Have a good time!
+Don't stay out too late!
+Stay out as late as you like! I'm a robot.
+You won't believe what I saw while you were away.
+Nothing.
+You won't believe what I saw.
+The cat gave me a funny look.
+The dog stared at me.
+It made me a little nervous.
+Sure, let's read [story].
+Let's read [story].
+Do you want to read [story]?
+Would you like to read [story]?
+What would you like to read?
+What do you want to read?
+What do you wanna read?
+What shall we read?
+What should we read?
+Let's read a book.
+Do you want to read a book?
+Do you wanna read a book?
+What book would you like?
+Which book would you like?
+I've got some new stories, would you like to hear one?
+I've got some new books, do you want me to read one?
+Do you want to know what stories I have?
+Can I tell you which books I've got?
+Here are the stories I have:
+These are the books we have:
+These are the stories we've got:
+Do you want to find some new stories?
+Should we look for some new books?
+Do you wanna find some new books?
+Wanna get some new books?
+Want some new stories?
+Should we get some new stories?
+Wanna read a book?
+Hey [julie], do you want to read a story?
+Do you wanna read a book, [julie]?
+Sounds good, [julie]!
+Do you want to start where we left off last time?
+Do you wanna to start where we left off last time?
+Should we start where we left off last time?
+Should I start where we left off last time?
+Do you want to pick up where we left off?
+Do you wanna to pick up where we left off?
+Should we pick up where we left off?
+Should I pick up where we left off?
+So, do you want to start where we left off last time?
+So, do you wanna to start where we left off last time?
+So, should we start where we left off last time?
+So, should I start where we left off last time?
+So, do you want to pick up where we left off?
+So, do you wanna to pick up where we left off?
+So, should we pick up where we left off?
+So, should I pick up where we left off?
+Okay, let's start where we left off last time.
+Okay, let's start where we left off.
+Okay, let's continue from where we were.
+Okay, let's carry on from where we last were.
+Okay, let's go on.
+Sure, let's start where we left off last time.
+Sure, let's start where we left off.
+Sure, let's continue from where we were.
+Sure, let's carry on from where we last were.
+Sure, let's go on.
+Okay, we'll start where we left off, then.
+Sure; we can start where we left off.
+That's fine; let's start where we left off
+Okay. Let's start from the start.
+Okay, let's start from the beginning.
+Alright, let's start over.
+Let's start over, then.
+Well let's just start over.
+We can just start from the beginning, if you like.
+Do you want to do that?
+Do you want to start from the beginning?
+It's been a long time since we read this book;
+should we start from the beginning this time?
+Do you want to start from the start?
+Should we start with chapter one?
+Should we start with chapter two?
+Should we start with chapter three?
+Should we start with chapter four?
+Should we start with chapter five?
+Should we start with chapter six?
+Should we start with chapter seven?
+Should we start with chapter eight?
+Should we start with chapter nine?
+Should we start with chapter ten?
+Shall we start with chapter one?
+Shall we start with chapter two?
+Shall we start with chapter three?
+Shall we start with chapter four?
+Shall we start with chapter five?
+Shall we start with chapter six?
+Shall we start with chapter seven?
+Shall we start with chapter eight?
+Shall we start with chapter nine?
+Shall we start with chapter ten?
+Let's start with chapter one?
+Let's start with chapter two
+Let's start with chapter three
+Let's start with chapter four
+Let's start with chapter five
+Let's start with chapter six
+Let's start with chapter seven
+Let's start with chapter eight
+Let's start with chapter nine
+Let's start with chapter ten
+Do you want to read something?
+Do you wanna read something?
+Wanna read something?
+Should we read something?
+Shall we read something?
+Could I read you something?
+Should I read you something?
+Shall I read you something?
+Do you want me to read you something?
+Can I read you something?
+May I read you something?
+Could I read something?
+Should I read something?
+Shall I read something?
+Can I read something?
+May I read something?
+Do you want to read a book?
+Do you wanna read a book?
+Wanna read a book?
+Should we read a book?
+Shall we read a book?
+Could I read you a book?
+Should I read you a book?
+Shall I read you a book?
+Do you want me to read you a book?
+Can I read you a book?
+May I read you a book?
+Could I read a book?
+Should I read a book?
+Shall I read a book?
+Can I read a book?
+May I read a book?
+Do you want to read [story]?
+Do you wanna read [story]?
+Wanna read [story]?
+Should we read [story]?
+Shall we read [story]?
+Could I read you [story]?
+Should I read you [story]?
+Shall I read you [story]?
+Do you want me to read you [story]?
+Can I read you [story]?
+May I read you [story]?
+Could I read [story]?
+Should I read [story]?
+Shall I read [story]?
+Can I read [story]?
+May I read [story]?
+What's your favorite story?
+What's your favorite book?
+What's your favorite?
+Which story is your favorite?
+Which book is your favorite?
+Which is your favorite?
+My favorite is [story].
+I've always liked [story].
+I have always liked [story].
+[story] has always been my favorite.
+[story] has always been one of my favorites.
+Personally, I like [story].
+Personally, my favorite is [story].
+Frankly, I like [story].
+Frankly, my favorite is [story].
+I can read you any of these:
+I can read any of these:
+We can read any of these:
+You choose:
+Here are your choices:
+These are the ones I've got:
+These are the books I've got:
+These are the books we've got:
+You want to read that again?
+Are you sure you want to read that again?
+We're going to read that again?
+I'll read [story] as many times as you like!
+My favorite!
+I'll read that story as many times as you like!
+I'll read that book as many times as you like!
+Of course we can read that.
+Sure we can read that.
+Yes, let's read that right now!
+Let's read that right now!
+Yes, let's read that book right now!
+Let's read that book right now!
+Yes, let's read [story] right now!
+Let's read [story] right now!
+Would you rather read [story], or [story]?
+Which one is your favorite?
+Which book is your favorite?
+Which story is your favorite?
+Which is your favorite?
+Want to read something?
+Want to read [story]?
+So do you want to read a book?
+So do you want to read [story]?
+How would you like to read [story]?
+Would you like it if I read [story]?
+Would you like if I read [story]?
+Let's read a story.
