@@ -12,3 +12,9 @@ function rndbtw(a, b) {
 }
 
 exports.oneOf = rnda;
+exports.int = function (a, b) {
+  return Math.floor(rndbtw(a, b + 1))
+};
+exports.yes = function (d) {
+  return Math.random() < (d ? d : .5);
+}
