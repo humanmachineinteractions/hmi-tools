@@ -69,6 +69,7 @@ function convert_dir(dir, dest_dir, name_options, convert_options, complete) {
       var fname = path.basename(file, fext);
       if (name_options.name instanceof Function)
         fname = name_options.name(fname);
+      console.log(file)
       convert([dir + file], [dest_dir + fname + name_options.outputExt], convert_options, function (err, info) {
         convert_one(++i);
       });

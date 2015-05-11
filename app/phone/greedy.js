@@ -1,70 +1,25 @@
-var _ = require('lodash');
-var mary = require('./mary');
-var utils = require('../utils');
 var fs = require('fs');
-var file = process.argv[2];
-var lines = [];
-var c = 0;
-var d = 0;
-var out = fs.createWriteStream(file + "-ranked.txt")
+var _ = require('lodash');
+var utils = require('../utils');
+var PhoneDict = require('./phonedict');
 
-if (fs.existsSync(file + ".json")) {
-  fs.readFile(file + ".json", function (err, file) {
-    lines = JSON.parse(file);
-    doGreedy();
-  })
-} else {
-  utils.readLines(file, function (line) {
-    c++;
-    var info = {line: line, index: c, transcription: ""};
-    lines.push(info);
-    mary.transcribe(line, function (err, tees) {
-      d++;
-      info.phones = [];
-      _.each(tees, function (t) {
-        if (!t.transcription)
-          return;
-        var phones = t.transcription.split(" ");
-        _.each(phones, function (p) {
-          info.phones.push(p);
-          info.transcription += p;
-        });
-        info.transcription += " ";
-      });
-      if (d % 10 == 0)
-        console.log('transcribed ' + d + ' of ' + c);
-      if (c == d) { // got as many transcriptions as lines...
-        fs.writeFile(file + ".json", JSON.stringify(lines), function (err) {
-          if (err)  console.log(err);
-          doGreedy();
-        });
-      }
+function greedy(infile, outfile, options, complete) {
+  var out = fs.createWriteStream(outfile);
+  var lines = [];
+  var d = new PhoneDict();
+  d.on('ready', function () {
+    utils.readLines(infile, function (line) {
+      var s = d.getTranscriptionInfo(line);
+      lines.push({line: line, transcription: s.transcription, phones: s.transcription.split(' ')});
+      console.log(lines[lines.length - 1]);
+    }, function () {
+      doGreedy(lines, out);
     });
-  }, function () {
-    console.log("DONE");
   });
 }
-function forNphone(n, phones, next) {
-  for (var i = 0; i < phones.length - (n - 1); i++) {
-    var nphone = '';
-    var aphone = [];
-    for (var j = 0; j < n; j++) {
-      nphone += phones[i + j];
-      aphone.push(phones[i + j]);
-    }
-    next(nphone, aphone);
-  }
-}
 
-function forDiphone(phones, next) {
-  forNphone(2, phones, next);
-}
 
-function forTriphone(phones, next) {
-  forNphone(3, phones, next);
-}
-
-function doGreedy() {
+function doGreedy(lines, out) {
   console.log("// The greedy selection algorithm (Santen and Buchsbaum, 1997)");
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.
@@ -73,18 +28,18 @@ function doGreedy() {
   var unique = {};
 
   function step_1() {
-   // Step 1: Generate a unique diphone list from the corpus.
+    // Step 1: Generate a unique diphone list from the corpus.
     _.each(lines, function (line) {
       forPhone(line.phones, function (diphone, phones) {
         if (unique[diphone])
           unique[diphone].count++;
         else
-          unique[diphone] = { phones: phones, count: 1};
+          unique[diphone] = {phones: phones, count: 1};
       });
     });
   }
 
-  function step_2_and_3(){
+  function step_2_and_3() {
     // Step 2: Calculate frequency of the diphone in the list from the corpus.
     var total = 0;
     _.each(unique, function (diphone) {
@@ -112,7 +67,7 @@ function doGreedy() {
     });
     // Step 5: Select the highest scored sentence.
     lines.sort(function (a, b) {
-      return  b.score - a.score
+      return b.score - a.score
     });
   }
 
@@ -150,7 +105,30 @@ function doGreedy() {
 
 }
 
-/* more docs
+
+///
+function forNphone(n, phones, cb) {
+  for (var i = 0; i < phones.length - (n - 1); i++) {
+    var nphone = '';
+    var aphone = [];
+    for (var j = 0; j < n; j++) {
+      nphone += phones[i + j];
+      aphone.push(phones[i + j]);
+    }
+    cb(nphone, aphone);
+  }
+}
+
+function forDiphone(phones, cb) {
+  forNphone(2, phones, cb);
+}
+
+function forTriphone(phones, cb) {
+  forNphone(3, phones, cb);
+}
+
+
+/*
 
  Algorithm works step−by−step: a first sentence is selected
  according to a criterion; the sentence is added to the cover,
@@ -160,3 +138,11 @@ function doGreedy() {
  units. The process stops when all units are covered.
 
  */
+
+exports.greedy = greedy;
+
+if (process.argv.length > 3) {
+  greedy(process.argv[2], process.argv[3], {}, function () {
+    console.log("!");
+  })
+}
