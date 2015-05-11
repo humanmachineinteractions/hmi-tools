@@ -6,7 +6,7 @@ var NLP = require('./stanford/StanfordNLP');
 var db = null;
 var coreNLP = null;
 var m = {};
-MongoClient.connect("mongodb://localhost/hmi", function (err, d) {
+MongoClient.connect("mongodb://192.155.87.239/hmi", function (err, d) {
   if (err) throw err;
   console.log('db ready');
   db = d;
@@ -21,33 +21,25 @@ MongoClient.connect("mongodb://localhost/hmi", function (err, d) {
   });
 });
 
-  var s = false;
 
 function collect_and_write() {
   var c = 0;
-  var log = fs.createWriteStream('../phone/log4.txt');
+  var log = fs.createWriteStream(__dirname + '/log4.txt');
 // use {'flags': 'a'} to append and {'flags': 'w'} to erase and write a new file
 
-  var content = db.collection('contents');
-  var cursor = content.find({state: 'crawled', lang: 'en'});
+  var content = db.collection('readercontents');
+  var cursor = content.find({host:'medium.com'});
   var process = function (err, doc) {
+    console.log(err,doc)
     if (err || doc == null) {
       log.end();
       return;
     }
-    if (!s) {
-      console.log("skip")
-      if (doc.body.indexOf("As one of the panelists pointed out, this sort of thing happens all the ") != -1)
-        s = true;
-      cursor.nextObject(process);
-      return;
-    }
-
-    var pp = doc.body.split("\n");
+    var pp = doc.text.split("\n");
     utils.forEach(pp, function (p, next) {
       if (!p) return next();
       coreNLP.process(p, function (err, result) {
-        //console.log(err, result);
+        console.log(err, result);
         //console.log(util.inspect(result, { depth: 5, colors: true }));
         if (err || result == null) {
           console.log("?", err, result);

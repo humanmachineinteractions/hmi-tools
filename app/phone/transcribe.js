@@ -2,6 +2,7 @@ var fs = require('fs');
 var utils = require('../utils/index');
 var PhoneDict = require('./phonedict');
 
+// https://github.com/mscdex/spellcheck ?
 function transcribe(infile, outfile, complete) {
   var unknown = {};
   var stream = fs.createWriteStream(outfile);

@@ -9,9 +9,18 @@ function greedy(infile, outfile, options, complete) {
   var d = new PhoneDict();
   d.on('ready', function () {
     utils.readLines(infile, function (line) {
-      var s = d.getTranscriptionInfo(line);
-      lines.push({line: line, transcription: s.transcription, phones: s.transcription.split(' ')});
-      console.log(lines[lines.length - 1]);
+      if (line.length < 100) {
+        // simple line, no options
+        if (!options.type || options.transcription) {
+          var s = d.getTranscriptionInfo(line);
+          lines.push({line: line, transcription: s.transcription, phones: s.transcription.split(' ')});
+        } else if (options.csv) { //todo validate options
+          var csvline = line.split(options.csv_split_char ? options.csv_split_char : '\t');
+          var trscrptn = csvline[options.transcription_column]
+          lines.push({csvline: line[options.text_column], transcription: trscrptn, phones: trscrptn.split(' ')});
+        }
+        //console.log(lines[lines.length - 1]);
+      }
     }, function () {
       doGreedy(lines, out);
     });
@@ -20,7 +29,6 @@ function greedy(infile, outfile, options, complete) {
 
 
 function doGreedy(lines, out) {
-  console.log("// The greedy selection algorithm (Santen and Buchsbaum, 1997)");
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.
   var forPhone = forDiphone;
@@ -76,7 +84,8 @@ function doGreedy(lines, out) {
     step_4_and_5();
     // Step 6: Delete the selected sentence from the corpus.
     var deleted = lines.shift();
-    out.write(deleted.line + "\t" + deleted.transcription + "\n");
+    //out.write(deleted.line + "\t" + deleted.transcription + "\n");
+    out.write(deleted.line + "\n");
     // Step 7: Delete all the diphones found in the selected sentence from the diphone list.
     forPhone(deleted.phones, function (diphone) {
       delete unique[diphone];
@@ -92,7 +101,8 @@ function doGreedy(lines, out) {
       step_2_and_3();
       step_4_and_5();
       _.each(lines, function (line) {
-        out.write(line.line + "\t" + line.transcription + "\n");
+        //out.write(line.line + "\t" + line.transcription + "\n");
+        out.write(line.line + "\n");
         console.log(line.score, line.line);
       });
       return;
