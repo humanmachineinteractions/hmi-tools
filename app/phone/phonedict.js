@@ -2,48 +2,7 @@ var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var utils = require('../utils/index');
 var exec = require('child_process').exec;
-
-var Phonesaurus = {
-  BASE_DIR: '/home/vagrant/Phonetisaurus/script',
-  init: function () {
-    exec('pgrep twistd', function (err, stdout, stderr) {
-      if (!stdout) {
-        console.log('twistd server starting')
-        exec('/usr/bin/twistd -y g2pservice.tac', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
-          if (err) console.error('error', err, stdout, stderr);
-          else {
-            console.log('...server ready. to: kill -9 `pgrep twistd`');
-            Phonesaurus.test();
-          }
-        });
-      }
-      else {
-        console.log('twistd server ready');
-        Phonesaurus.test();
-      }
-    });
-  },
-  get_transcriptions: function (t, complete) {
-    exec(Phonesaurus.BASE_DIR + '/g2p-client.py -m app-id -w ' + t.toUpperCase() + ' -n 3', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
-      //console.log(err, stdout, stderr);
-      var r = [];
-      var s = stdout.split('\n');
-      s.forEach(function (u) {
-        var v = u.split('\t');
-        if (v.length==2)
-          r.push(v[1]);
-      })
-      complete(err, r);
-    });
-  },
-  test: function () {
-    Phonesaurus.get_transcriptions('Machine', function (err, r) {
-      if (err) console.error('error', err)
-      else console.log(r);
-    });
-  }
-};
-Phonesaurus.init();
+var model = require('./model');
 
 /**
  * The phonetic transcription dictionary.
@@ -81,32 +40,53 @@ PhoneDict.prototype.getTranscription = function (sentence) {
   return this.getTranscriptionInfo(sentence).transcription;
 }
 
-PhoneDict.prototype.getTranscriptionInfo = function (sentence) {
+
+PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
+  var self = this;
   var unknown = [];
-  var s = '';
-  sentence = sentence.replace(/[-|–|—]/g, ' ');
-  var words = sentence.split(' ');
-  for (var i = 0; i < words.length; i++) {
-    var word = removePunc(words[i]);
-    var e = this.entries[word.toUpperCase()];
-    if (e) {
-      e.transcriptions[0].forEach(function (ss) {
-        if (ss)
-          s += ss + ' ';
-      })
-    }
-    else {
-      if (word) {
+  var s = [];
+  var phs = [];
+  var words = tokenize(sentence);
+  utils.forEach(words, function (word, next) {
+    if (!word) return next();
+    if (word.match(model.NON_VOICED)) {
+      s.push(word);
+      phs.push(word);
+      return next();
+    } else {
+      var WORD = word.toUpperCase();
+      var lex_entry = self.entries[WORD];
+      if (lex_entry) {
+        s.push(lex_entry.getString(0));
+        phs = phs.concat(lex_entry.get(0));
+        return next();
+      } else {
         unknown.push(word);
-        s += '*' + word + '* ';
+        Phonesaurus.get_transcriptions(WORD, function (err, ss) {
+          if (ss.length == 0) {
+            console.log(">", WORD, ss);
+            return next();
+          }
+          s.push(ss[0]);
+          phs = phs.concat(ss[0].split(' '));
+          return next();
+        })
       }
     }
-    if (i != words.length - 1)
-      s += '- ';
-  }
-  return {text: sentence, transcription: s, unknown: unknown};
+  }, function () {
+    complete(null, {text: sentence, transcription: s, phones: clean_phones(phs), unknown: unknown});
+  });
 }
 
+// class?
+function clean_phones(phs) {
+  var r = [];
+  phs.forEach(function (ph) {
+    var s = new model.Symbol(ph);
+    r.push(s);
+  });
+  return r;
+}
 
 /**
  * wrapper for dict entries, collapsing multiple pronounciations
@@ -121,6 +101,8 @@ function PhoneDictEntry(word, phones) {
 }
 
 PhoneDictEntry.prototype.add = function (phones) {
+  if (phones[0] == '')
+    phones.shift();
   if (phones)
     this.transcriptions.push(phones);
 }
@@ -134,15 +116,94 @@ PhoneDictEntry.prototype.get = function (idx) {
     return null;
 }
 
+PhoneDictEntry.prototype.getString = function (idx) {
+  var ts = this.get(idx);
+  if (!ts) return null;
+  var s = '';
+  ts.forEach(function (ss) {
+    if (ss)
+      s += ss + ' ';
+  });
+  return s.trim();
+}
+
 PhoneDictEntry.prototype.size = function () {
   return this.transcriptions.length;
 }
 
-
-function removePunc(word) {
-  var p = word.replace(/[\.|\?|,|!|"|;|:|…]/gi, "");
-  return p.trim();
+/**
+ * turns a sentence into an array of tokens (words and punctuation elements)
+ * @param sentence
+ * @returns {Array}
+ */
+function tokenize(sentence) {
+  var st = sentence.split(' ');
+  var words = [];
+  st.forEach(function (s) {
+    var m = s.match(model.NON_VOICED);
+    if (m) {
+      for (var i = 0; i < m.length; i++) {
+        var c = m[i];
+        var idx = s.indexOf(c);
+        words.push(s.substring(0, idx));
+        words.push(s.substring(idx, idx + c.length)); // punc
+        s = s.substring(idx + c.length);
+      }
+    }
+    if (s)
+      words.push(s);
+  });
+  return words;
 }
+
+/**
+ * Phonesaurus wrapper
+ * @type {{BASE_DIR: (*|string), init: Function, get_transcriptions: Function, test: Function}}
+ * @see https://github.com/AdolfVonKleist/Phonetisaurus
+ */
+var Phonesaurus = {
+  BASE_DIR: process.env.PHONESAURUS_BASE || '/home/vagrant/Phonetisaurus/script',
+  init: function () {
+    exec('pgrep twistd', function (err, stdout, stderr) {
+      if (!stdout) {
+        console.log('twistd server starting');
+        exec('/usr/bin/twistd -y g2pservice.tac', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
+          if (err) console.error('error - is phonesaurus installed?', err, stdout, stderr);
+          else {
+            console.log('...server ready. to: kill -9 `pgrep twistd`');
+            Phonesaurus.test();
+          }
+        });
+      }
+      else {
+        console.log('twistd server ready');
+        Phonesaurus.test();
+      }
+    });
+  },
+  get_transcriptions: function (t, complete) {
+    t = t.replace("'", '');
+    t = t.toUpperCase();
+    exec(Phonesaurus.BASE_DIR + '/g2p-client.py -m app-id -w ' + t + ' -n 3', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
+      //console.log(err, stdout, stderr);
+      var r = [];
+      var s = stdout.split('\n');
+      s.forEach(function (u) {
+        var v = u.split('\t');
+        if (v.length == 2)
+          r.push(v[1]);
+      })
+      complete(err, r);
+    });
+  },
+  test: function () {
+    Phonesaurus.get_transcriptions('Machine', function (err, r) {
+      if (err) console.error('error', err)
+      else console.log(r);
+    });
+  }
+};
+Phonesaurus.init();
 
 
 exports = module.exports = PhoneDict;

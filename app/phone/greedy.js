@@ -5,28 +5,45 @@ var PhoneDict = require('./phonedict');
 
 function greedy(infile, outfile, options, complete) {
   var out = fs.createWriteStream(outfile);
-  var lines = [];
   var d = new PhoneDict();
   d.on('ready', function () {
-    utils.readLines(infile, function (line) {
-      if (line.length < 100) {
+    var c = 0;
+    var lines = [];
+    utils.readLines(infile, function (err, tlines) {
+      utils.forEach(tlines, function (line, next) {
+        if (line.length > 130) return next();
+        if (c % 10 == 0)
+          console.log('at line ' + c);
+        if (c % 100 == 0)
+          console.log(lines[lines.length-1]);
+        c++;
         // simple line, no options
         if (!options.type || options.transcription) {
-          var s = d.getTranscriptionInfo(line);
-          lines.push({line: line, transcription: s.transcription, phones: s.transcription.split(' ')});
+          d.getTranscriptionInfo(line, function (err, s) {
+            lines.push({line: line, transcription: s.transcription, phones: voiced_symbols(s.phones)});
+            return next();
+          });
         } else if (options.csv) { //todo validate options
           var csvline = line.split(options.csv_split_char ? options.csv_split_char : '\t');
           var trscrptn = csvline[options.transcription_column]
           lines.push({csvline: line[options.text_column], transcription: trscrptn, phones: trscrptn.split(' ')});
+          return next();
         }
-        //console.log(lines[lines.length - 1]);
-      }
-    }, function () {
-      doGreedy(lines, out);
+      }, function () {
+        doGreedy(lines, out);
+      });
     });
   });
 }
 
+function voiced_symbols(phones) {
+  var v = [];
+  phones.forEach(function(s){
+    if (s.voiced)
+      v.push(s.text);
+  });
+  return v;
+}
 
 function doGreedy(lines, out) {
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences

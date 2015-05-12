@@ -10,22 +10,18 @@ function transcribe(infile, outfile, complete) {
   stream.once('open', function (fd) {
     var d = new PhoneDict();
     d.on('ready', function () {
-      utils.readLines(infile, function (data) {
-        var ph = d.getTranscriptionInfo(data);
-        ph.unknown.forEach(function (p) {
-          if (!unknown[p]) {
-            unknown[p] = 1;
-          } else {
-            unknown[p]++;
-          }
+      utils.readLines(infile, function (err, lines) {
+        utils.forEach(lines, function (line) {
+          d.getTranscriptionInfo(line, function (err, ph) {
+            stream.write(ph.transcription + '\n');
+            l++;
+          });
+        }, function () {
+          stream.end();
+          console.log('read ' + l + ' lines');
+          console.log('unknown', unknown)
+          complete();
         });
-        stream.write(ph.transcription + '\n');
-        l++;
-      }, function () {
-        stream.end();
-        console.log('read ' + l + ' lines');
-        console.log('unknown', unknown)
-        complete();
       });
     });
   });
