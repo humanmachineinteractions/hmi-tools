@@ -1,7 +1,49 @@
 var fs = require('fs');
 var EventEmitter = require('events').EventEmitter;
 var utils = require('../utils/index');
+var exec = require('child_process').exec;
 
+var Phonesaurus = {
+  BASE_DIR: '/home/vagrant/Phonetisaurus/script',
+  init: function () {
+    exec('pgrep twistd', function (err, stdout, stderr) {
+      if (!stdout) {
+        console.log('twistd server starting')
+        exec('/usr/bin/twistd -y g2pservice.tac', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
+          if (err) console.error('error', err, stdout, stderr);
+          else {
+            console.log('...server ready. to: kill -9 `pgrep twistd`');
+            Phonesaurus.test();
+          }
+        });
+      }
+      else {
+        console.log('twistd server ready');
+        Phonesaurus.test();
+      }
+    });
+  },
+  get_transcriptions: function (t, complete) {
+    exec(Phonesaurus.BASE_DIR + '/g2p-client.py -m app-id -w ' + t.toUpperCase() + ' -n 3', {cwd: Phonesaurus.BASE_DIR}, function (err, stdout, stderr) {
+      //console.log(err, stdout, stderr);
+      var r = [];
+      var s = stdout.split('\n');
+      s.forEach(function (u) {
+        var v = u.split('\t');
+        if (v.length==2)
+          r.push(v[1]);
+      })
+      complete(err, r);
+    });
+  },
+  test: function () {
+    Phonesaurus.get_transcriptions('Machine', function (err, r) {
+      if (err) console.error('error', err)
+      else console.log(r);
+    });
+  }
+};
+Phonesaurus.init();
 
 /**
  * The phonetic transcription dictionary.
@@ -59,7 +101,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence) {
         s += '*' + word + '* ';
       }
     }
-    if (i != words.length -1)
+    if (i != words.length - 1)
       s += '- ';
   }
   return {text: sentence, transcription: s, unknown: unknown};
