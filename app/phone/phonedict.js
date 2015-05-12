@@ -45,7 +45,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   var self = this;
   var unknown = [];
   var s = [];
-  var phs = [];
+  var phs = new model.SymbolList();
   var words = tokenize(sentence);
   utils.forEach(words, function (word, next) {
     if (!word) return next();
@@ -74,19 +74,11 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       }
     }
   }, function () {
-    complete(null, {text: sentence, transcription: s, phones: clean_phones(phs), unknown: unknown});
+    complete(null, {text: sentence, transcription: s, phones: phs, unknown: unknown});
   });
 }
 
-// class?
-function clean_phones(phs) {
-  var r = [];
-  phs.forEach(function (ph) {
-    var s = new model.Symbol(ph);
-    r.push(s);
-  });
-  return r;
-}
+
 
 /**
  * wrapper for dict entries, collapsing multiple pronounciations

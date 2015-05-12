@@ -3,7 +3,7 @@ var utils = require('../utils/index');
 var PhoneDict = require('./phonedict');
 
 // https://github.com/mscdex/spellcheck ?
-function transcribe(infile, outfile, complete) {
+function transcribe(infile, outfile, options, complete) {
   var unknown = {};
   var stream = fs.createWriteStream(outfile);
   var l = 0;
@@ -11,10 +11,17 @@ function transcribe(infile, outfile, complete) {
     var d = new PhoneDict();
     d.on('ready', function () {
       utils.readLines(infile, function (err, lines) {
-        utils.forEach(lines, function (line) {
+        utils.forEach(lines, function (line, next) {
           d.getTranscriptionInfo(line, function (err, ph) {
-            stream.write(ph.transcription + '\n');
+            if (l % 100 == 0)
+              console.log('at line ' + l);
+            if (options.voiced) {
+              stream.write(ph.phones.voiced().toString() + '\n');
+            } else {
+              stream.write(ph.phones.toString() + '\n');
+            }
             l++;
+            next();
           });
         }, function () {
           stream.end();
@@ -37,7 +44,7 @@ function test() {
 exports.transcribe = transcribe;
 
 if (process.argv.length > 3) {
-  transcribe(process.argv[2], process.argv[3], function () {
+  transcribe(process.argv[2], process.argv[3], {voiced: true}, function () {
     console.log("!");
   })
 }

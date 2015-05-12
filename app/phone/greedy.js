@@ -20,7 +20,7 @@ function greedy(infile, outfile, options, complete) {
         // simple line, no options
         if (!options.type || options.transcription) {
           d.getTranscriptionInfo(line, function (err, s) {
-            lines.push({line: line, transcription: s.transcription, phones: voiced_symbols(s.phones)});
+            lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
             return next();
           });
         } else if (options.csv) { //todo validate options
@@ -36,14 +36,7 @@ function greedy(infile, outfile, options, complete) {
   });
 }
 
-function voiced_symbols(phones) {
-  var v = [];
-  phones.forEach(function(s){
-    if (s.voiced)
-      v.push(s.text);
-  });
-  return v;
-}
+
 
 function doGreedy(lines, out) {
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
