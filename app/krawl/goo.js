@@ -7,7 +7,8 @@ var Dictionary = mongoose.model('Dictionary', {
   type: String,
   tags: [String],
   uses: Number,
-  details: String
+  details: String,
+  source: String
 });
 
 // places
@@ -63,7 +64,7 @@ function save_d(word, type, tags, complete) {
       console.log(d);
       d.save(complete);
     } else {
-      d = new Dictionary({word: word, type: type, tags: tags, uses: 1});
+      d = new Dictionary({word: word, type: type, tags: tags, uses: 1, source: 'google-places'});
       console.log(d);
       d.save(complete);
     }

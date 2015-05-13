@@ -1,0 +1,38 @@
+phonetically relevant sentences
+    how many phrasal types? 5, 10 or 3
+    medial point, full stop
+    2 comma appositive
+    adjective clause
+
+sentence variety
+    1. noun phrase
+    2. verb phrase
+    3. adverbial phrase
+    4. statement
+    5. questions
+    6. declarative
+    7. exclamation
+    8. compound
+    9. short/medium/long
+
+sources
+    1. journalist
+    2. story/narration
+    3. social/blogs
+    4. screenplay
+       http://www.dailyscript.com/movie.html
+       http://www.springfieldspringfield.co.uk/episode_scripts.php?tv-show=full-house
+    5. tutorials
+       video game, etc
+    6. personal assistant
+    7. childrens
+       https://www.gutenberg.org/cache/epub/1597/pg1597.txt
+
+
+stats
+    what structures appear in each source/domain
+
+
+what punctuation is jibo handling and how does that translate into prosody
+
+where can we get personal assistant dialogs?

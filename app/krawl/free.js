@@ -26,8 +26,9 @@ var freebase = require('freebase');
 //freebase.list("/book/book", {}, function (r) {
 //  console.log("!", r)
 //});
-
-freebase.list("/music/artist", {cursor:null, key:'AIzaSyCoRa-naBDIOmwg71Q7WgqZQVv2XvvUmms'}, function (r) {
-  console.log("!", r.length)
+//AIzaSyCqvRYeoVDM0rlFh3DhqEHsYwU7xAlEMsg
+//cursor:null, key:'AIzaSyCoRa-naBDIOmwg71Q7WgqZQVv2XvvUmms'
+freebase.list("/music/artist", {}, function (r) {
+  console.log("!", r)
 });
 
