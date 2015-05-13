@@ -31,3 +31,5 @@ node_modules
 app/build/data/test*
 app/build/data/voice-dv
 app/build/data
+dump
+dump.tar

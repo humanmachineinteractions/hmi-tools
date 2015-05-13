@@ -1,15 +1,8 @@
-var mongoose = require('mongoose');
 var utils = require('../utils');
-
+var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/hmi-domain-data');
-var Dictionary = mongoose.model('Dictionary', {
-  word: String,
-  type: String,
-  tags: [String],
-  uses: Number,
-  details: String,
-  source: String
-});
+var Dictionary = require('../dictionary').Dictionary;
+
 
 // places
 var GooglePlaces = require('google-places');
@@ -64,22 +57,10 @@ function save_d(word, type, tags, complete) {
       console.log(d);
       d.save(complete);
     } else {
-      d = new Dictionary({word: word, type: type, tags: tags, uses: 1, source: 'google-places'});
+      d = new Dictionary({word: word, type: type, tags: tags, uses: 1});
       console.log(d);
       d.save(complete);
     }
   });
 }
 
-function rnd(a) {
-  return Math.random() * a;
-}
-function rndf(a) {
-  return Math.floor(rnd(a));
-}
-function rnda(A) {
-  return A[rndf(A.length)];
-}
-function rndbtw(a, b) {
-  return (Math.random() * (b - a)) + a;
-}

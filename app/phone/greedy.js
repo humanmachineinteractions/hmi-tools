@@ -1,71 +1,44 @@
-var _ = require('lodash');
-var mary = require('./mary');
-var utils = require('../utils');
 var fs = require('fs');
-var file = process.argv[2];
-var lines = [];
-var c = 0;
-var d = 0;
-var out = fs.createWriteStream(file + "-ranked.txt")
+var _ = require('lodash');
+var utils = require('../utils');
+var PhoneDict = require('./phonedict');
 
-if (fs.existsSync(file + ".json")) {
-  fs.readFile(file + ".json", function (err, file) {
-    lines = JSON.parse(file);
-    doGreedy();
-  })
-} else {
-  utils.readLines(file, function (line) {
-    c++;
-    var info = {line: line, index: c, transcription: ""};
-    lines.push(info);
-    mary.transcribe(line, function (err, tees) {
-      d++;
-      info.phones = [];
-      _.each(tees, function (t) {
-        if (!t.transcription)
-          return;
-        var phones = t.transcription.split(" ");
-        _.each(phones, function (p) {
-          info.phones.push(p);
-          info.transcription += p;
-        });
-        info.transcription += " ";
+function greedy(infile, outfile, options, complete) {
+  var out = fs.createWriteStream(outfile);
+  var d = new PhoneDict();
+  d.on('ready', function () {
+    var c = 0;
+    var lines = [];
+    utils.readLines(infile, function (err, tlines) {
+      utils.forEach(tlines, function (line, next) {
+        if (line.length > 130) return next();
+        if (c % 10 == 0)
+          console.log('at line ' + c);
+        if (c % 100 == 0)
+          console.log(lines[lines.length-1]);
+        c++;
+        // simple line, no options
+        if (!options.type || options.transcription) {
+          d.getTranscriptionInfo(line, function (err, s) {
+            lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
+            return next();
+          });
+        } else if (options.csv) { //todo validate options
+          var csvline = line.split(options.csv_split_char ? options.csv_split_char : '\t');
+          var trscrptn = csvline[options.transcription_column]
+          lines.push({csvline: line[options.text_column], transcription: trscrptn, phones: trscrptn.split(' ')});
+          return next();
+        }
+      }, function () {
+        doGreedy(lines, out);
       });
-      if (d % 10 == 0)
-        console.log('transcribed ' + d + ' of ' + c);
-      if (c == d) { // got as many transcriptions as lines...
-        fs.writeFile(file + ".json", JSON.stringify(lines), function (err) {
-          if (err)  console.log(err);
-          doGreedy();
-        });
-      }
     });
-  }, function () {
-    console.log("DONE");
   });
 }
-function forNphone(n, phones, next) {
-  for (var i = 0; i < phones.length - (n - 1); i++) {
-    var nphone = '';
-    var aphone = [];
-    for (var j = 0; j < n; j++) {
-      nphone += phones[i + j];
-      aphone.push(phones[i + j]);
-    }
-    next(nphone, aphone);
-  }
-}
 
-function forDiphone(phones, next) {
-  forNphone(2, phones, next);
-}
 
-function forTriphone(phones, next) {
-  forNphone(3, phones, next);
-}
 
-function doGreedy() {
-  console.log("// The greedy selection algorithm (Santen and Buchsbaum, 1997)");
+function doGreedy(lines, out) {
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.
   var forPhone = forDiphone;
@@ -73,18 +46,18 @@ function doGreedy() {
   var unique = {};
 
   function step_1() {
-   // Step 1: Generate a unique diphone list from the corpus.
+    // Step 1: Generate a unique diphone list from the corpus.
     _.each(lines, function (line) {
       forPhone(line.phones, function (diphone, phones) {
         if (unique[diphone])
           unique[diphone].count++;
         else
-          unique[diphone] = { phones: phones, count: 1};
+          unique[diphone] = {phones: phones, count: 1};
       });
     });
   }
 
-  function step_2_and_3(){
+  function step_2_and_3() {
     // Step 2: Calculate frequency of the diphone in the list from the corpus.
     var total = 0;
     _.each(unique, function (diphone) {
@@ -112,7 +85,7 @@ function doGreedy() {
     });
     // Step 5: Select the highest scored sentence.
     lines.sort(function (a, b) {
-      return  b.score - a.score
+      return b.score - a.score
     });
   }
 
@@ -121,7 +94,8 @@ function doGreedy() {
     step_4_and_5();
     // Step 6: Delete the selected sentence from the corpus.
     var deleted = lines.shift();
-    out.write(deleted.line + "\t" + deleted.transcription + "\n");
+    //out.write(deleted.line + "\t" + deleted.transcription + "\n");
+    out.write(deleted.line + "\n");
     // Step 7: Delete all the diphones found in the selected sentence from the diphone list.
     forPhone(deleted.phones, function (diphone) {
       delete unique[diphone];
@@ -137,7 +111,8 @@ function doGreedy() {
       step_2_and_3();
       step_4_and_5();
       _.each(lines, function (line) {
-        out.write(line.line + "\t" + line.transcription + "\n");
+        //out.write(line.line + "\t" + line.transcription + "\n");
+        out.write(line.line + "\n");
         console.log(line.score, line.line);
       });
       return;
@@ -150,7 +125,30 @@ function doGreedy() {
 
 }
 
-/* more docs
+
+///
+function forNphone(n, phones, cb) {
+  for (var i = 0; i < phones.length - (n - 1); i++) {
+    var nphone = '';
+    var aphone = [];
+    for (var j = 0; j < n; j++) {
+      nphone += phones[i + j];
+      aphone.push(phones[i + j]);
+    }
+    cb(nphone, aphone);
+  }
+}
+
+function forDiphone(phones, cb) {
+  forNphone(2, phones, cb);
+}
+
+function forTriphone(phones, cb) {
+  forNphone(3, phones, cb);
+}
+
+
+/*
 
  Algorithm works step−by−step: a first sentence is selected
  according to a criterion; the sentence is added to the cover,
@@ -160,3 +158,11 @@ function doGreedy() {
  units. The process stops when all units are covered.
 
  */
+
+exports.greedy = greedy;
+
+if (process.argv.length > 3) {
+  greedy(process.argv[2], process.argv[3], {}, function () {
+    console.log("!");
+  })
+}

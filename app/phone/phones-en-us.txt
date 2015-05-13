@@ -1,0 +1,58 @@
+#phone interchange
+#http://www.csee.ogi.edu/~gormanky/papers/codes/
+
+SAMPA	DISC	Worldbet	Klattese	ARPABET	IPA	Wells	Notes
+I	I	I	I	IH	ɪ	KIT
+	E	E	E	EH	ɛ	DRESS
+{	{	@	@	AE	æ	TRAP/BATH	DISC merges BATH, PALM, and START
+A	Q	A	a	AA	ɑ	LOT/PALM	DISC merges BATH, PALM, and START
+V	V	^	^	AH	ʌ	STRUT	Maybe identical to ə in some dialects
+U	U	U	U	UH	ʊ	FOOT
+O	$	>	c	AO	ɔ	CLOTH/THOUGHT	DISC merges THOUGHT, NORTH, and FORCE
+r=	3	&r	X	ER	ɚ	NURSE	Unclear phonological identity
+i	i	i:	i	IY	iː	FLEECE	May have front offglide
+	1	ei	e	EY	eɪ	FACE
+@U	5	oU	o	OW	oʊ	GOAT
+u	u	u	u	UW	uː	GOOSE	May have front glide before or back glide after
+AI	2	aI	Y	AY	aɪ	PRICE
+OI	4	>i	O	OY	ɔɪ	CHOICE
+aU	6	aU	W	AW	aʊ	MOUTH
+	7	i 9r	I r	IH R	ɪɚ	NEAR
+E	8	ei 9r	E r	EH R	ɛɚ	SQUARE
+	#	A 9r	a r	AA R	aɚ	START	DISC merges BATH, PALM, and START
+	$	> 3r	c r	AO R	ɔɚ	NORTH/FORCE	DISC merges THOUGHT, NORTH, and FORCE
+	9	u 9r	U r	UH R	ʊɚ	CURE
+	@	&	x	AH	ə		Maybe identical to ʌ/STRUT in some dialects
+p	p	p	p	P	p		Aspirated initially
+b	b	b	b	B	b
+t	t	t	t	T	t		Aspirated initially; can be ɾ or even ʔ when intervocalic and immediately post-tonic
+d	d	d	d	D	d		Can be ɾ or even ʔ when intervocalic and immediately post-tonic
+k	k	k	k	K	k		Aspirated initially
+g	g	g	g	G	g
+tS	J	tS	C	CH	tʃ		DISC's is counterintuitive
+dZ	_	dZ	J	JH	dʒ
+f	f	f	f	F	f
+v	v	v	v	V	v
+T	T	T	T	TH	θ
+D	D	D	D	DH	ð
+s	s	s	s	S	s
+S	S	S	S	SH	ʃ
+z	z	z	z	Z	z
+Z	Z	Z	Z	ZH	ʒ		Marginal (in type terms), but difficult to exclude by markedness principles
+h	h	h	h	HH	h
+r	r	9r	r	R	ɹ
+m	m	m	m	M	m
+n	n	n	n	N	n
+N	N	N	G	NG	ŋ		Generally thought to be a pure allophone of /n/ before dorsals
+l	l	l	l	L	l
+	P	& l	L	AH L	əl		Maybe just syllabic allophone of /l/
+	H	& n	N	AH N	ən		Maybe just syllabic allophone of /n/
+j	j	j	j	Y	j
+w	w	w	w	W	w
+
+# ????
+# sampa   mrpa
+# @       AX
+# EI      y
+
+

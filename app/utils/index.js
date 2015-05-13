@@ -1,20 +1,17 @@
-exports.forEach = function(list, target, complete, concurrent)
-{
-  if (!list || list.length == 0)
-  {
+exports.forEach = function (list, target, complete, concurrent) {
+  if (!list || list.length == 0) {
     if (complete) complete();
     return;
   }
   var c = concurrent ? concurrent : 1;
   var i = 0;
   var k = 0;
-  var ff = function(){
-    for (var j=0; j<c && i+j<list.length; j++) f();
+  var ff = function () {
+    for (var j = 0; j < c && i + j < list.length; j++) f();
   }
-  var f = function()
-  {
+  var f = function () {
     var item = list[i];
-    target(item, function(){
+    target(item, function () {
       k++;
       i++;
       if (k < list.length)
@@ -32,8 +29,7 @@ exports.forEach = function(list, target, complete, concurrent)
 var winston = require('winston');
 require('winston-mongodb').MongoDB;
 
-exports.get_logger = function(name)
-{
+exports.get_logger = function (name) {
   return new winston.Logger({
     transports: [
       new winston.transports.Console({colorize: true}),
@@ -41,9 +37,6 @@ exports.get_logger = function(name)
     ]
   });
 }
-
-
-
 
 
 // id conversion
@@ -81,8 +74,8 @@ exports.compareArrays = function (a, b) {
 
 // given form meta info & related schema info & some new data, compare new data to the original and return 'diffs'.
 var jsdiff = require('diff');
-exports.get_diffs = function(form, schema_info, data, original){
-  var info = { diffs: {} };
+exports.get_diffs = function (form, schema_info, data, original) {
+  var info = {diffs: {}};
   for (var i = 0; i < form.length; i++) {
     var f = form[i].name;
     if (!f)
@@ -107,10 +100,6 @@ exports.get_diffs = function(form, schema_info, data, original){
 }
 
 
-
-
-
-
 // process ui description of filter into mongo ready
 exports.process_browse_filter = function (o) {
   var c = {};
@@ -131,15 +120,10 @@ exports.process_browse_filter = function (o) {
 };
 
 
-
-
-
-
 // auth stuff
 
-exports.save_user = function(user, options, complete)
-{
-  exports.set_password(user, options.password, function(){
+exports.save_user = function (user, options, complete) {
+  exports.set_password(user, options.password, function () {
     delete options.password;
     for (var p in options)
       user[p] = options[p];
@@ -150,8 +134,7 @@ exports.save_user = function(user, options, complete)
 }
 
 
-exports.set_password = function(user, password, complete)
-{
+exports.set_password = function (user, password, complete) {
   exports.hash(password, function (err, salt, hash) {
     if (err) throw err;
     user.salt = salt;
@@ -159,10 +142,6 @@ exports.set_password = function(user, password, complete)
     complete();
   });
 }
-
-
-
-
 
 
 // https://github.com/visionmedia/node-pwd
@@ -181,22 +160,22 @@ var crypto_iterations = 12000;
  * @api public
  */
 
-exports.hash = function(pwd, salt, fn) {
+exports.hash = function (pwd, salt, fn) {
   try {
     if (3 == arguments.length) {
-        crypto.pbkdf2(pwd, salt, crypto_iterations, crypto_len, function(err, hash) {
-            fn(err, hash.toString('base64'));
-        });
+      crypto.pbkdf2(pwd, salt, crypto_iterations, crypto_len, function (err, hash) {
+        fn(err, hash.toString('base64'));
+      });
     } else {
-        fn = salt;
-        crypto.randomBytes(crypto_len, function(err, salt) {
-            if (err) return fn(err);
-            salt = salt.toString('base64');
-            crypto.pbkdf2(pwd, salt, crypto_iterations, crypto_len, function(err, hash) {
-                if (err) return fn(err);
-                fn(null, salt, hash.toString('base64'));
-            });
+      fn = salt;
+      crypto.randomBytes(crypto_len, function (err, salt) {
+        if (err) return fn(err);
+        salt = salt.toString('base64');
+        crypto.pbkdf2(pwd, salt, crypto_iterations, crypto_len, function (err, hash) {
+          if (err) return fn(err);
+          fn(null, salt, hash.toString('base64'));
         });
+      });
     }
   } catch (e) {
     fn(e);
@@ -204,18 +183,14 @@ exports.hash = function(pwd, salt, fn) {
 };
 
 
-
-
 //
-exports.expand_functions = function(ctx, list)
-{
+exports.expand_functions = function (ctx, list) {
   var ff = [];
-  for (var i=0; i<list.length; i++)
-  {
-    var o =  list[i];
+  for (var i = 0; i < list.length; i++) {
+    var o = list[i];
     var fo = {};
     ff.push(fo);
-    for (var p in o){
+    for (var p in o) {
       if (typeof(o[p]) == 'function')
         fo[p] = o[p](ctx);
       else
@@ -226,13 +201,22 @@ exports.expand_functions = function(ctx, list)
 }
 
 
-
 // (FILE READING) UTILITIES
 
 var fs = require('fs');
 var xml2js = require('xml2js');
 
-exports.readLines = function(filepath, func, done) {
+exports.readLines = function (filepath, func, done) {
+  if (!done) {
+    var lines = [];
+    var cb = func;
+    done = function () {
+      return cb(null, lines);
+    }
+    func = function (line) {
+      lines.push(line);
+    }
+  }
   var rs = fs.createReadStream(filepath);
   var remaining = '';
   rs.on('data', function (data) {
