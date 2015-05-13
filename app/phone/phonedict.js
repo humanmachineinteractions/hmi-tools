@@ -59,6 +59,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       if (lex_entry) {
         s.push(lex_entry.getString(0));
         phs = phs.concat(lex_entry.get(0));
+        phs.push('_');
         return next();
       } else {
         unknown.push(word);
@@ -69,6 +70,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
           }
           s.push(ss[0]);
           phs = phs.concat(ss[0].split(' '));
+          phs.push('_');
           return next();
         })
       }

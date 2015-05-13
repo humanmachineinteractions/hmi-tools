@@ -44,7 +44,7 @@ function test() {
 exports.transcribe = transcribe;
 
 if (process.argv.length > 3) {
-  transcribe(process.argv[2], process.argv[3], {voiced: true}, function () {
+  transcribe(process.argv[2], process.argv[3], {}, function () { //{voiced: true}
     console.log("!");
   })
 }
