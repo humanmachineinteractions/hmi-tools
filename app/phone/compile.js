@@ -6,7 +6,8 @@ var NLP = require('./stanford/StanfordNLP');
 var db = null;
 var coreNLP = null;
 var useNLP = true;
-var m = {};
+
+
 MongoClient.connect("mongodb://192.155.87.239/hmi", function (err, d) {
   if (err) throw err;
   console.log('db ready');
@@ -36,9 +37,9 @@ function collect_and_write() {
   stream.on('data', function (doc) {
     process(doc);
   }).on('error', function (err) {
-    // handle the error
+    console.log('error', err)
   }).on('close', function () {
-    // the stream is closed
+    console.log('complete');
   });
 
   var process = function (doc) {

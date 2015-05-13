@@ -37,7 +37,7 @@ var Translator = {
           phs.forEach(function (s) {
             var row = Translator.M[in_idx + s];
             if (!row) {
-              console.log('?',s)
+              console.log('?', s)
               ls += s;
             } else {
               var ts = row[out_idx];
@@ -55,7 +55,10 @@ var Translator = {
   }
 }
 Translator.init(function () {
-  Translator.translateFile(__dirname + '/loga.ph0', __dirname + '/loga.ph1', {from: 'arpabet', to: 'ipa'}, function (err, r) {
+  Translator.translateFile(__dirname + '/loga.ph0', __dirname + '/loga.ph1', {
+    from: 'arpabet',
+    to: 'ipa'
+  }, function (err, r) {
     console.log(err, r);
   })
 });
