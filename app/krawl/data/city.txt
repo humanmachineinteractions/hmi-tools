@@ -1367,3 +1367,371 @@ Wauwatosa
 Menomonee Falls
 Milwaukee
 Stamford
+New York
+Wayne
+Pequannock Township
+Lincoln Park
+Greenwood Village
+Englewood
+Denver
+Aurora
+Centennial
+Birmingham
+Mountain Brook
+Homewood
+Amarillo
+North Wales
+Chalfont
+Lansdale
+West Point
+Frewsburg
+Morley
+Howard City
+Piketon
+Waverly
+Crandall
+Charleston
+Big Chimney
+Rural Hall
+King
+Winston-Salem
+Middletown
+Oliver Springs
+Oak Ridge
+Charlotte
+Arkansas City
+Vancouver
+Northern Cambria
+Barnesboro
+Carrolltown
+Longwood
+Casselberry
+Altamonte Springs
+Winter Springs
+Fern Park
+Sunnyvale
+Los Angeles
+New Cumberland
+Harrisburg
+Lemoyne
+Camp Hill
+Takoma Park
+Silver Spring
+Friendship Heights
+Washington
+Chevy Chase
+Adelphi
+Hyattsville
+Silver Springs
+Liberal
+Needham
+Newton
+Wellesley
+Flagstaff
+Little Rock
+Waynesboro
+Pensacola
+East Northport
+Huntington
+Greenlawn
+Northport
+South Bend
+Atlantic Highlands
+Red Bank
+Fair Haven
+Portage
+Hobart
+Gary
+South Kingstown
+Edmonton
+Warren
+Hazel Park
+Detroit
+Hamtramck
+Highland Park
+Bessemer
+Hueytown
+Clearwater
+Dunedin
+Pikesville
+Baltimore
+Denton
+Modesto
+Eufaula
+Duluth
+Schaumburg
+Hoffman Estates
+South Barrington
+Yorktown
+Grafton
+Tyler
+Roscommon
+St. Louis
+Saint Louis
+Smyrna
+Clayton
+Shreveport
+Houma
+Rochester
+Rosholt
+Des Moines
+Ankeny
+Johnston
+Pekin
+Ottawa
+Calgary
+Tomball
+Magnolia
+Flemington
+Clinton
+Dover
+Franklin
+Asheboro
+Novato
+Youngstown
+Boardman
+Raytown
+Independence
+Kansas City
+Briarcliff Manor
+Croton-on-Hudson
+Ossining
+Millwood
+Avon
+Saint Joseph
+Omaha
+Stuart
+Morgantown
+Allentown
+Bethlehem
+Catasauqua
+Whitehall
+Lancaster
+Hutchins
+Corte Madera
+Larkspur
+Mill Valley
+San Rafael
+Nashville
+Thornwood
+Hawthorne
+Pleasantville
+Chappaqua
+Valhalla
+Little Silver
+Shrewsbury
+Eatontown
+West Long Branch
+Maricopa
+Toronto
+Houston
+Philadelphia
+Dumfries
+Woodbridge
+Lexington
+North Miami Beach
+Miami Gardens
+Miami
+Frankfurt am Main
+Stockton
+Springville
+East Concord
+Brooksville
+Morris Plains
+East Hanover
+Mountain Lakes
+Parsippany
+Whippany
+Gastonia
+Bessemer City
+Nuiqsut
+Loomis
+Rocklin
+Bedford
+Burlington
+Billerica
+Orange
+Santa Ana
+Pocola
+Austin
+Lake Grove
+Stony Brook
+Lockeford
+Deerfield
+Northbrook
+Highwood
+Huntersville
+Cornelius
+Burbank
+Grand Bay
+Rocky Hill
+Wethersfield
+Glastonbury
+Newington
+Hartford
+Fountain Valley
+Costa Mesa
+Huntington Beach
+Westminster
+Victor
+Boise
+Garden City
+Sacramento
+Clarksburg
+Germantown
+Howey-in-the-Hills
+Tavares
+Howey In Hills
+Astatula
+Dubuque
+North Little Rock
+Sausalito
+Belvedere Tiburon
+Hopkinton
+Ashland
+Southborough
+Linwood
+Webster
+League City
+Friendswood
+Spring Hill
+Shady Hills
+Quincy
+Braintree
+Milton
+Weymouth
+El Paso
+Algonquin
+Brandon
+West Reading
+Reading
+Gravette
+Williamsport
+Woburn
+Emporia
+Fall River
+Somerset
+Park City
+Morristown
+Lutherville
+Towson
+Cockeysville
+Lutherville-Timonium
+Rochester Hills
+Sterling Heights
+Shelby charter Township
+Utica
+Troy
+Platteville
+Shelbyville
+West Des Moines
+Clive
+Windsor Heights
+Moorefield
+Montréal
+Montreal
+Hanover
+Norwich
+Lebanon
+Coral Springs
+Coconut Creek
+Pompano Beach
+Parkland
+Wichita
+Springfield
+Wilbraham
+Ludlow
+E. Springfield
+Quentin
+Manheim
+Mount Gretna
+Riverside
+Perris
+Menifee
+Caldwell
+Douglas
+Spencer
+Gosport
+Tacoma
+Raleigh
+Sedgwick
+Niceville
+Valparaiso
+Eglin Air Force Base
+Norht Hollywood
+Maitland
+Winter Park
+Boulder
+Jamestown
+Saint Helena
+East Haddam
+Lyme
+Essex
+Deep River
+Chester
+Pembroke
+Leesville
+San Francisco
+New Roads
+Erie
+Lambertville
+Temperance
+Yankton
+Marshall
+Colorado Springs
+Bristol
+Lakeland
+Lemont
+Woodridge
+Romeoville
+Bolingbrook
+Lockport
+Homer Glen
+Tigard
+Beaverton
+Portland
+Elkins
+Los Angeles Covina
+Covina
+Seminole
+Saint Petersburg
+Madeira Beach
+Treasure Island
+Grand Island
+Farmington
+Phoenix
+N Little Rock
+Keosauqua
+Cheswick
+Verona
+Tarentum
+Oakmont
+Pittsburgh
+New Kensington
+Marion
+Winnipeg
+Atwood
+Trezevant
+Dallas
+Bloomington
+Normal
+Clear Lake
+Plymouth
+Mobile
+Gonzales
+Prairieville
+Monticello
+Eighty Four
+Rock Hill
+Burnaby
+New Westminster
+Port Moody
+South Burlington
+Williston
+Reynosa
+Saint Paul
+Roseville
+Pine Springs
+Hyden
+Winston Salem
+Orlando
