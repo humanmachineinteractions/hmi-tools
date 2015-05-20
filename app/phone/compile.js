@@ -34,22 +34,32 @@ function collect_and_write() {
   var content = db.collection('readercontents');
   var stream = content.find().stream();
 
+  var docs = [];
+  var start = false;
   stream.on('data', function (doc) {
-    process(doc);
+    docs.push(doc);
+    if (!start) {
+      start = true;
+      process();
+    }
   }).on('error', function (err) {
     console.log('error', err)
   }).on('close', function () {
     console.log('complete');
   });
 
-  var process = function (doc) {
+  var process = function () {
+    if (docs.length == 0)
+      return;
+    var doc = docs.shift();
     var pp = doc.text.split("\n");
     utils.forEach(pp, function (p, next) {
       if (!p) return next();
       if (useNLP) {
         coreNLP.process(p, function (err, result) {
+          console.log('--------------------------------------')
           console.log(err, result);
-          console.log(util.inspect(result, {depth: 5, colors: true}));
+          //console.log(util.inspect(result, {depth: 5, colors: true}));
           if (err || result == null) {
             console.log("?", err, result);
             return next();
@@ -58,8 +68,8 @@ function collect_and_write() {
           //var corefs = result.document.coreferences.coreference;
           _.forEach(sentences, function (sentence) {
             if (sentence.parsedTree && sentence.parsedTree.text != null) {
-              //console.log(c, sentence.parsedTree.text);
-              log.write(sentence.parsedTree.text + '\n');
+              console.log(c, sentence);
+              //log.write(sentence.parsedTree.text + '\n');
               c++;
             }
           });
@@ -70,6 +80,7 @@ function collect_and_write() {
         return next();
       }
     }, function () {
+      process();
     });
   };
 }
