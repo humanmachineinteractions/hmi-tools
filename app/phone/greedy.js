@@ -2,6 +2,8 @@ var fs = require('fs');
 var _ = require('lodash');
 var utils = require('../utils');
 var PhoneDict = require('./phonedict');
+var stats = require('./stats');
+
 
 function greedy(infile, outfile, options, complete) {
   var out = fs.createWriteStream(outfile);
@@ -15,7 +17,7 @@ function greedy(infile, outfile, options, complete) {
         if (c % 10 == 0)
           console.log('at line ' + c);
         if (c % 100 == 0)
-          console.log(lines[lines.length-1]);
+          console.log(lines[lines.length - 1]);
         c++;
         // simple line, no options
         if (!options.type || options.transcription) {
@@ -37,24 +39,20 @@ function greedy(infile, outfile, options, complete) {
 }
 
 
-
 function doGreedy(lines, out) {
+  // di, tri, quad
+  var N = 2;
   // This is an optimization technique for constructing a subset of sentences from a large set of sentences
   // to cover the largest unit space with the smallest number of sentences.
-  var forPhone = forDiphone;
-  //var forPhone = forTriphone; // or triphones?
+  var forPhone = function (phones, cb) {
+    stats.forNphone(N, phones, cb);
+  };
+  // dictionary of unique nphones
   var unique = {};
 
   function step_1() {
     // Step 1: Generate a unique diphone list from the corpus.
-    _.each(lines, function (line) {
-      forPhone(line.phones, function (diphone, phones) {
-        if (unique[diphone])
-          unique[diphone].count++;
-        else
-          unique[diphone] = {phones: phones, count: 1};
-      });
-    });
+    unique = stats.unique(lines, N);
   }
 
   function step_2_and_3() {
@@ -67,7 +65,7 @@ function doGreedy(lines, out) {
       diphone.frequency = diphone.count / total;
     });
     // Step 3: Calculate weight of each diphone in the list where weight of a diphone is inverse of the frequency.
-    // note - we don't seem to use this!
+    // note - unused / for display
     _.each(unique, function (diphone) {
       diphone.weight = 1 - diphone.frequency;
     });
@@ -85,7 +83,7 @@ function doGreedy(lines, out) {
     });
     // Step 5: Select the highest scored sentence.
     lines.sort(function (a, b) {
-      return b.score - a.score
+      return b.score - a.score;
     });
   }
 
@@ -127,25 +125,6 @@ function doGreedy(lines, out) {
 
 
 ///
-function forNphone(n, phones, cb) {
-  for (var i = 0; i < phones.length - (n - 1); i++) {
-    var nphone = '';
-    var aphone = [];
-    for (var j = 0; j < n; j++) {
-      nphone += phones[i + j];
-      aphone.push(phones[i + j]);
-    }
-    cb(nphone, aphone);
-  }
-}
-
-function forDiphone(phones, cb) {
-  forNphone(2, phones, cb);
-}
-
-function forTriphone(phones, cb) {
-  forNphone(3, phones, cb);
-}
 
 
 /*

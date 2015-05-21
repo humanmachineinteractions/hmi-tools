@@ -3,7 +3,12 @@ var utils = require('../utils/index');
 function unique(lines, n) {
   var unique = {};
   lines.forEach(function (line) {
-    forNphone(n, line.split(' '), function (nph, phones) {
+    var s;
+    if (typeof(line) == 'string')
+      s = line.split(' ');
+    else
+      s = line;
+    forNphone(n, s, function (nph, phones) {
       if (unique[nph])
         unique[nph].count++;
       else
@@ -27,10 +32,11 @@ function forNphone(n, phones, cb) {
 
 
 exports.unique = unique;
+exports.forNphone = forNphone;
 
 if (process.argv.length > 3) {
   utils.readLines(process.argv[2], function (err, lines) {
-    console.log('processing '+lines.length+' lines');
+    console.log('processing ' + lines.length + ' lines');
     var map = unique(lines, process.argv[3]);
     var items = [];
     for (var p in map) {

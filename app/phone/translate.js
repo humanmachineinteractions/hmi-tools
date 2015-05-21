@@ -11,7 +11,6 @@ var Translator = {
         var c = lines[i].split('\t');
         for (var j = 0; j < c.length; j++) {
           var id = j + c[j];
-          console.log(id);
           Translator.M[id] = c;
         }
       }
@@ -32,30 +31,40 @@ var Translator = {
     stream.once('open', function (fd) {
       utils.readLines(infile, function (err, lines) {
         lines.forEach(function (line) {
-          var ls = '';
-          var phs = line.split(' ');
-          phs.forEach(function (s) {
-            var row = Translator.M[in_idx + s];
-            if (!row) {
-              console.log('?',s)
-              ls += s;
-            } else {
-              var ts = row[out_idx];
-              ls += ts;
-            }
-          });
+          var ls = this._translate(line, in_idx, out_idx);
           stream.write(ls + '\n');
-          console.log(ls)
+          console.log(ls);
         })
       });
     });
   },
-  translate: function (word, options) {
-//
+  translate: function (line, options) {
+    return this._translate(line, Translator.find(options.from), Translator.find(options.to));
+  },
+  _translate: function (line, in_idx, out_idx) {
+    var ls = '';
+    var phs = line.split(' ');
+    phs.forEach(function (s) {
+      var row = Translator.M[in_idx + s];
+      ls += ' ';
+      if (!row) {
+        ls += s;
+      } else {
+        var ts = row[out_idx];
+        ls += ts;
+      }
+    });
+    return ls;
   }
 }
-Translator.init(function () {
-  Translator.translateFile(__dirname + '/loga.ph0', __dirname + '/loga.ph1', {from: 'arpabet', to: 'ipa'}, function (err, r) {
-    console.log(err, r);
-  })
-});
+
+exports.translate = Translator.translate;
+exports.translateFile = Translator.translateFile;
+
+if (process.argv.length > 3) {
+  Translator.init(function () {
+    Translator.translateFile(process.argv[2], process.argv[3], {from: process.argv[4], to: process.argv[5]}, function (err, r) {
+      console.log(err, r);
+    })
+  });
+}

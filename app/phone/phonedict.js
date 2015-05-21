@@ -19,7 +19,7 @@ function PhoneDict() {
     var s = data.split(" ");
     var word = s.shift();
     var phones = s;
-    // is it an alternate pronounciation? indicated by WORD(3)
+    // is it an alternate pronunciation? indicated by WORD(3)
     var alt = word.search(/\(\d\)$/);
     if (alt != -1) {
       word = word.substring(0, alt);
@@ -38,8 +38,7 @@ PhoneDict.prototype.__proto__ = EventEmitter.prototype;
 
 PhoneDict.prototype.getTranscription = function (sentence) {
   return this.getTranscriptionInfo(sentence).transcription;
-}
-
+};
 
 PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   var self = this;
@@ -78,12 +77,10 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   }, function () {
     complete(null, {text: sentence, transcription: s, phones: phs, unknown: unknown});
   });
-}
-
-
+};
 
 /**
- * wrapper for dict entries, collapsing multiple pronounciations
+ * wrapper for dict entries, collapsing multiple pronunciations
  * @param word
  * @param phones
  * @constructor
@@ -99,7 +96,7 @@ PhoneDictEntry.prototype.add = function (phones) {
     phones.shift();
   if (phones)
     this.transcriptions.push(phones);
-}
+};
 
 PhoneDictEntry.prototype.get = function (idx) {
   if (idx && this.transcriptions.length > idx)
@@ -108,7 +105,7 @@ PhoneDictEntry.prototype.get = function (idx) {
     return this.transcriptions[0];
   else
     return null;
-}
+};
 
 PhoneDictEntry.prototype.getString = function (idx) {
   var ts = this.get(idx);
@@ -119,11 +116,11 @@ PhoneDictEntry.prototype.getString = function (idx) {
       s += ss + ' ';
   });
   return s.trim();
-}
+};
 
 PhoneDictEntry.prototype.size = function () {
   return this.transcriptions.length;
-}
+};
 
 /**
  * turns a sentence into an array of tokens (words and punctuation elements)
