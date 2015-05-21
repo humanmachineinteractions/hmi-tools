@@ -1,4 +1,5 @@
 var fs = require('fs');
+var util = require('util');
 var _ = require('lodash');
 var MongoClient = require('mongodb').MongoClient;
 var utils = require('../utils');
@@ -58,8 +59,8 @@ function collect_and_write() {
       if (useNLP) {
         coreNLP.process(p, function (err, result) {
           console.log('--------------------------------------')
-          console.log(err, result);
-          //console.log(util.inspect(result, {depth: 5, colors: true}));
+          //console.log(err, result);
+          console.log(util.inspect(result, {depth: 30, colors: true}));
           if (err || result == null) {
             console.log("?", err, result);
             return next();
@@ -68,7 +69,7 @@ function collect_and_write() {
           //var corefs = result.document.coreferences.coreference;
           _.forEach(sentences, function (sentence) {
             if (sentence.parsedTree && sentence.parsedTree.text != null) {
-              console.log(c, sentence);
+              //console.log(c, sentence);
               //log.write(sentence.parsedTree.text + '\n');
               c++;
             }
