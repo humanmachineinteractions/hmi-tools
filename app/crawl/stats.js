@@ -30,8 +30,8 @@ stream.on('data', function (doc) {
   //count_ngrams(doc.text, 4);
   //var s = metaphone.process(doc.title);
   self.pause();
-  mary.transcribe(doc.title, function(err, s){
-    console.log(">",err,s);
+  mary.transcribe(doc.title, function (err, s) {
+    console.log(">", err, s);
     self.resume();
   });
   c++;
@@ -112,4 +112,3 @@ function write_array(fname, a, sf, complete) {
       });
   });
 }
-

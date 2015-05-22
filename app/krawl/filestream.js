@@ -16,7 +16,7 @@ Stream.prototype.writeln = function (s) {
     return;
   this.ids[s] = true;
   this.stream.write(s + "\n");
-  console.log(s);
+  //console.log(s);
 }
 
 Stream.prototype.end = function () {
