@@ -31,6 +31,45 @@ function forNphone(n, phones, cb) {
 }
 
 
+/**
+ * tracks unique keys
+ * @constructor
+ */
+function Mapper() {
+  this.map = {};
+}
+/**
+ * add a key to track
+ * @param a
+ */
+Mapper.prototype.add = function (a, b) {
+  if (this.map[a])
+    this.map[a].use++;
+  else
+    this.map[a] = {use: 1};
+  if (b) {
+    if (!this.map[a].b)
+      this.map[a].b = new Mapper();
+    this.map[a].b.add(b);
+  }
+}
+/**
+ * returns an array of names and uses sorted by use
+ * @returns {Array}
+ */
+Mapper.prototype.get = function () {
+  var arr = [];
+  for (var p in this.map) {
+    arr.push({name: p, use: this.map[p].use, b: this.map[p].b})
+  }
+  arr.sort(function (a, b) {
+    return b.use - b.use;
+  });
+  return arr;
+}
+
+
+exports.Mapper = Mapper;
 exports.unique = unique;
 exports.forNphone = forNphone;
 
