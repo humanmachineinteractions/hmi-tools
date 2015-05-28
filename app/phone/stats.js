@@ -4,15 +4,27 @@ function unique(lines, n) {
   var unique = {};
   lines.forEach(function (line) {
     var s;
-    if (typeof(line) == 'string')
-      s = line.split(' ');
-    else
-      s = line;
-    forNphone(n, s, function (nph, phones) {
-      if (unique[nph])
-        unique[nph].count++;
+    if (typeof(line) == 'string') {
+      if (line.indexOf('\t'))
+        s = line.split('\t')[1].split(' ');
       else
-        unique[nph] = {phones: phones, count: 1};
+        s = line.split(' ');
+    }
+    else {
+      s = line.phones;
+    }
+    for (var i = 0; i < s.length; i++) {
+      if (s[i].length > 2) {
+        //console.log('invalid symbol '+s[i]);
+        return;
+      }
+    }
+    forNphone(n, s, function (nph, phones, idx) {
+      var p = Math.floor((idx / s.length) * 4);
+      if (unique[nph + p])
+        unique[nph + p].count++;
+      else
+        unique[nph + p] = {phones: phones, count: 1, position: p, idx: idx, line: line};
     });
   });
   return unique;
@@ -26,7 +38,7 @@ function forNphone(n, phones, cb) {
       nphone += phones[i + j];
       aphone.push(phones[i + j]);
     }
-    cb(nphone, aphone);
+    cb(nphone, aphone, i);
   }
 }
 
@@ -74,6 +86,7 @@ exports.unique = unique;
 exports.forNphone = forNphone;
 
 if (process.argv.length > 3) {
+  console.log('reading ' + process.argv[2])
   utils.readLines(process.argv[2], function (err, lines) {
     console.log('processing ' + lines.length + ' lines');
     var map = unique(lines, process.argv[3]);
@@ -84,7 +97,9 @@ if (process.argv.length > 3) {
     items.sort(function (a, b) {
       return b.count - a.count
     });
-    console.log(items);
+    for (var i=0; i<100; i++) {
+      console.log(items[i].phones, items[i].count, items[i].position);
+    }
     console.log(items.length);
   })
 }
