@@ -14,6 +14,16 @@ function Symbol(ph /*, options*/) {
   this.voiced = ph.match(NON_VOICED) ? false : true;
 }
 
+Symbol.prototype.toObject = function () {
+  var o = {
+    ph: this.text
+  }
+  if (this.stressed)
+    o.stress = this.stress;
+  return o;
+};
+
+
 /**
  *
  * @param type
@@ -86,10 +96,25 @@ SymbolList.prototype.voiced = function () {
 SymbolList.prototype.toString = function () {
   var v = '';
   this.forEach(function(s){
-    v += s.text + ' ';
+    v += s.initial + ' ';
   });
   return v;
 };
+
+SymbolList.prototype.toObject = function () {
+  var l = [];
+  this.list.forEach(function(s){
+    l.push(s.toObject())
+  });
+  return {
+    type: this.type,
+    list: l
+  }
+};
+
+SymbolList.prototype.toJSON = function () {
+  return JSON.stringify(this.toObject());
+}
 
 exports.NON_VOICED = NON_VOICED;
 exports.Symbol = Symbol;

@@ -13,6 +13,7 @@ function PhoneDict() {
   var self = this;
   self.entries = {};
   self.numberOfEntries = 0;
+  self.phonesaurus = true;
   utils.readLines(__dirname + '/cmu/cmudict.0.7a', function (data) {
     if (data.indexOf(";;;") == 0 || data.indexOf("#") == 0)
       return;
@@ -65,16 +66,19 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
         return next();
       } else {
         unknown.push(word);
-        Phonesaurus.get_transcriptions(WORD, function (err, ss) {
-          if (ss.length == 0) {
-            console.log(">", WORD, ss);
+        if (self.phonesaurus)
+          Phonesaurus.get_transcriptions(WORD, function (err, ss) {
+            if (ss.length == 0) {
+              console.log(">", WORD, ss);
+              return next();
+            }
+            s.push(ss[0]);
+            phs.push('_');
+            phs = phs.concat(ss[0].split(' '));
             return next();
-          }
-          s.push(ss[0]);
-          phs.push('_');
-          phs = phs.concat(ss[0].split(' '));
+          })
+        else
           return next();
-        })
       }
     }
   }, function () {

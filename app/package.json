@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.9.2",
+    "clj-fuzzy": "0.1.8",
     "cloudinary": "1.0.7",
     "connect-mongo": "0.4.0",
     "csv-parse": "0.0.6",
@@ -17,6 +18,8 @@
     "formidable": "1.0.14",
     "gm": "1.14.2",
     "gridfs-stream": "0.4.1",
+    "groove": "^2.2.7",
+    "iconv-lite": "0.4.6",
     "java": "^0.4.2",
     "jsdom": "^1.0.0-pre.7",
     "kue": "^0.7.5",
@@ -27,9 +30,11 @@
     "moment": "^2.8.4",
     "mongodb": "^1.4.12",
     "mongoose": "3.8.7",
+    "natural": "^0.2.0",
     "node-uuid": "1.4.1",
     "nodemailer": "0.6.0",
     "pkgcloud": "0.9.4",
+    "progress": "^1.1.8",
     "prompt": "0.2.12",
     "request": "^2.44.0",
     "sax": "^0.6.0",
@@ -40,11 +45,7 @@
     "winston": "0.7.2",
     "winston-mongodb": "0.4.3",
     "xlsjs": "^0.7.1",
-    "xml2js": "^0.4.4",
-    "iconv-lite": "0.4.6",
-    "groove": "^2.2.7",
-    "natural": "^0.2.0",
-    "clj-fuzzy": "0.1.8"
+    "xml2js": "^0.4.4"
   },
   "devDependencies": {
     "grunt": "~0.4.2",
