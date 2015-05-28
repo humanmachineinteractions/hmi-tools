@@ -11,9 +11,10 @@ function greedy(infile, outfile, options, complete) {
   d.on('ready', function () {
     var c = 0;
     var lines = [];
+    var max_len = options.max_line_length ? options.max_line_length ? 130;
     utils.readLines(infile, function (err, tlines) {
       utils.forEach(tlines, function (line, next) {
-        if (line.length > 130) return next();
+        if (line.length > max_len) return next();
         if (c % 10 == 0)
           console.log('at line ' + c);
         if (c % 100 == 0)
@@ -25,38 +26,55 @@ function greedy(infile, outfile, options, complete) {
             lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
             return next();
           });
-        } else if (options.csv) { //todo validate options
-          var csvline = line.split(options.csv_split_char ? options.csv_split_char : '\t');
-          var trscrptn = csvline[options.transcription_column]
-          lines.push({csvline: line[options.text_column], transcription: trscrptn, phones: trscrptn.split(' ')});
+        } else if (options.type == "csv") { //todo validate options
+          var split_char = options.csv_split_char ? options.csv_split_char : '\t';
+          var tcol = options.text_column ? Number(options.text_column) : 0;
+          var pcol = options.transcription_column ? Number(options.transcription_column) : 1;
+          var csvline = line.split(split_char);
+          lines.push({line: csvline[tcol], transcription: csvline[pcol], phones: csvline[pcol].split(' ')});
           return next();
         }
       }, function () {
-        doGreedy(lines, out);
+        doGreedy(lines, out, complete);
       });
     });
   });
 }
 
 
-function doGreedy(lines, out) {
+/**
+ * This is an optimization technique for constructing a subset of sentences from a large set of sentences
+ * to cover the largest unit space with the smallest number of sentences.
+ *
+ * Algorithm works step−by−step: a first sentence is selected according to a criterion; the sentence is added to the cover,
+ * and the covered units are removed from the set of units to cover. The process starts again: the second sentence, in this
+ * example, contains a maximum of non−already covered units. The process stops when all units are covered.
+ *
+ * @param lines {Array} a list of objects {line: "text", transcription: "T EE S
+ * @param out
+ * @param complete
+ */
+function doGreedy(lines, out, complete) {
   // di, tri, quad
-  var N = 2;
-  // This is an optimization technique for constructing a subset of sentences from a large set of sentences
-  // to cover the largest unit space with the smallest number of sentences.
+  var N = 3;
   var forPhone = function (phones, cb) {
     stats.forNphone(N, phones, cb);
   };
   // dictionary of unique nphones
   var unique = {};
 
+  /**
+   * Step 1: Generate a unique diphone list from the corpus.
+   */
   function step_1() {
-    // Step 1: Generate a unique diphone list from the corpus.
     unique = stats.unique(lines, N);
   }
 
+  /**
+   * Step 2: Calculate frequency of the diphone in the list from the corpus.
+   * Step 3: Calculate weight of each diphone in the list where weight of a diphone is inverse of the frequency.
+   */
   function step_2_and_3() {
-    // Step 2: Calculate frequency of the diphone in the list from the corpus.
     var total = 0;
     _.each(unique, function (diphone) {
       total += diphone.count;
@@ -64,15 +82,16 @@ function doGreedy(lines, out) {
     _.each(unique, function (diphone) {
       diphone.frequency = diphone.count / total;
     });
-    // Step 3: Calculate weight of each diphone in the list where weight of a diphone is inverse of the frequency.
-    // note - unused / for display
     _.each(unique, function (diphone) {
       diphone.weight = 1 - diphone.frequency;
     });
   }
 
+  /**
+   * Step 4: Calculate a score for every sentence. The sentence score is defined by the equation.
+   * Step 5: Select the highest scored sentence.
+   */
   function step_4_and_5() {
-    //Step 4: Calculate a score for every sentence. The sentence score is defined by the equation (1).
     _.each(lines, function (line) {
       var score = 0;
       forPhone(line.phones, function (diphone) {
@@ -81,24 +100,28 @@ function doGreedy(lines, out) {
       });
       line.score = score;
     });
-    // Step 5: Select the highest scored sentence.
     lines.sort(function (a, b) {
       return b.score - a.score;
     });
   }
 
+  /**
+   * Step 6: Delete the selected sentence from the corpus.
+   * Step 7: Delete all the diphones found in the selected sentence from the diphone list.
+   * Step 8: Repeat from Step 2 to 7 until the diphone list is empty.
+   * @returns {Array} a ranked list of lines
+   */
   function step_2_through_7() {
     step_2_and_3();
     step_4_and_5();
-    // Step 6: Delete the selected sentence from the corpus.
+    //
     var deleted = lines.shift();
-    //out.write(deleted.line + "\t" + deleted.transcription + "\n");
     out.write(deleted.line + "\n");
-    // Step 7: Delete all the diphones found in the selected sentence from the diphone list.
+    //
     forPhone(deleted.phones, function (diphone) {
       delete unique[diphone];
     });
-    // Step 8: Repeat from Step 2 to 7 until the diphone list is empty.
+    //
     var diphone_count = 0;
     _.each(unique, function (p) {
       diphone_count++;
@@ -108,12 +131,7 @@ function doGreedy(lines, out) {
       step_1();
       step_2_and_3();
       step_4_and_5();
-      _.each(lines, function (line) {
-        //out.write(line.line + "\t" + line.transcription + "\n");
-        out.write(line.line + "\n");
-        console.log(line.score, line.line);
-      });
-      return;
+      return complete(null, lines);
     }
     step_2_through_7();
   }
@@ -126,17 +144,6 @@ function doGreedy(lines, out) {
 
 ///
 
-
-/*
-
- Algorithm works step−by−step: a first sentence is selected
- according to a criterion; the sentence is added to the cover,
- and the covered units are removed from the set of units to
- cover. The process starts again: the second sentence, in this
- example, contains a maximum of non−already covered
- units. The process stops when all units are covered.
-
- */
 
 exports.greedy = greedy;
 
