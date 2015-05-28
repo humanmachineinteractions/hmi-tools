@@ -16,9 +16,9 @@ function transcribe(infile, outfile, options, complete) {
             if (l % 100 == 0)
               console.log('at line ' + l);
             if (options.voiced) {
-              stream.write(ph.phones.voiced().toString() + '\n');
+              stream.write(line + "\t" + ph.phones.voiced().toString() + '\n');
             } else {
-              stream.write(ph.phones.toString() + '\n');
+              stream.write(line + "\t" + ph.phones.toString() + '\n');
             }
             l++;
             next();
@@ -26,7 +26,7 @@ function transcribe(infile, outfile, options, complete) {
         }, function () {
           stream.end();
           console.log('read ' + l + ' lines');
-          console.log('unknown', unknown)
+          console.log('unknown', unknown);
           complete();
         });
       });
@@ -44,7 +44,7 @@ function test() {
 exports.transcribe = transcribe;
 
 if (process.argv.length > 3) {
-  transcribe(process.argv[2], process.argv[3], {}, function () { //{voiced: true}
+  transcribe(process.argv[2], process.argv[3], {voiced: (process.argv.length > 4 && process.argv[4] == "voiced")}, function () { //{}
     console.log("!");
   })
 }
