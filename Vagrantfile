@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
       v.memory = 8000
       v.cpus = 4
       v.customize ["modifyvm", :id, "--cpuexecutioncap", "100"]
-      v.gui = true
+      #v.gui = true
     end
 
 
