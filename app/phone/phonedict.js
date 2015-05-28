@@ -169,15 +169,13 @@ var Phonesaurus = {
           if (err) console.error('error - is phonesaurus installed?', err, stdout, stderr);
           else {
             console.log('...server ready. to: kill -9 `pgrep twistd`');
-            Phonesaurus.test();
+            Phonesaurus.test(ready);
           }
         });
       }
       else {
         console.log('twistd server ready');
-        Phonesaurus.test(function () {
-          ready();
-        });
+        Phonesaurus.test(ready);
       }
     });
   },
