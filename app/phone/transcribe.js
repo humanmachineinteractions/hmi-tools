@@ -15,6 +15,7 @@ function transcribe(infile, outfile, options, complete) {
     d.on('ready', function () {
       utils.readLines(infile, function (err, lines) {
         utils.forEach(lines, function (line, next) {
+          line = line.replace(/-/g, ' ');
           d.getTranscriptionInfo(line, function (err, ph) {
             if (c % 100 == 0)
               console.log('at line ' + c + ' of ' + lines.length);
