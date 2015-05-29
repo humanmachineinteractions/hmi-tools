@@ -33,14 +33,16 @@ function unique(lines, n) {
 }
 
 function forNphone(n, phones, cb) {
-  for (var i = 0; i < phones.length - (n - 1); i++) {
+  var s = phones.length - (n - 1);
+  for (var ph_idx = 0; ph_idx < s; ph_idx++) {
     var nphone = '';
     var aphone = [];
     for (var j = 0; j < n; j++) {
-      nphone += phones[i + j];
-      aphone.push(phones[i + j]);
+      var p = phones[ph_idx + j];
+      nphone += p;
+      aphone.push(p);
     }
-    cb(nphone, aphone, i);
+    cb(nphone, aphone, ph_idx, s);
   }
 }
 

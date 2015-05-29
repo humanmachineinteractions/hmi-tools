@@ -8,8 +8,8 @@ var translator = require('./translate');
 
 // read file, prepare for transcription if necessary
 function greedy(infile, outfile, options, complete) {
-  var max_len = options.max_line_length ? options.max_line_length : 150;
-  var min_len = options.min_line_length ? options.min_line_length : 50;
+  var max_len = options.max_line_length ? options.max_line_length : 140;
+  var min_len = options.min_line_length ? options.min_line_length : 30;
   var lines = [];
   if (!options.type || options.type == 'plain-text') {
     var d = new PhoneDict();
@@ -67,7 +67,7 @@ function greedy(infile, outfile, options, complete) {
 
 function doGreedy(lines, out, complete) {
   // triphones
-  var N = 2;
+  var N = 3;
 
   // utility
   function forPhone(phones, cb) {
@@ -83,7 +83,8 @@ function doGreedy(lines, out, complete) {
   function step_1() {
     unique = stats.unique(lines, N);
     _.each(unique, function (n) {
-      n.greed = 4;
+      n.init = 0;
+      n.final = 0;
     });
     console.log('Unique groups ' + _.keys(unique).length);
   }
@@ -137,19 +138,18 @@ function doGreedy(lines, out, complete) {
     var ph = translator.translate(selected.transcription, {from: "ARPABET", to: "IPA"}).replace(/_/g, ' ');
     out.write(selected.line + "\t" + ph + "\n");
 
-    //
-    forPhone(selected.phones, function (nphone) {
+    forPhone(selected.phones, function (nphone, aphone, idx, s) {
       if (unique[nphone]) {
-        unique[nphone].greed--; // todo more positioned!
-        if (unique[nphone].greed < 1)
+        if ((idx / s) > .6)
+          unique[nphone].final++;
+        else
+          unique[nphone].init++;
+        if (unique[nphone].final + unique[nphone].init > 3)
           delete unique[nphone];
       }
     });
     //
-    var phone_count = 0;
-    _.each(unique, function (p) {
-      phone_count++;
-    });
+    var phone_count = _.keys(unique).length;
     console.log(phone_count + " " + lines.length + " " + selected.line + " " + ph);
     if (phone_count == 0) {
       step_1();
