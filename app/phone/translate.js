@@ -45,12 +45,20 @@ var Translator = {
     var ls = '';
     var phs = Array.isArray(line) ? line : line.indexOf(' ') != -1 ? line.split(' ') : line.split('');
     phs.forEach(function (s) {
+      var accent = null;
+      var m = s.match(/([A-Z][A-Z])([0-3])/);
+      if (m) {
+        s = m[1];
+        accent = m[2];
+      }
       var row = Translator.M[in_idx + s];
       //ls += ' ';
       if (!row) {
         ls += s;
       } else {
         var ts = row[out_idx];
+        //if (accent)
+        //  ts += '\'';
         ls += ts;
       }
     });
@@ -82,7 +90,7 @@ var Translator = {
 
 module.exports = exports = Translator;
 
-if (process.argv.length > 3) {
+if (!module.parent && process.argv.length > 3) {
   Translator.init(function () {
     Translator.translateFile(process.argv[2], process.argv[3], {from: process.argv[4], to: process.argv[5]}, function (err, r) {
       console.log(err, r);
