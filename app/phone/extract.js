@@ -8,6 +8,7 @@ var translator = require('./translate');
 var input_dir = '/Users/posttool/Documents/Projects/_bk/com_nuance_zeropoint/data/Data--CorporaImposing/tom/rawdata/';
 var text_out = fs.createWriteStream('/Users/posttool/Documents/github/adapt/MIN/txt.done.data');
 var phseq_out = fs.createWriteStream('/Users/posttool/Documents/github/adapt/MIN/txt.phseq.data');
+//${SOX} -r 22050 -e signed -b 16 ${DEST}/${i%pcm}raw -r 16000 ${DEST}/${i%pcm}wav
 
 translator.init(function () {
   console.log(input_dir)
