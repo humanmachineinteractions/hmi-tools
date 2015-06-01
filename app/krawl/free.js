@@ -69,6 +69,8 @@ new Stream('data/films.txt', function (fstream) {
 //  "limit": 100
 //}];
 
+
+// TODO get the track titles too
 //var outfile = 'data/artists.txt';
 //var query = [{
 //  "id": null,
@@ -143,3 +145,6 @@ new Stream('data/films.txt', function (fstream) {
 //});
 
 
+// TODO recipes
+
+// TODO city, state
