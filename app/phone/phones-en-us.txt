@@ -38,15 +38,16 @@ l	L	l	l	l	l	l	l	l
 θ	TH	th	T	T	T	T	T	T
 ð	DH	dh	D	D	D	D	D	D
 ɹ	R	r	R+	r	r	r	9r	r
-ɾ	DX		r6	R				
+ɾ	DX	dx	r6	R				
 t͡ʃ	CH	ch	t&S	C	tS	J	tS	C
 d͡ʒ	JH	jh	d&Z	G	dZ	_	dZ	J
-l			l	L				
+l		l	l	L				
 p		p	p%{	P				
 t		t	t%{	Æ				
 k		k	k%{	K				
+n		n	n%)	ñ				
  		ssil		-*				
 		pau		#				
 				"				
 -				-				
-								
+				%				

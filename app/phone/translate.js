@@ -39,9 +39,11 @@ var Translator = {
     });
   },
   translate: function (line, options) {
-    return this._translate(line, Translator.find(options.from), Translator.find(options.to));
+    return this._translate(line, options);
   },
-  _translate: function (line, in_idx, out_idx) {
+  _translate: function (line, options) {
+    var in_idx = Translator.find(options.from);
+    var out_idx = Translator.find(options.to);
     var ls = '';
     var phs = Array.isArray(line) ? line : line.indexOf(' ') != -1 ? line.split(' ') : line.split('');
     phs.forEach(function (s) {
@@ -52,7 +54,8 @@ var Translator = {
         accent = m[2];
       }
       var row = Translator.M[in_idx + s];
-      //ls += ' ';
+      if (options.spaced && ls.length != 0 && ls.charAt(ls.length - 1) != ' ')
+        ls += ' ';
       if (!row) {
         ls += s;
       } else {
@@ -81,7 +84,7 @@ var Translator = {
         j--;
       }
       if (i < line.length)
-        console.log("???", i, line.length, line.substring(i, i + 1));
+        console.log("???", line, line.substring(i, i + 1));
       i++;
     }
     return r;
@@ -92,7 +95,10 @@ module.exports = exports = Translator;
 
 if (!module.parent && process.argv.length > 3) {
   Translator.init(function () {
-    Translator.translateFile(process.argv[2], process.argv[3], {from: process.argv[4], to: process.argv[5]}, function (err, r) {
+    Translator.translateFile(process.argv[2], process.argv[3], {
+      from: process.argv[4],
+      to: process.argv[5]
+    }, function (err, r) {
       console.log(err, r);
     })
   });

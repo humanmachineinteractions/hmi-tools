@@ -5,10 +5,12 @@ iconv.extendNodeEncodings();
 var utils = require('../utils');
 var translator = require('./translate');
 
-var input_dir = '/Users/david/Data--CorporaImposing/tom/rawdata/';
-var out = fs.createWriteStream('/Users/david/adapt/MIN/txt.done.data');
+var input_dir = '/Users/posttool/Documents/Projects/_bk/com_nuance_zeropoint/data/Data--CorporaImposing/tom/rawdata/';
+var text_out = fs.createWriteStream('/Users/posttool/Documents/github/adapt/MIN/txt.done.data');
+var phseq_out = fs.createWriteStream('/Users/posttool/Documents/github/adapt/MIN/txt.phseq.data');
 
 translator.init(function () {
+  console.log(input_dir)
   fs.readdir(input_dir, function (err, files) {
     var c = 0;
     utils.forEach(files, function (file, next) {
@@ -21,23 +23,23 @@ translator.init(function () {
           var t = lines[1].substring(9).trim();
           var pt = lines[2].substring(9).trim();
           var s = translator.split(pt, 'TTN');
-          var ipa = translator.translate(s, {from: 'TTN', to: 'IPA'});
-          console.log('\n----- '+c+' -----')
-          console.log(t);
-          console.log(pt);
-          console.log(ipa);
-          if (c== 20)
-            process.exit();
-//          var l = '( ' + name + ' "' + t.trim() + '" )';
-//          console.log(l);
-//          out.write(l+'\n');
+          var ipa = translator.translate(s, {from: 'TTN', to: 'FESTVOX', spaced: true});
+          if (name.indexOf('saet') == 0 || name.indexOf('scom') == 0) {
+            console.log('\n----- ' + c + ' -----')
+            console.log(t);
+            console.log(pt);
+            console.log(name + ' ' + ipa);
+            phseq_out.write(name + ' ' + ipa + '\n');
+            text_out.write('( ' + name + ' "' + t + '" )\n');
+          }
           next();
         });
       } else {
         next();
       }
     }, function () {
-      out.end();
+      text_out.end();
+      phseq_out.end();
     });
   });
 });
