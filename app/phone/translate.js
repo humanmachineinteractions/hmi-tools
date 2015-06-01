@@ -6,8 +6,8 @@ var Translator = {
   H: [],
   init: function (ready) {
     utils.readLines(__dirname + '/phones-en-us.txt', function (err, lines) {
-      Translator.H = lines[3].split('\t');
-      for (var i = 4; i < lines.length; i++) {
+      Translator.H = lines[0].split('\t');
+      for (var i = 1; i < lines.length; i++) {
         var c = lines[i].split('\t');
         for (var j = 0; j < c.length; j++) {
           var id = j + c[j];
@@ -43,10 +43,10 @@ var Translator = {
   },
   _translate: function (line, in_idx, out_idx) {
     var ls = '';
-    var phs = line.split(' ');
+    var phs = Array.isArray(line) ? line : line.indexOf(' ') != -1 ? line.split(' ') : line.split('');
     phs.forEach(function (s) {
       var row = Translator.M[in_idx + s];
-      ls += ' ';
+      //ls += ' ';
       if (!row) {
         ls += s;
       } else {
@@ -55,11 +55,32 @@ var Translator = {
       }
     });
     return ls;
+  },
+  split: function (line, type) {
+    var r = [];
+    var idx = Translator.find(type);
+    var i = 0;
+    A: while (i <= line.length) {
+      var j = 3;
+      while (j > 0) {
+        var ts = line.substring(i, i + j);
+        var f = Translator.M[idx + ts];
+        if (f) {
+          r.push(ts);
+          i += j;
+          continue A;
+        }
+        j--;
+      }
+      if (i < line.length)
+        console.log("???", i, line.length, line.substring(i, i + 1));
+      i++;
+    }
+    return r;
   }
 }
 
-exports.translate = Translator.translate;
-exports.translateFile = Translator.translateFile;
+module.exports = exports = Translator;
 
 if (process.argv.length > 3) {
   Translator.init(function () {
