@@ -10,10 +10,15 @@ fs.readdir(b, function (err, files) {
         var result = JSON.parse(txt);
         var sentences = arrayify(result.document.sentences.sentence);
         sentences.forEach(function (s) {
-          if (s.parsedTree && s.parsedTree.text != null) {
-            console.log(c, s.parsedTree.text); //TODO
-            c++;
-          }
+          //if (s.parsedTree && s.parsedTree.text != null) {
+          //  console.log(c, s.parsedTree.text); //TODO
+          //  c++;
+          //}
+          var tokens = arrayify(s.tokens.token);
+          tokens.forEach(function (t) {
+            //var ner = (t.NER != 'O') ? t.NER : '';
+            console.log(">", t.word, t.POS); //
+          });
         });
         next();
       } catch (e) {

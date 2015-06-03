@@ -130,11 +130,14 @@ function doGreedy(lines, out, complete) {
    * Step 8: Repeat from Step 2 to 7 until the nphone list is empty.
    * @returns {Array} a ranked list of lines
    */
+  var c = 0;
+
   function step_2_through_7() {
     step_2_and_3();
     step_4_and_5();
     //
     var selected = lines.shift();
+    c++;
     var ph = translator.translate(selected.transcription, {from: "ARPABET", to: "IPA"}).replace(/_/g, ' ');
     out.write(selected.line + "\t" + ph + "\n");
 
@@ -144,20 +147,21 @@ function doGreedy(lines, out, complete) {
           unique[nphone].final++;
         else
           unique[nphone].init++;
-        if (unique[nphone].final + unique[nphone].init > 3)
+        if (unique[nphone].final + unique[nphone].init >= unique[nphone].count)
           delete unique[nphone];
       }
     });
     //
     var phone_count = _.keys(unique).length;
     console.log(phone_count + " " + lines.length + " " + selected.line + " " + ph);
-    if (phone_count == 0) {
+    if (c > 5000 || phone_count == 0) {
       step_1();
       step_2_and_3();
       step_4_and_5();
+      out.end();
       return complete(null, lines);
     }
-    step_2_through_7();
+    process.nextTick(step_2_through_7);
   }
 
   step_1();

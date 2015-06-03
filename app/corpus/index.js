@@ -38,8 +38,8 @@ function generate(infile, outfile, options, complete) {
 
 console.log('//////////////////////////////////////////////////////////////////')
 
-var infile = __dirname + '/template.txt';
-var outfile = __dirname + '/template-0.txt';
+var infile = __dirname + '/data/template.txt';
+var outfile = __dirname + '/data/template-0.txt';
 var props = [
   {exp: /\[(familymember|familyname|babyname|julie)\.?]/, values: names.People},
   {exp: /\[petname]/, values: names.Pets},
@@ -54,7 +54,7 @@ generate(infile, outfile, {props: props}, function (err) {
 // util
 
 var T2W = require('../utils/numbers/number2text');
-var translator = new T2W("EN_US");
+var translator = new T2W('EN_US');
 
 function generateTime() {
   if (random.yes(.05)) {

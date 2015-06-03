@@ -165,12 +165,15 @@ var Phonesaurus = {
   init: function (ready) {
     exec('pgrep twistd', function (err, stdout, stderr) {
       if (!stdout) {
-        console.log('twistd server starting');
+        console.log('phonesaurus server starting');
         exec('/usr/bin/twistd -y g2pservice.tac', {
           cwd: Phonesaurus.BASE_DIR,
           env: {LD_LIBRARY_PATH: '/usr/local/lib'}
         }, function (err, stdout, stderr) {
-          if (err) console.error('error - is phonesaurus installed?', err, stdout, stderr);
+          if (err) {
+            console.error('error - is phonesaurus installed?', err, stdout, stderr);
+            ready(new Error('no phonesaurus'))
+          }
           else {
             console.log('...server ready. to: kill -9 `pgrep twistd`');
             Phonesaurus.test(ready);
