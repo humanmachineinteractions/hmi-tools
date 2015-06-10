@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var utils = require('../utils/index');
 var exec = require('child_process').exec;
 var model = require('./model');
+var numbers = require('../utils/numbers');
 
 /**
  * The phonetic transcription dictionary.
@@ -49,37 +50,62 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   var unknown = [];
   var s = [];
   var phs = new model.SymbolList();
-  var words = tokenize(sentence);
-  utils.forEach(words, function (word, next) {
-    if (!word) return next();
-    if (word.match(model.NON_VOICED)) {
-      s.push(word);
-      phs.push(word);
+  var wordInSentence;
+  var nextNe = null;
+  if (Array.isArray(sentence)) {
+    wordInSentence = sentence;
+  } else {
+    wordInSentence = tokenize(/[–|—|\?|,|!|"|;|…]/g, sentence);
+  }
+  utils.forEach(wordInSentence, function (wordInfo, next) {
+    if (!wordInfo.word) return next();
+    if (wordInfo.pos && wordInfo.pos.indexOf("-") != -1) return next();
+    if (wordInfo.word.match(model.NON_VOICED)) {
+      s.push(wordInfo.word);
+      phs.push(wordInfo.word);
+      return next();
+    } else if (wordInfo.word.match(/\$/)) {
+      nextNe = 'DOLLARS';
+      return next();
+    } else if (wordInfo.word.match(/#/)) {
+      nextNe = 'EVERY';
       return next();
     } else {
-      var WORD = word.toUpperCase();
-      var lex_entry = self.entries[WORD];
-      if (lex_entry) {
-        s.push(lex_entry.getString(0));
-        phs.push('_');
-        phs = phs.concat(lex_entry.get(0));
-        return next();
+      var words;
+      if (wordInfo.word.match(/-?\d[\d,\.:]*/)) {
+        words = tokenize(/[–|,]/g, numbers.convert(wordInfo.ne ? wordInfo.ne : nextNe, wordInfo.word));
+        nextNe = null;
       } else {
-        unknown.push(word);
-        if (self.phonesaurus)
-          Phonesaurus.get_transcriptions(WORD, function (err, ss) {
-            if (ss.length == 0) {
-              console.log(">", WORD, ss);
-              return next();
-            }
-            s.push(ss[0]);
-            phs.push('_');
-            phs = phs.concat(ss[0].split(' '));
-            return next();
-          })
-        else
-          return next();
+        words = tokenize(/[\.|-]/g, wordInfo.word);
       }
+      utils.forEach(words, function (word, next) {
+        if (word.word.match(model.NON_VOICED)) {
+          return next();
+        }
+        var WORD = word.word.toUpperCase();
+        var lex_entry = self.entries[WORD];
+        if (lex_entry) {
+          s.push(lex_entry.getString(0));
+          phs.push('_');
+          phs = phs.concat(lex_entry.get(0));
+          return next();
+        } else {
+          unknown.push(word.word);
+          if (self.phonesaurus)
+            Phonesaurus.get_transcriptions(WORD, function (err, ss) {
+              if (ss.length == 0) {
+                return next();
+              }
+              self.entries[WORD] = new PhoneDictEntry(WORD, ss[0].split(' '), true); // next time it will be 'cached' TODO improve this!
+              s.push(ss[0]);
+              phs.push('_');
+              phs = phs.concat(ss[0].split(' '));
+              return next();
+            });
+          else
+            return next();
+        }
+      }, next);
     }
   }, function () {
     complete(null, {text: sentence, transcription: s, phones: phs, unknown: unknown});
@@ -93,9 +119,10 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
  * @param phones
  * @constructor
  */
-function PhoneDictEntry(word, phones) {
+function PhoneDictEntry(word, phones, g2p) {
   this.word = word;
   this.transcriptions = [];
+  this.g2p = g2p;
   this.add(phones);
 }
 
@@ -135,22 +162,22 @@ PhoneDictEntry.prototype.size = function () {
  * @param sentence
  * @returns {Array}
  */
-function tokenize(sentence) {
+function tokenize(rg, sentence) {
   var st = sentence.split(' ');
   var words = [];
   st.forEach(function (s) {
-    var m = s.match(model.NON_VOICED);
+    var m = s.match(rg);
     if (m) {
       for (var i = 0; i < m.length; i++) {
         var c = m[i];
         var idx = s.indexOf(c);
-        words.push(s.substring(0, idx));
-        words.push(s.substring(idx, idx + c.length)); // punc
+        words.push({word: s.substring(0, idx)});
+        words.push({word: s.substring(idx, idx + c.length)}); // punc
         s = s.substring(idx + c.length);
       }
     }
     if (s)
-      words.push(s);
+      words.push({word: s});
   });
   return words;
 }
@@ -181,13 +208,13 @@ var Phonesaurus = {
         });
       }
       else {
-        console.log('twistd server ready');
+        console.log('phonesaurus server ready');
         Phonesaurus.test(ready);
       }
     });
   },
-  get_transcriptions: function (t, complete) {
-    t = t.replace("'", '');
+  get_transcriptions: function (WORD, complete) {
+    var t = WORD.replace("'", '');
     t = t.toUpperCase();
     exec(Phonesaurus.BASE_DIR + '/g2p-client.py -m app-id -w ' + t + ' -n 3', {
       cwd: Phonesaurus.BASE_DIR,

@@ -1,8 +1,43 @@
-var utils = require('../../utils/index');
+var utils = require('../../utils');
 var GoogleSpreadsheet = require("google-spreadsheet");
 var Stream = require('../../krawl/filestream').Stream;
 
-function doit(complete) {
+function processSheet(wid, sheetf, rowf, complete) {
+  var C = 0;
+  var my_sheet = new GoogleSpreadsheet(wid);
+  my_sheet.getInfo(function (err, sheet_info) {
+    if (err) return complete(err);
+    utils.forEach(sheet_info.worksheets, function (sheet, next) {
+      sheet.getRows(1, function (err, rows) {
+        if (err) return complete(err);
+        var speech_col_name = get_spcol(rows[0]);
+        if (speech_col_name == null) {
+          //console.log('skipping ' + sheet.title + ' because i dont see a column title starting with "speech"...')
+          return next();
+        }
+        sheetf(sheet, function () {
+          var c = 0;
+          for (var i = 0; i < rows.length; i++) {
+            var p = rows[i][speech_col_name];
+            if (p) {
+              C++;
+              c++;
+              rowf(p, c);
+            }
+          }
+          next();
+        });
+      });
+    }, function () {
+      console.log("final sentence count=" + C);
+      console.log('-');
+      complete(null, C);
+    });
+  });
+}
+exports.processSheet = processSheet;
+
+function write_stream(complete) {
   var C = 0;
   var my_sheet = new GoogleSpreadsheet('1C-xWDFYpjZMxorOkre372U4BzESAMOITbqhf7o3lyHc');
   my_sheet.getInfo(function (err, sheet_info) {
@@ -81,7 +116,7 @@ function gen_scaf(complete) {
         }
         console.log('  ' + sheet.title.substring(6).toLowerCase() + ': [');
         for (var p in MM)
-          console.log('    {exp: /\\' + p + '/g, values: []}, // '+MM[p]);
+          console.log('    {exp: /\\' + p + '/g, values: []}, // ' + MM[p]);
         console.log('  ],');
         next();
       });
@@ -94,6 +129,6 @@ function gen_scaf(complete) {
   });
 }
 
-gen_scaf(function (e) {
-  console.log(e)
-})
+//gen_scaf(function (e) {
+//  console.log(e)
+//})

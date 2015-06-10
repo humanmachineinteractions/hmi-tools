@@ -1,4 +1,4 @@
-var NON_VOICED = /[-|–|—|\.|\?|,|!|"|;|:|…]/;
+var NON_VOICED = /^[-|–|—|\.|\?|,|!|"|;|:|…]$/;
 
 /**
  * Reprepsents an individual phone or unvoiced symbol.

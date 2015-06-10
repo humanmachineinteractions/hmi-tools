@@ -3,11 +3,10 @@ var ProgressBar = require('progress');
 var utils = require('../utils/index');
 
 function unique(lines, n) {
-  var bar = new ProgressBar('Analyzing :current of :total', {total: lines.length});
-
   var unique = {};
   var c = 0;
-  lines.forEach(function (line) {
+  var bar = new ProgressBar('Analyzing :current of :total', {total: lines.length});
+  lines.forEach(function (line, idx) {
     var s;
     if (typeof(line) == 'string') {
       if (line.indexOf('\t'))
@@ -20,13 +19,13 @@ function unique(lines, n) {
     }
 
     forNphone(n, s, function (nph, phones, idx) {
-      var p = "";//Math.floor((idx / s.length) * 4);
-      if (unique[nph + p])
-        unique[nph + p].count++;
+      if (unique[nph])
+        unique[nph].count++;
       else
-        unique[nph + p] = {phones: phones, count: 1, position: p, idx: idx, line: line};
+        unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line};
     });
-    bar.tick();
+    if (idx%100==0)
+    bar.tick(100);
     c++;
   });
   return unique;

@@ -5,13 +5,17 @@ var utils = require('../utils');
 var PhoneDict = require('./phonedict');
 var stats = require('./stats');
 var translator = require('./translate');
+var cons = require('../console');
+
+// triphones
+var N = 3;
 
 // read file, prepare for transcription if necessary
 function greedy(infile, outfile, options, complete) {
   var max_len = options.max_line_length ? options.max_line_length : 140;
   var min_len = options.min_line_length ? options.min_line_length : 30;
   var lines = [];
-  if (!options.type || options.type == 'plain-text') {
+  if (options.type == 'plain-text') {
     var d = new PhoneDict();
     d.on('ready', function () {
       utils.readLines(infile, function (err, tlines) {
@@ -24,11 +28,11 @@ function greedy(infile, outfile, options, complete) {
             return next();
           });
         }, function () {
-          doGreedy(lines, fs.createWriteStream(outfile), complete);
+          doGreedy(lines, null, fs.createWriteStream(outfile), complete);
         });
       });
     });
-  } else if (options.type == "csv") {
+  } else if (!options.type || options.type == "csv") {
     var split_char = options.csv_split_char ? options.csv_split_char : '\t';
     var tcol = options.text_column ? Number(options.text_column) : 0;
     var pcol = options.transcription_column ? Number(options.transcription_column) : 1;
@@ -38,11 +42,20 @@ function greedy(infile, outfile, options, complete) {
         bar.tick();
         var csvline = line.split(split_char);
         var text = csvline[tcol];
-        if (text.length < min_len || text.length > max_len) return next();
+        //if (text.length < min_len || text.length > max_len) return next();
         lines.push({line: text, transcription: csvline[pcol], phones: csvline[pcol].split(' ')});
         process.nextTick(next);
       }, function () {
-        doGreedy(lines, fs.createWriteStream(outfile), complete);
+        if (options.covered) {
+          if (typeof(options.covered) == 'string')
+            utils.readLines(options.covered, function (err, covered_lines) {
+              doGreedy(lines, stats.unique(covered_lines, N), fs.createWriteStream(outfile), complete);
+            });
+          else
+            doGreedy(lines, options.covered, fs.createWriteStream(outfile), complete);
+        } else {
+          doGreedy(lines, null, fs.createWriteStream(outfile), complete);
+        }
       });
     });
   } else {
@@ -59,15 +72,14 @@ function greedy(infile, outfile, options, complete) {
  * and the covered units are removed from the set of units to cover. The process starts again: the second sentence, in this
  * example, contains a maximum of non−already covered units. The process stops when all units are covered.
  *
- * @param lines {Array} a list of objects {line: "text", transcription: "T EE S
- * @param out
+ * @param lines {Array} a list of objects {line: "text", transcription: "T EE S"}
+ * @param covered {Object} a map of phones to ignore (optional)
+ * @param out the output stream
  * @param complete
  */
 
 
-function doGreedy(lines, out, complete) {
-  // triphones
-  var N = 3;
+function doGreedy(lines, covered, out, complete) {
 
   // utility
   function forPhone(phones, cb) {
@@ -87,6 +99,15 @@ function doGreedy(lines, out, complete) {
       n.final = 0;
     });
     console.log('Unique groups ' + _.keys(unique).length);
+    if (covered) {
+      _.each(covered, function (p) {
+        if (unique[p.nphone]) {
+          delete unique[p.nphone];
+          //console.log("deleted " + p.nphone)
+        }
+      });
+      console.log(' ... after excluding covered ' + _.keys(unique).length);
+    }
   }
 
   /**
@@ -138,22 +159,22 @@ function doGreedy(lines, out, complete) {
     //
     var selected = lines.shift();
     c++;
-    var ph = translator.translate(selected.transcription, {from: "ARPABET", to: "IPA"}).replace(/_/g, ' ');
-    out.write(selected.line + "\t" + ph + "\n");
+    //var ph = translator.translate(selected.transcription, {from: "ARPABET", to: "IPA"}).replace(/_/g, ' ');
+    out.write(selected.line + "\t" + selected.transcription + "\n");
 
     forPhone(selected.phones, function (nphone, aphone, idx, s) {
       if (unique[nphone]) {
-        if ((idx / s) > .6)
-          unique[nphone].final++;
-        else
-          unique[nphone].init++;
-        if (unique[nphone].final + unique[nphone].init >= unique[nphone].count)
-          delete unique[nphone];
+        //if ((idx / s) > .6)
+        //  unique[nphone].final++;
+        //else
+        //  unique[nphone].init++;
+        //if (unique[nphone].final + unique[nphone].init >= unique[nphone].count)
+        delete unique[nphone];
       }
     });
     //
     var phone_count = _.keys(unique).length;
-    console.log(phone_count + " " + lines.length + " " + selected.line + " " + ph);
+    console.log(phone_count + " " + lines.length + " " + c + " " + selected.line + " " + selected.transcription);
     if (c > 5000 || phone_count == 0) {
       step_1();
       step_2_and_3();
@@ -178,11 +199,12 @@ exports.greedy = greedy;
 
 if (!module.parent && process.argv.length > 3) {
   var options = {};
-  console.log('|-| |_| |\\/| /\\ |\\|   |\\/| /\\ ( |-| | |\\| [-   | |\\| ~|~ [- /? /\\ ( ~|~ | () |\\| _\\~ ')
+  cons.welcome();
   translator.init(function () {
     console.log('Translator ' + translator.translate("R EH1 D IY0", {from: "ARPABET", to: "IPA"}))
+    var options = {};
     if (process.argv.length > 4)
-      options = {type: process.argv[4]};
+      options.covered = process.argv[4];
     greedy(process.argv[2], process.argv[3], options, function () {
       console.log("!");
     });
