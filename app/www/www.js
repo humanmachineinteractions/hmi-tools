@@ -19,6 +19,8 @@ if (useCluster && cluster.isMaster) {
 
 
   express()
+    .use(express.vhost('hmi.ai', require('./public').app))
+    .use(express.vhost('www.hmi.ai', require('./public').app))
     .use(express.vhost('humanmachineinteractions.com', require('./public').app))
     .use(express.vhost('www.humanmachineinteractions.com', require('./public').app))
     .use(express.vhost('helios.humanmachineinteractions.com', require('./helios').app))
