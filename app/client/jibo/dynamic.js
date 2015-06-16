@@ -1,14 +1,19 @@
 var fs = require('fs');
 var moment = require('moment');
+var natural = require('natural'),
+  nounInflector = new natural.NounInflector();
 
 var names = require('../../corpus/names');
 var books = require('../../corpus/books');
 var datetime = require('../../corpus/datetime');
-var cities = readList('../../corpus/data/city.txt');
+var cities = readList('../../corpus/data/geo.us.city.txt');
+var states = readList('../../corpus/data/geo.us.state.txt');
+var countries = readList('../../corpus/data/geo.country.txt');
 var establishment = readList('../../corpus/data/establishment.edit.txt');
 var booksKid = readList('../../corpus/data/books-children-lit.edit.txt');
 var streets = readList('../../corpus/data/street.txt');
 var listItem = readList('./data/list.txt');
+var kitchenListItem = readList('./data/kitchen.list.txt');
 var measures = readList('./data/measure.txt');
 var musicArtist = readList('./data/music.artist.txt');
 var musicSong = readList('./data/music.song.txt');
@@ -16,6 +21,9 @@ var musicType = readList('./data/music.type.txt');
 var sportsCities = readList('./data/sports.cities.txt');
 var sportsTeams = readList('./data/sports.teams.txt');
 var remindersAction = readList('./data/reminders.action.txt');
+var weatherConditions = readList('./data/weather.condition.txt');
+var weatherConditioning = readList('./data/weather.conditioning.txt');
+var weatherDirection = readList('./data/weather.direction.txt');
 var chefs = readList('./data/chefs.txt');
 
 //var T2W = require('../../utils/numbers/number2text');
@@ -25,7 +33,19 @@ var random = require('../../utils/random')
 
 var special = ['zeroth', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelvth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth', 'eighteenth', 'nineteenth'];
 var deca = ['twent', 'thirt', 'fourt', 'fift', 'sixt', 'sevent', 'eight', 'ninet'];
-var MMM = ['miles', 'blocks']
+
+var MEASUREMENT = ['mile', 'block'];
+var MEASUREMENTS = ['miles', 'blocks'];
+
+var ROUTE_END = ['North', 'South', 'East', 'West'];
+var ROUTE_BEGIN = ['Highway', 'Route'];
+
+var VELOCITY = ['mile an hour', 'knot'];
+var VELOCITIES = ['miles an hour', 'knots'];
+
+var AMPM = ['AM', 'PM'];
+
+var WEEKDAY = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
 var M = {
   be: [
@@ -34,6 +54,7 @@ var M = {
     {exp: /\[named entity]/, values: names.People},
     {exp: /\[familymember\-plural]/, values: peoplePossesive()},
     {exp: /\[familyname]/, values: names.People},
+    {exp: /\[names]/, values: names.People},
     {exp: /\[HH:MM]/, values: timeHHMM()},
   ],
   messaging: [
@@ -75,18 +96,36 @@ var M = {
     {exp: /\[name]/, values: names.People},
     {exp: /\[location]/, values: cities},
     {exp: /\[address]/, values: addresses()},
+    {exp: /\[familymember]/, values: names.People},
+    {exp: /\[cardinal 1-20]/, values: cardinals(1, 20)},
+    {exp: /\[city]/, values: cities},
+    {exp: /\[weekday]/, values: WEEKDAY},
   ],
   weather: [
-    {exp: /\[cardinal 0-130]/, values: cardinals0to130()},
-    {exp: /\[fifty five]/, values: cardinals0to130()},
-    {exp: /\[two]/, values: cardinals0to130()},
-    {exp: /\[cardinal]/, values: cardinals0to130()},
+    {exp: /\[cardinal 0-130]/, values: cardinals(-50, 200)},
+    {exp: /\[fifty five]/, values: cardinals(-50, 200)},
+    {exp: /\[two]/, values: cardinals(-50, 200)},
+    {exp: /\[cardinal]/, values: cardinals(0, 200)},
     {exp: /\[city]/, values: cities},
-    {exp: /\[cardinal - up to 130]/, values: cardinals0to130()}
+    {exp: /\[city\/state]/, values: cities},
+    {exp: /\[cardinal (- )?up t[o|p] 130]/, values: cardinals(-50, 200)},
+    {exp: /\[date]/, values: dateMMDD()},
+    {exp: /\[date]/, values: timeHHMM()},
+    {exp: /\[today\/tomorrow\/date]/, values: dateTTMMDD()},
+    {exp: /\[location]/, values: cities},
+    {exp: /\[rain\/snow]/, values: weatherConditions},
+    {exp: /\[condition]/, values: weatherConditions},
+    {exp: /\[condition-ing]/, values: weatherConditioning},
+    {exp: /\[temp]/, values: temps()},
+    {exp: /\[route]/, values: routes()},
+    {exp: /\[direction]/, values: weatherDirection},
+    {exp: /\[velocity]/, values: velocities()},
+    {exp: /\[date\/year]/, values: dateMMDD()},
+    {exp: /\[time]/, values: timeHHMM()},
   ],
   kitchen: [
     {exp: /\[measurement]/, values: measures},
-    {exp: /\[ingredient names]/, values: listItem},
+    {exp: /\[ingredient names]/, values: kitchenListItem},
     {exp: /\[cardinal]/, values: cardinals0to130()},
     {exp: /\[author]/, values: chefs},
     {exp: /\[Author]/, values: chefs},
@@ -94,8 +133,12 @@ var M = {
   music: [
     {exp: /\[Artist Name\/Music Type]/, values: musicArtist},
     {exp: /\[Artist Name]/, values: musicArtist},
+    {exp: /\[artist]/, values: musicArtist},
     {exp: /\[Music Type]/, values: musicType},
+    {exp: /\[music]/, values: musicType},
     {exp: /\[Song Name]/, values: musicSong},
+    {exp: /\[song]/, values: musicSong},
+    {exp: /\[name]/, values: names.People},
   ],
   sports: [
     {exp: /\[cardinal]/, values: cardinals0to130()},
@@ -105,13 +148,20 @@ var M = {
   ],
   locations: [
     {exp: /\[Location]/, values: establishment},
+    {exp: /\[location]/, values: establishment},
+    {exp: /\[locations]/, values: pluralize(establishment)},
     {exp: /\[address]/, values: addresses()},
     {exp: /\[cardinal]/, values: cardinals0to130()},
+    {exp: /\[cardinal 1-20]/, values: cardinals(1, 20)},
     {exp: /\[city]/, values: cities},
+    {exp: /\[Country]/, values: countries},
+    {exp: /\[country]/, values: countries},
+    {exp: /\[state]/, values: states},
     {exp: /\[distance]/, values: distances()},
     {exp: /\[time]/, values: timeHHMM()},
-    {exp: /\[location]/, values: establishment},
+
   ],
+  entertainment: []
 }
 
 module.exports = exports = M;
@@ -119,7 +169,13 @@ module.exports = exports = M;
 
 //
 function readList(f) {
-  return fs.readFileSync(f).toString().split('\n');
+  var s = fs.readFileSync(f).toString().split('\n');
+  var r = [];
+  for (var i = 0; i < s.length && i < 1000; i++) {
+    if (s[i])
+      r.push(s[i].trim());
+  }
+  return r;
 }
 //function n2t(c) {
 //  var n = (typeof(c) == 'string') ? parseInt(c) : c;
@@ -149,11 +205,18 @@ function dateMMDD() {
   }
   return r;
 }
+
+function dateTTMMDD() {
+  return dateMMDD().concat(['today', 'tomorrow']);
+}
+
 function timeHHMM() {
   var r = [];
-  for (var h = 1; h < 13; h++) {
-    for (var m = 0; m < 60; m++) {
-      r.push(time(h, m));
+  for (var a = 0; a < 2; a++) {
+    for (var h = 1; h < 13; h++) {
+      for (var m = 0; m < 60; m++) {
+        r.push(time(h, m) + ' ' + AMPM[a]);
+      }
     }
   }
   return r;
@@ -177,7 +240,7 @@ function phoneNumbers() {
     for (var f = 230; f < 930; f += fc) {
       var lc = random.int(33, 76);
       for (var l = 1001; l < 9998; l += lc) {
-        var s = '# ' + ac + '-' + f + '-' + l;
+        var s = ac + '-' + f + '-' + l;
         //var sl = s.length - 4;
         //var x = everyNumber(s.substring(0, sl)) + ' ';
         //x += twodig(s.substr(sl, 2)) + ' ';
@@ -204,9 +267,12 @@ function addresses() {
 }
 function distances() {
   var r = [];
-  for (var i = 0; i < MMM.length; i++) {
+  for (var i = 0; i < MEASUREMENT.length; i++) {
     for (var n = 1; n < 30; n++) {
-      r.push(n + ' ' + MMM[i])
+      if (n == 1)
+        r.push(n + ' ' + MEASUREMENT[i])
+      else
+        r.push(n + ' ' + MEASUREMENTS[i])
     }
   }
   return r;
@@ -219,16 +285,13 @@ function peoplePossesive() {
   return r;
 }
 // utils
-
 function cardinals(a, b) {
   var r = [];
   for (var i = a; i < b + 1; i++) {
-    //r.push(n2t(i));
     r.push(i);
   }
   return r;
 }
-
 function twodig(n) {
   n = typeof(n) == 'string' ? parseInt(n) : n;
   if (n < 10)
@@ -236,22 +299,56 @@ function twodig(n) {
   else
     return n;
 }
-
 function time(hr, min) {
   var s = hr;
   s += ':';
   s += twodig(min);
   return s;
 }
-
-//function everyNumber(n) {
-//  var x = '';
-//  var s = String(n);
-//  for (var i = 0; i < s.length; i++) {
-//    var c = n2t(s.charAt(i));
-//    if (i != 0 && c != ',')
-//      x += ' ';
-//    x += c;
-//  }
-//  return x.trim();
-//}
+function temps() {
+  var r = [];
+  var a = -50;
+  var b = 200;
+  for (var i = a; i < b; i++) {
+    r.push(temp(i));
+  }
+  return r;
+}
+function temp(d) {
+  return d + ' degrees';
+}
+function velocities() {
+  var r = [];
+  for (var i = 0; i < VELOCITY.length; i++) {
+    for (var a = 1; a < 55; a++) {
+      if (a == 1)
+        r.push(a + ' ' + VELOCITY[i]);
+      else
+        r.push(a + ' ' + VELOCITIES[i]);
+    }
+  }
+  return r;
+}
+function routes() {
+  var r = [];
+  for (var i = 0; i < ROUTE_END.length; i++) {
+    var ac = random.int(22, 400);
+    for (var addr = random.int(1, 20); addr < 2999; addr += ac) {
+      r.push(addr + ' ' + ROUTE_END[i]);
+    }
+  }
+  for (var i = 0; i < ROUTE_BEGIN.length; i++) {
+    var ac = random.int(22, 400);
+    for (var addr = random.int(1, 20); addr < 2999; addr += ac) {
+      r.push(ROUTE_BEGIN[i] + ' ' + addr);
+    }
+  }
+  return r;
+}
+function pluralize(words) {
+  var r = [];
+  words.forEach(function (w) {
+    r.push(nounInflector.pluralize(w))
+  });
+  return r;
+}

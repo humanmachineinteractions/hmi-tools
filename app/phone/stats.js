@@ -1,32 +1,45 @@
 var _ = require('lodash');
 var ProgressBar = require('progress');
 var utils = require('../utils/index');
+var cons = require('../console');
+var Stream = require('../krawl/filestream').Stream;
 
-function unique(lines, n) {
+function unique(lines, options) {
+  if (typeof(options) == 'number')
+    options= {n: options};
   var unique = {};
   var c = 0;
   var bar = new ProgressBar('Analyzing :current of :total', {total: lines.length});
   lines.forEach(function (line, idx) {
-    var s;
-    if (typeof(line) == 'string') {
-      if (line.indexOf('\t'))
-        s = line.split('\t')[1].split(' ');
-      else
-        s = line.split(' ');
-    }
-    else {
-      s = line.phones;
-    }
+    try {
+      var s;
+      if (typeof(line) == 'string') {
+        if (line.indexOf('\t'))
+          s = line.split('\t')[1].split(' ');
+        else
+          s = line.split(' ');
+      }
+      else {
+        s = line.phones;
+      }
+      if (options.removeStress) {
+        for (var i = 0; i < s.length; i++) {
+          if (s[i].match(/..[0-3]/)) {
+            s[i] = s[i].substring(0, 2);
+          }
+        }
+      }
 
-    forNphone(n, s, function (nph, phones, idx) {
-      if (unique[nph])
-        unique[nph].count++;
-      else
-        unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line};
-    });
-    if (idx%100==0)
-    bar.tick(100);
-    c++;
+      forNphone(options.n, s, function (nph, phones, idx) {
+        if (unique[nph])
+          unique[nph].count++;
+        else
+          unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line};
+      });
+      if (idx % 100 == 0)
+        bar.tick(100);
+      c++;
+    } catch(e){ }
   });
   return unique;
 }
@@ -113,11 +126,16 @@ exports.forNphone = forNphone;
 exports.diff = diff;
 
 if (!module.parent) {
-  if (process.argv.length == 4) {
-    console.log('!reading ' + process.argv[2])
+  cons.welcome('Phoneme statistics');
+  if (process.argv.length < 4) {
+    cons.log('Requires at least infile and number of phone symbols to track (1-n)');
+    return;
+  }
+  //if (process.argv.length == 4) {
+    console.log('Reading ' + process.argv[2])
     utils.readLines(process.argv[2], function (err, lines) {
-      console.log('processing ' + lines.length + ' lines');
-      var map = unique(lines, process.argv[3]);
+      console.log('Processing ' + lines.length + ' lines');
+      var map = unique(lines, {n: process.argv[3], removeStress: true});
       var items = [];
       for (var p in map) {
         items.push(map[p]);
@@ -125,16 +143,19 @@ if (!module.parent) {
       items.sort(function (a, b) {
         return b.count - a.count
       });
-      for (var i = 0; i < 100; i++) {
-        console.log(items[i].phones, items[i].count, items[i].position);
-        if (i < 3)
-          console.log(items[i].line)
-      }
+      if (process.argv.length > 4)
+        new Stream(process.argv[4], function(out){
+          out.writeln(JSON.stringify(items));
+        });
+      else
+        for (var i = 0; i < items.length && i < 300; i++) {
+          console.log(items[i].phones, items[i].count);
+        }
       console.log(items.length);
     });
-  } else if (process.argv.length == 5) {
-    diff(process.argv[2], process.argv[3], {N: Number(process.argv[4])}, function (err, data) {
-      console.log(data.intersect.length, _.keys(data.only_in_a).length, _.keys(data.only_in_b).length);
-    });
-  }
+  //} else if (process.argv.length == 5) {
+  //  diff(process.argv[2], process.argv[3], {N: Number(process.argv[4])}, function (err, data) {
+  //    console.log(data.intersect.length, _.keys(data.only_in_a).length, _.keys(data.only_in_b).length);
+  //  });
+  //}
 }

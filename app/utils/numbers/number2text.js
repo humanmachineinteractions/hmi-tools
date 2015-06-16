@@ -348,10 +348,11 @@ T2W.EN_US.prototype.translate = function (numbers) {
 
   // Check max value
   if (numbers.length * T2W.EN_US.TOKEN_LENGTH > T2W.EN_US.MAX_NUMBERS) {
-    throw {
-      name: "Error",
-      message: "The length of numbers is longer than the maximum value(" + T2W.EN_US.MAX_NUMBERS + ")."
-    };
+    return 'unknown'
+    //throw {
+    //  name: "Error",
+    //  message: "The length of numbers is longer than the maximum value(" + T2W.EN_US.MAX_NUMBERS + ")."
+    //};
   }
 
   // Deal with zero value

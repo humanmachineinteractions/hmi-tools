@@ -565,8 +565,6 @@ Glendale
 Topeka
 Flora
 Washington Court House
-Washington Ct Hs
-Washington Court HOU
 Cochran
 San Fernando
 Clearwater
@@ -589,7 +587,7 @@ Roslyn
 Carle Place
 Greenvale
 Albertson
-Carle Place (Westbury)
+Carle Place
 Burnaby
 New Westminster
 Port Moody
@@ -853,7 +851,7 @@ Newbury
 Bradford
 Gambrills
 Odenton
-Crofton (Gambrills)
+Crofton
 Crofton
 Millersville
 Crownsville
@@ -966,7 +964,7 @@ Petersburg
 Charlestown
 Southington
 Fayetteville
-Houston (yale I-ten)
+Houston
 Kitty Hawk
 Nags Head
 Memphis
@@ -1837,7 +1835,7 @@ San Antonio
 Aiea
 Waimalu
 Honolulu
-Honolulu (aiea)
+Honolulu
 Hingham
 Chattanooga
 East Ridge
@@ -2210,7 +2208,7 @@ Fairway
 Berwick
 Somersworth
 Dover
-Somersworth (Dover)
+Somersworth
 South Berwick
 Sutton
 Gassaway
@@ -2900,7 +2898,7 @@ Westland
 Presque Isle
 Brooksville
 Masaryktown
-Charlotte (Midtown)
+Charlotte
 Leland
 Audubon
 Haddonfield
@@ -3701,7 +3699,7 @@ Port Washington
 Sea Cliff
 Schulenburg
 Dracut
-Forest Hills (Queens)
+Forest Hills
 Rock Valley
 Plantation
 Cooper City

@@ -6,7 +6,7 @@ function year2text(yr) {
     return translator.toWords(yr);
   var y0 = Math.floor(yr / 100);
   var y1 = yr - (y0 * 100);
-  if (y0 != 20)
+  if (yr < 2000 || yr > 2019)
     if (y1 == 0)
       return translator.toWords(y0) + " hundred";
     else if (y1 < 10)

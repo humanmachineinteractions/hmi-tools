@@ -1173,7 +1173,7 @@ Kent Street
 Metcatfe St
 Slater Street
 Metcalfe Street
-Cooper St @ Percy
+Cooper Street at Percy
 Fifth Avenue
 Somerset Street West
 Water Street
@@ -2829,7 +2829,6 @@ Laurier Avenue East
 Kent Street
 Metcatfe St
 Metcalfe Street
-Cooper St @ Percy
 Fifth Avenue
 Somerset Street West
 West 7th Street
@@ -7007,7 +7006,6 @@ Kent Street
 Metcatfe St
 Slater Street
 Metcalfe Street
-Cooper St @ Percy
 Fifth Avenue
 Somerset Street West
 Mary Street
@@ -12338,7 +12336,6 @@ Murray Street
 Laurier Avenue East
 Metcatfe St
 Metcalfe Street
-Cooper St @ Percy
 South Adams Street
 East South D Street
 East 37th Street

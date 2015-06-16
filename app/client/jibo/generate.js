@@ -6,9 +6,28 @@ var corpus = require('../../corpus');
 var greedy = require('../../phone/greedy').greedy;
 var stats = require('../../phone/stats');
 
-var BP = __dirname + '/data/gen/';
+var BP = __dirname + '/data';
 var title = null;
 var stream;
+
+function simple(name) {
+  if (name.indexOf('.') != -1)
+    return name.split('.')[0];
+  else
+    return name;
+}
+function textFile(name) {
+  return BP + '/gen/' + simple(name) + '.txt';
+}
+function rankedFile(name) {
+  return BP + '/ph/' + simple(name) + '.ranked.ph';
+}
+function phoneFile(name) {
+  return BP + '/ph/' + simple(name) + '.ph'
+}
+function tsvFile(name) {
+  return BP + '/tsv/' + simple(name) + '.tsv';
+}
 
 function createScripts(which) {
   var goo = require('./goo-sheet');
@@ -19,7 +38,7 @@ function createScripts(which) {
       data[n] = D[n];
     });
   else {
-    console.log('*')
+    console.log('*');
     data = D;
   }
   goo.processSheet('1C-xWDFYpjZMxorOkre372U4BzESAMOITbqhf7o3lyHc',
@@ -34,7 +53,7 @@ function createScripts(which) {
       } else {
         console.log('processing ' + sheet.title);
       }
-      new Stream(BP + title + '.txt', function (out) {
+      new Stream(textFile(title), function (out) {
         stream = out;
         next();
       });
@@ -44,7 +63,7 @@ function createScripts(which) {
         return;
       var r = corpus.processRow(data[title], row);
       r.forEach(function (s) {
-        console.log(s);
+        ///console.log(s);
         stream.writeln(s);
       });
       if (c % 100 == 0)
@@ -67,7 +86,7 @@ function createTranscript(which) {
   fs.readdir(BP, function (err, files) {
     utils.forEach(files, function (file, next) {
       if (!m || m[file]) {
-        transcribe(BP + file, BP + '../ph/' + file + '.ph', {lexonly: false}, function () { //{}
+        transcribe(BP + file, phoneFile(file), {lexonly: false}, function () { //{}
           console.log("!", file);
           next();
         });
@@ -80,70 +99,54 @@ function createTranscript(which) {
 
   })
 }
+
 function doGreedy(which) {
-  var complete = function (err) {
-    if (err) console.error(err);
-  };
-  var m = null;
-  if (which) {
-    m = {};
-    which.forEach(function (w) {
-      m[w] = true;
-    });
-  }
-  var already_ranked = [];
-  fs.readdir(BP + '../ph/', function (err, files) {
-    if (err) return complete(err);
-    files.forEach(function (f) {
-      if (f.indexOf('.ranked.ph') != -1) {
-        already_ranked.push(f);
-      }
-    });
-    console.log(already_ranked);
-    var bigscript = [];
-    utils.forEach(already_ranked, function (ranked, next) {
-      utils.readLines(BP + '../ph/' + ranked, function (err, lines) {
-        bigscript = bigscript.concat(lines);
-        next();
-      });
-    }, function () {
-      console.log('Excluding from ' + bigscript.length + ' lines...')
-      var covered = stats.unique(bigscript, 3);
-      fs.readdir(BP, function (err, files) {
-        if (err) return complete(err);
-        utils.forEach(files, function (file, next) {
-          var name = file.substring(0, file.length - 4);
-          if (!m || m[name]) {
-            var f = BP + '../ph/' + name + '.ranked.ph';
-            fs.exists(f, function (b) {
-              if (b) {
-                console.log('skipping ' + name + ' because ranked file exists...')
-                next();
-              } else {
-                console.log('starting greedy on ' + name + '...')
-                var options = {covered: covered};
-                greedy(BP + '../ph/' + file + '.ph', f, options, function () {
-                  utils.readLines(f, function (err, lines) {
-                    bigscript = bigscript.concat(lines);
-                    console.log("Recomputing stats with " + bigscript.length + " lines!");
-                    covered = stats.unique(bigscript, 3);
-                    next();
-                  });
-                });
-              }
+  var scripts = ['be', 'messaging', 'cameraman', 'videoconferencing', 'storytelling', 'homewatch', 'lists', 'reminders', 'weather',
+    'kitchen', 'music', 'sports', 'entertainment', 'locations'];
+  compositeScript(scripts, function (err, composite) {
+    console.log('Loaded composite ' + composite.length + ' lines');
+    var covered = stats.unique(composite, 3);
+    utils.forEach(which ? which : scripts, function (script, next) {
+      var rfile = rankedFile(script);
+      fs.exists(rfile, function (b) {
+        if (b) {
+          console.log('Skipping ' + script + ' because ranked file exists...')
+          next();
+        } else {
+          console.log('Starting greedy on ' + script + '...')
+          greedy(phoneFile(script), rfile, {covered: covered, max_line_length: 10000, min_line_length: 1}, function () {
+            utils.readLines(rfile, function (err, lines) {
+              composite = composite.concat(lines);
+              console.log("Recomputing stats with " + composite.length + " lines!");
+              covered = stats.unique(composite, 3);
+              next();
             });
-          } else {
-            next();
-          }
-        }, function () {
-          console.log("done greedy")
-        });
-      });
-    });
-
-
+          });
+        }
+      }, function () {
+        console.log("done greedy2")
+      })
+    })
   });
 }
+
+function compositeScript(scripts, complete) {
+  var bigscript = [];
+  utils.forEach(scripts, function (name, next) {
+    var f = rankedFile(name);
+    fs.exists(f, function (b) {
+      if (b)
+        utils.readLines(f, function (err, lines) {
+          bigscript = bigscript.concat(lines);
+          next();
+        }); else next()
+    });
+  }, function () {
+    complete(null, bigscript);
+  });
+}
+
+
 function genCsv(which) {
   var m = null;
   if (which) {
@@ -152,19 +155,22 @@ function genCsv(which) {
       m[w] = true;
     });
   }
-  fs.readdir(BP, function (err, files) {
+  var c = 0;
+  fs.readdir(BP + '/gen', function (err, files) {
     utils.forEach(files, function (file, next) {
       var name = file.substring(0, file.length - 4);
       console.log(name)
       if (!m || m[name]) {
-        var f = BP + '../ph/' + name + '.ranked.ph'
+        var f = rankedFile(name);
         fs.exists(f, function (b) {
           if (b) {
-            var d = BP + '../tsv/' + name + '.tsv';
+            var d = tsvFile(name);
             new Stream(d, function (out) {
               utils.readLines(f, function (line) {
                 line = line.split('\t');
                 out.writeln(line[0])
+                c++;
+                console.log(name, c)
               }, function () {
                 out.end();
               });
@@ -178,10 +184,11 @@ function genCsv(which) {
         next();
       }
     }, function () {
-      console.log("done csv")
+      console.log("done csv", c)
     });
   })
 }
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];

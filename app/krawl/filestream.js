@@ -2,13 +2,13 @@ var fs = require('fs');
 
 function Stream(fname, ready) {
   var self = this;
+  self.fname = fname;
   self.ids = {};
   self.pool = [];
   self.writing = false;
   self.ended = false;
   self.stream = fs.createWriteStream(fname);//, {'flags': 'a'}
   self.stream.once('open', function (fd) {
-    console.log('opened', fd);
     ready(self);
   });
 }
@@ -57,7 +57,7 @@ Stream.prototype.end = function () {
     this._end();
 }
 Stream.prototype._end = function () {
-  console.log("END")
+  console.log("end "+this.fname)
   this.stream.end();
 }
 exports.Stream = Stream;

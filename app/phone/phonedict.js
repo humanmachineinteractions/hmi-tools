@@ -64,10 +64,10 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       s.push(wordInfo.word);
       phs.push(wordInfo.word);
       return next();
-    } else if (wordInfo.word.match(/\$/)) {
+    } else if (!wordInfo.ne && wordInfo.word.match(/\$/)) {
       nextNe = 'DOLLARS';
       return next();
-    } else if (wordInfo.word.match(/#/)) {
+    } else if (!wordInfo.ne && wordInfo.word.match(/#/)) {
       nextNe = 'EVERY';
       return next();
     } else {

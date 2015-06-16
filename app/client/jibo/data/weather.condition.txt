@@ -1,0 +1,6 @@
+raining
+snowing
+cloudy
+hailing
+partly cloudy
+sunny
