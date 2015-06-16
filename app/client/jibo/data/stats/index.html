@@ -20,6 +20,10 @@
             $.getJSON('tech.stats2.json').done(function (data) {
                 minmax(data);
                 draw(data, '0,0,255');
+                $.getJSON('ent.stats2.json').done(function (data) {
+                    minmax(data);
+                    draw(data, '255,0,255');
+                });
             });
         });
     });
@@ -31,7 +35,7 @@
             max = Math.max(data[i].count, max);
             min = Math.min(data[i].count, min);
         }
-        console.log(min,max)
+        console.log(min, max)
     }
     function getu(data) {
         for (var i = 0; i < data.length; i++) {

@@ -96,14 +96,17 @@ function createTranscript(which) {
     }, function () {
       console.log("done transcribe")
     });
-
-  })
+  });
 }
 
 function doGreedy(which) {
   var scripts = ['be', 'messaging', 'cameraman', 'videoconferencing', 'storytelling', 'homewatch', 'lists', 'reminders', 'weather',
     'kitchen', 'music', 'sports', 'entertainment', 'locations'];
-  compositeScript(scripts, function (err, composite) {
+  var scriptPaths = [];
+  scripts.forEach(function (s) {
+    scriptPaths.push(rankedFile(s))
+  });
+  stats.composite(scriptPaths, function (err, composite) {
     console.log('Loaded composite ' + composite.length + ' lines');
     var covered = stats.unique(composite, 3);
     utils.forEach(which ? which : scripts, function (script, next) {
@@ -127,22 +130,6 @@ function doGreedy(which) {
         console.log("done greedy2")
       })
     })
-  });
-}
-
-function compositeScript(scripts, complete) {
-  var bigscript = [];
-  utils.forEach(scripts, function (name, next) {
-    var f = rankedFile(name);
-    fs.exists(f, function (b) {
-      if (b)
-        utils.readLines(f, function (err, lines) {
-          bigscript = bigscript.concat(lines);
-          next();
-        }); else next()
-    });
-  }, function () {
-    complete(null, bigscript);
   });
 }
 

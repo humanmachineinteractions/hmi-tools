@@ -5,10 +5,11 @@
 <script>
     var canvas = document.getElementById('x');
     var ctx = canvas.getContext('2d');
+    //ctx.globalCompositeOperation = "multiply";
     var xlabelsmap = {}, ylabelsmap = {}, xlabels = [], ylabels = [];
     var info = {};
     var max, min;
-    var cellsize = 11;
+    var cellsize = 12;
     var xoff = 50, yoff = 80;
 
     $.getJSON('news.stats3.json').done(function (data) {
@@ -16,7 +17,7 @@
         minmax(data);
         drawlegend();
         draw(data, '255,0,0');
-        $.getJSON('be.stats3.json').done(function (data) {
+        $.getJSON('news.stats3.json').done(function (data) {
             minmax(data);
             draw(data, '0,255,0');
             $.getJSON('tech.stats3.json').done(function (data) {
@@ -25,6 +26,10 @@
                 $.getJSON('long.stats3.json').done(function (data) {
                     minmax(data);
                     draw(data, '255,255,0');
+                    $.getJSON('ent.stats3.json').done(function (data) {
+                        minmax(data);
+                        draw(data, '0,255,255');
+                    });
                 });
             });
         });
@@ -100,7 +105,7 @@
                 info[k].push(data[i]);
             else
                 info[k] = [data[i]];
-            var c = r(min, max, data[i].count, cellsize * .25, cellsize);
+            var c = r(min, max, data[i].count, cellsize * .5, cellsize);
             ctx.beginPath();
             ctx.arc(x, y, c, 0, Math.PI * 2, true);
             ctx.closePath();
@@ -118,8 +123,8 @@
         var xidx = Math.floor((x - xoff) / cellsize);
         var yidx = Math.floor((y - yoff) / cellsize);
         var d = info[ylabels[yidx] + xlabels[xidx]];
-        if (d){
-            for (var i=0; i< d.length; i++){
+        if (d) {
+            for (var i = 0; i < d.length; i++) {
                 console.log(d[i].nphone, d[i].count, d[i].line.split('\t')[0])
             }
         }
