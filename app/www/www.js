@@ -25,7 +25,7 @@ if (useCluster && cluster.isMaster) {
     .use(express.vhost('humanmachineinteractions.com', require('./public').app))
     .use(express.vhost('www.humanmachineinteractions.com', require('./public').app))
     .use(express.vhost('helios.humanmachineinteractions.com', require('./helios').app))
-    .listen(3000)
+    .listen(80)
 }
 
 //process.on('uncaughtException', function (err) {
