@@ -32,11 +32,17 @@ exports.convert = function (type, num) {
       var c = clean(num);
       if (c.indexOf(':') != -1) {
         var a = c.split(':');
-        var o = parseInt(a[1]) < 10 ? 'oh ' : '';
-        return n2t(a[0]) + ' ' + o + n2t(a[1]);
+        var m = parseInt(a[1]);
+        if (m == 0)
+          return n2t(a[0]);
+        else
+          return n2t(a[0]) + ' ' + (m < 10 ? 'oh ' : '') + n2t(a[1]);
       } else if (c.indexOf('.') != -1) {
         var a = c.split('.');
-        return n2t(a[0]) + " point " + everyNumber(a[1]);
+        if (a[1])
+          return n2t(a[0]) + " point " + everyNumber(a[1]);
+        else
+          return n2t(a[0]);
       }
       else
         return n2t(clean(num));
@@ -47,7 +53,7 @@ function n2t(c) {
   var n = (typeof(c) == 'string') ? parseInt(c) : c;
   if (isNaN(n)) return c;
   try {
-    return translator.toWords(n);
+    return yr2txt(n)
   } catch (e) {
     console.log('number err', c);
     return everyNumber(n);

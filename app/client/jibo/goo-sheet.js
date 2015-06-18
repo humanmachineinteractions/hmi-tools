@@ -37,6 +37,34 @@ function processSheet(wid, sheetf, rowf, complete) {
 }
 exports.processSheet = processSheet;
 
+function processSheet2(wid, sheetf, rowf, complete) {
+  var C = 0;
+  var my_sheet = new GoogleSpreadsheet(wid);
+  my_sheet.getInfo(function (err, sheet_info) {
+    if (err) return complete(err);
+    utils.forEach(sheet_info.worksheets, function (sheet, next) {
+      sheet.getRows(1, function (err, rows) {
+        if (err) return complete(err);
+        sheetf(sheet, function () {
+          var c = 0;
+          utils.forEach(rows, function (row, next) {
+            C++;
+            c++;
+            if (row)
+              rowf(row, c, next);
+            else
+              next();
+          }, next);
+        });
+      });
+    }, function () {
+      complete(null, C);
+    });
+  });
+}
+exports.processSheet2 = processSheet2;
+
+
 function write_stream(complete) {
   var C = 0;
   var my_sheet = new GoogleSpreadsheet('1C-xWDFYpjZMxorOkre372U4BzESAMOITbqhf7o3lyHc');

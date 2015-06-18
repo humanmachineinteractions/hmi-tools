@@ -10,7 +10,7 @@ var numbers = require('../utils/numbers');
  * Emits a 'ready' event
  * @constructor
  */
-function PhoneDict() {
+function PhoneDict(options, complete) {
   var self = this;
   self.entries = {};
   self.numberOfEntries = 0;
@@ -33,8 +33,17 @@ function PhoneDict() {
     self.entries[e.word] = e;
     self.numberOfEntries++;
   }, function () {
+    if (options && options.lex) {
+      options.lex.forEach(function (le) {
+        var e = new PhoneDictEntry(le.word, le.phones);
+        self.entries[e.word] = e;
+        self.numberOfEntries++;
+      });
+    }
     Phonesaurus.init(function () {
       self.emit('ready');
+      if (complete)
+        complete();
     });
   });
 }
@@ -55,7 +64,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   if (Array.isArray(sentence)) {
     wordInSentence = sentence;
   } else {
-    wordInSentence = tokenize(/[–|—|\?|,|!|"|;|…]/g, sentence);
+    wordInSentence = tokenize(/[ |–|—|\?|!|"|;|…]/g, sentence);
   }
   utils.forEach(wordInSentence, function (wordInfo, next) {
     if (!wordInfo.word) return next();
@@ -108,6 +117,7 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       }, next);
     }
   }, function () {
+
     complete(null, {text: sentence, transcription: s, phones: phs, unknown: unknown});
   });
 }
@@ -163,21 +173,28 @@ PhoneDictEntry.prototype.size = function () {
  * @returns {Array}
  */
 function tokenize(rg, sentence) {
+  sentence = sentence.trim();
   var st = sentence.split(' ');
   var words = [];
   st.forEach(function (s) {
-    var m = s.match(rg);
-    if (m) {
-      for (var i = 0; i < m.length; i++) {
-        var c = m[i];
-        var idx = s.indexOf(c);
-        words.push({word: s.substring(0, idx)});
-        words.push({word: s.substring(idx, idx + c.length)}); // punc
-        s = s.substring(idx + c.length);
+    if (!s.match(/\d/) && s.toUpperCase() == s) {
+      for (var i = 0; i < s.length; i++) {
+        words.push({word: s.charAt(i)});
       }
+    } else {
+      var m = s.match(rg);
+      if (m) {
+        for (var i = 0; i < m.length; i++) {
+          var c = m[i];
+          var idx = s.indexOf(c);
+          words.push({word: s.substring(0, idx)});
+          words.push({word: s.substring(idx, idx + c.length)}); // punc
+          s = s.substring(idx + c.length);
+        }
+      }
+      if (s)
+        words.push({word: s});
     }
-    if (s)
-      words.push({word: s});
   });
   return words;
 }

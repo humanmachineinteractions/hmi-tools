@@ -1,10 +1,11 @@
 var fs = require('fs');
 var transcribe = require('../../phone/transcribe').transcribeText;
+var translator = require('../../phone/translate');
+var greedy = require('../../phone/greedy').greedy;
+var stats = require('../../phone/stats');
 var Stream = require('../../krawl/filestream').Stream;
 var utils = require('../../utils');
 var corpus = require('../../corpus');
-var greedy = require('../../phone/greedy').greedy;
-var stats = require('../../phone/stats');
 
 var BP = __dirname + '/data';
 var title = null;
@@ -28,6 +29,7 @@ function phoneFile(name) {
 function tsvFile(name) {
   return BP + '/tsv/' + simple(name) + '.tsv';
 }
+
 
 function createScripts(which) {
   var goo = require('./goo-sheet');
@@ -99,17 +101,18 @@ function createTranscript(which) {
   });
 }
 
+var scripts = require('./scripts');
+
 function doGreedy(which) {
-  var scripts = ['be', 'messaging', 'cameraman', 'videoconferencing', 'storytelling', 'homewatch', 'lists', 'reminders', 'weather',
-    'kitchen', 'music', 'sports', 'entertainment', 'locations'];
   var scriptPaths = [];
-  scripts.forEach(function (s) {
+  scripts.jibo.forEach(function (s) {
     scriptPaths.push(rankedFile(s))
   });
+
   stats.composite(scriptPaths, function (err, composite) {
     console.log('Loaded composite ' + composite.length + ' lines');
     var covered = stats.unique(composite, 3);
-    utils.forEach(which ? which : scripts, function (script, next) {
+    utils.forEach(which ? which : scripts.jibo, function (script, next) {
       var rfile = rankedFile(script);
       fs.exists(rfile, function (b) {
         if (b) {
@@ -176,6 +179,191 @@ function genCsv(which) {
   })
 }
 
+var FINAL_LENGTHS = {
+  'be': Number.MAX_VALUE,
+  'messaging': Number.MAX_VALUE,
+  'cameraman': Number.MAX_VALUE,
+  'videoconferencing': Number.MAX_VALUE,
+  'storytelling': Number.MAX_VALUE,
+  'homewatch': Number.MAX_VALUE,
+  'lists': Number.MAX_VALUE,
+  'reminders': 688,
+  'weather': 630,
+  'kitchen': 250,
+  'music': 500,
+  'sports': 71,
+  'entertainment': 500,
+  'locations': 500,
+  'pc-news': 1699,
+  'pc-tech-biz': 1699,
+  'pc-ent': 1299,
+  'pc-long': 1299
+}
+var ABC = ['a', 'b', 'c', 'd'];
+var d;
+
+// /home/vagrant/sw/festival/bin/festival --script ~/deploy/dump.scm "text"
+
+function finalize() {
+  var processFinalRow = processFinalRowFFE;
+  var PhoneDict = require('../../phone/phonedict');
+  d = new PhoneDict();
+  d.on('ready', function () {
+    translator.init(function () {
+      var goo = require('./goo-sheet');
+      var title, tt, cc;
+      var tmap = {};
+      goo.processSheet2('12NUJQkjgVXvnOpaCMkR2H-cCqtT0pqz_oN_2XRQ0jEM',
+        function (sheet, next) {
+          title = sheet.title;
+          tt = title.substring(0, 3);
+          if (tmap[tt]) {
+            console.log("ALREADY SAW " + tt);
+            tmap[tt] = true;
+          }
+          if (stream)
+            stream.end();
+          new Stream(tsvFile(title), function (out) {
+            cc = -1;
+            stream = out;
+            next();
+          });
+        },
+        function (row, c, next) {
+          cc++;
+          processFinalRow(title, tt, row, cc, next);
+        },
+        function (err, c) {
+          console.log('processed some of ' + c + ' lines, moving on...');
+          var ci = -1;
+          goo.processSheet2('1qEZkFvOu8C-4auLmuw2xCy8_JHRdzInnvqFwwMVuJvo',
+            function (sheet, next) {
+              title = sheet.title;
+              tt = 'pc';
+              if (stream)
+                stream.end();
+              ci++;
+              new Stream(tsvFile(tt + ABC[ci] + '.tsv'), function (out) {
+                cc = -1;
+                stream = out;
+                next();
+              });
+            },
+            function (row, c, next) {
+              if (row.title.match(/Row: \d+/))
+                return next();
+              cc++;
+              processFinalRow(title, tt + ABC[ci], row, cc, next);
+            },
+            function () {
+              console.log('done final');
+              if (stream)
+                stream.end();
+            });
+        });
+    });
+  });
+}
+
+function finalize1(which) {
+  var m = null;
+  if (which) {
+    m = {};
+    which.forEach(function (w) {
+      m[w] = true;
+    });
+  }
+  var processFinalRow = processFinalRowFFE;
+  var PhoneDict = require('../../phone/phonedict');
+  d = new PhoneDict();
+  d.on('ready', function () {
+    translator.init(function () {
+      var goo = require('./goo-sheet');
+      var title, tt, cc;
+      goo.processSheet2('12NUJQkjgVXvnOpaCMkR2H-cCqtT0pqz_oN_2XRQ0jEM',
+        function (sheet, next) {
+          title = sheet.title;
+          tt = title.substring(0, 3);
+          if (stream)
+            stream.end();
+          if (m[title]) {
+            new Stream(tsvFile(title), function (out) {
+              cc = -1;
+              stream = out;
+              next();
+            });
+          } else {
+            console.log('skip '+title)
+            next();
+          }
+        },
+        function (row, c, next) {
+          if (m[title]) {
+            cc++;
+            processFinalRow(title, tt, row, cc, next);
+          } else {
+            next();
+          }
+        },
+        function (err, c) {
+          console.log('processed some of ' + c + ' s...');
+
+        });
+    });
+  });
+}
+
+var exec = require('child_process').exec;
+function processFinalRowFFE(title, tt, row, c, next) {
+  if (FINAL_LENGTHS[title] < c) {
+    process.nextTick(next);
+    return;
+  }
+  var p = '0000' + c;
+  p = p.substring(p.length - 4, p.length);
+  exec('/home/vagrant/sw/festival/bin/festival --script ~/deploy/dump.scm "' + row.title + '"', function (error, stdout, stderr) {
+    var phs = stdout.trim().split(' ');
+    var tphs = translator.translate(phs, {from: 'FESTVOX', to: 'IPA'}).replace(/_/g, ' ').trim();
+    stream.writeln(tt + p + '\t' + row.title + '\t' + tphs);
+    console.log(tt + p + '\t' + row.title + '\t' + tphs)
+    process.nextTick(next);
+  });
+}
+
+function processFinalRowHFE(title, tt, row, c, next) {
+  if (FINAL_LENGTHS[title] < c) {
+    process.nextTick(next);
+    return;
+  }
+  var p = '0000' + c;
+  p = p.substring(p.length - 4, p.length);
+  d.getTranscriptionInfo(row.title, function (err, ph) {
+    //var tphs = translator.translate(ph.phones.toString(), {from: 'ARPABET', to: 'IPA'}).replace(/_/g, ' ').trim();
+    //stream.writeln(tt + p + '\t' + row.title + '\t' + tphs);
+    var tphs = ph.phones.toString();
+    stream.writeln(row.title + '\t' + tphs);
+    console.log(tt + p + ' ' + row.title)
+    process.nextTick(next);
+  });
+}
+
+function lineCount() {
+  var scriptPaths = [];
+  scripts.jibo.forEach(function (s) {
+    scriptPaths.push(tsvFile(s))
+  });
+  stats.composite(scriptPaths, function (err, composite) {
+    console.log("TOTAL = " + composite.length)
+    scriptPaths = [];
+    scripts.jibopc.forEach(function (s) {
+      scriptPaths.push(tsvFile(s))
+    });
+    stats.composite(scriptPaths, function (err, composite) {
+      console.log("TOTAL = " + composite.length)
+    });
+  });
+}
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];
@@ -191,3 +379,9 @@ else if (process.argv[2] == 'greedy')
   doGreedy(which);
 else if (process.argv[2] == 'tsv')
   genCsv(which);
+else if (process.argv[2] == 'final')
+  finalize();
+else if (process.argv[2] == 'final1')
+  finalize1(which);
+else if (process.argv[2] == 'count')
+  lineCount();

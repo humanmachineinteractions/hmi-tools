@@ -32,10 +32,12 @@ function unique(lines, options) {
       }
 
       forNphone(options.n, s, function (nph, phones, idx) {
-        if (unique[nph])
+        if (unique[nph]) {
           unique[nph].count++;
+          unique[nph].lines.push(line);
+        }
         else
-          unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line};
+          unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line, lines: [line]};
       });
       if (idx % 100 == 0)
         bar.tick(100);
@@ -95,6 +97,10 @@ function diff2(alines, blines, options) {
   return {intersect: intersect, only_in_a: a, only_in_b: b};
 }
 
+
+function index(lines, options) {
+  var n = options.n ? options.n : 3;
+}
 
 /**
  * tracks unique keys
