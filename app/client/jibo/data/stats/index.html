@@ -1,0 +1,93 @@
+<div>
+    <canvas id="x" width="1000" height="1000"></canvas>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>
+    var canvas = document.getElementById('x');
+    var ctx = canvas.getContext('2d');
+    var u = {}
+    var uu = []
+    var max, min;
+
+    $.getJSON('long.stats2.json').done(function (data) {
+        getu(data);
+        minmax(data);
+        legend();
+        draw(data, '255,0,0');
+        $.getJSON('news.stats2.json').done(function (data) {
+            minmax(data);
+            draw(data, '0,255,0');
+            $.getJSON('tech.stats2.json').done(function (data) {
+                minmax(data);
+                draw(data, '0,0,255');
+                $.getJSON('ent.stats2.json').done(function (data) {
+                    minmax(data);
+                    draw(data, '255,0,255');
+                });
+            });
+        });
+    });
+
+    function minmax(data) {
+        max = 0;
+        min = 11110;
+        for (var i = 0; i < data.length; i++) {
+            max = Math.max(data[i].count, max);
+            min = Math.min(data[i].count, min);
+        }
+        console.log(min, max)
+    }
+    function getu(data) {
+        for (var i = 0; i < data.length; i++) {
+            var p = data[i].phones;
+            for (var j = 0; j < p.length; j++) {
+                u[p[j]] = 1;
+            }
+        }
+        for (var p in u) {
+            uu.push(p);
+        }
+        uu = uu.sort();
+        for (var i = 0; i < uu.length; i++) {
+            u[uu[i]] = i;
+        }
+    }
+    function legend() {
+        ctx.textAlign = 'center'
+        for (var i = 0; i < uu.length; i++) {
+            ctx.fillText(uu[i].toLowerCase(), get_x(i), 50);
+        }
+        for (var i = 0; i < uu.length; i++) {
+            ctx.fillText(uu[i].toLowerCase(), 40, get_y(i));
+        }
+    }
+    function draw(data, c) {
+        var alpha = .4;
+        ctx.fillStyle = 'rgba(' + c + ', ' + alpha + ' )';
+        for (var i = 0; i < data.length; i++) {
+            var p = data[i].phones;
+            var x = get_x(u[p[0]]);
+            var y = get_y(u[p[1]]);
+            var c = r(min, max, data[i].count, 4, 15);
+            ctx.beginPath();
+            ctx.arc(x, y, c, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    function get_x(i) {
+        return i * 20 + 50;
+    }
+    function get_y(i) {
+        return i * 20 + 80;
+    }
+
+    function r(a, b, c, min, max) {
+        var d = max - min;
+        var d0 = b - a;
+        var r = d / d0;
+        return min + c * r;
+    }
+
+
+</script>

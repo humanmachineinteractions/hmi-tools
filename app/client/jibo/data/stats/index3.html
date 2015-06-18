@@ -1,0 +1,141 @@
+<div>
+    <canvas id="x" width="1000" height="15000"></canvas>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script>
+    var canvas = document.getElementById('x');
+    var ctx = canvas.getContext('2d');
+    //ctx.globalCompositeOperation = "multiply";
+    var xlabelsmap = {}, ylabelsmap = {}, xlabels = [], ylabels = [];
+    var info = {};
+    var max, min;
+    var cellsize = 12;
+    var xoff = 50, yoff = 80;
+
+    $.getJSON('news.stats3.json').done(function (data) {
+        getlegend(data);
+        minmax(data);
+        drawlegend();
+        draw(data, '255,0,0');
+        $.getJSON('news.stats3.json').done(function (data) {
+            minmax(data);
+            draw(data, '0,255,0');
+            $.getJSON('tech.stats3.json').done(function (data) {
+                minmax(data);
+                draw(data, '0,0,255');
+                $.getJSON('long.stats3.json').done(function (data) {
+                    minmax(data);
+                    draw(data, '255,255,0');
+                    $.getJSON('ent.stats3.json').done(function (data) {
+                        minmax(data);
+                        draw(data, '0,255,255');
+                    });
+                });
+            });
+        });
+    });
+    function getMousePos(canvas, evt) {
+        var rect = canvas.getBoundingClientRect();
+        return {
+            x: evt.clientX - rect.left,
+            y: evt.clientY - rect.top
+        };
+    }
+    canvas.addEventListener('mousemove', function (evt) {
+        var mouse = getMousePos(canvas, evt);
+        get_tp(mouse.x, mouse.y)
+    }, false);
+
+    function minmax(data) {
+        max = 0;
+        min = 11110;
+        for (var i = 0; i < data.length; i++) {
+            max = Math.max(data[i].count, max);
+            min = Math.min(data[i].count, min);
+        }
+    }
+    function getlegend(data) {
+        // x
+        for (var i = 0; i < data.length; i++) {
+            var phs = data[i].phones;
+            for (var j = 0; j < phs.length; j++) {
+                xlabelsmap[phs[j]] = 1;
+            }
+        }
+        for (var p in xlabelsmap) {
+            xlabels.push(p);
+        }
+        xlabels = xlabels.sort();
+        for (var i = 0; i < xlabels.length; i++) {
+            xlabelsmap[xlabels[i]] = i;
+        }
+        // y
+        for (var i = 0; i < data.length; i++) {
+            var phs = data[i].phones;
+            for (var j = 0; j < phs.length - 1; j++) {
+                ylabelsmap[phs[j] + phs[j + 1]] = 1;
+            }
+        }
+        for (var p in ylabelsmap) {
+            ylabels.push(p);
+        }
+        ylabels = ylabels.sort();
+        for (var i = 0; i < ylabels.length; i++) {
+            ylabelsmap[ylabels[i]] = i;
+        }
+    }
+    function drawlegend() {
+        ctx.textAlign = 'center'
+        for (var i = 0; i < xlabels.length; i++) {
+            ctx.fillText(xlabels[i].toLowerCase(), get_x(i), 50);
+        }
+        for (var i = 0; i < ylabels.length; i++) {
+            ctx.fillText(ylabels[i].toLowerCase(), 30, get_y(i));
+        }
+    }
+    function draw(data, c) {
+        var alpha = .4;
+        ctx.fillStyle = 'rgba(' + c + ', ' + alpha + ' )';
+        for (var i = 0; i < data.length; i++) {
+            var p = data[i].phones;
+            var x = get_x(xlabelsmap[p[2]]);
+            var y = get_y(ylabelsmap[p[0] + p[1]]);
+            var k = p[0] + p[1] + p[2];
+            if (info[k])
+                info[k].push(data[i]);
+            else
+                info[k] = [data[i]];
+            var c = r(min, max, data[i].count, cellsize * .5, cellsize);
+            ctx.beginPath();
+            ctx.arc(x, y, c, 0, Math.PI * 2, true);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+    function get_x(i) {
+        return i * cellsize + xoff;
+    }
+    function get_y(i) {
+        return i * cellsize + yoff;
+    }
+
+    function get_tp(x, y) {
+        var xidx = Math.floor((x - xoff) / cellsize);
+        var yidx = Math.floor((y - yoff) / cellsize);
+        var d = info[ylabels[yidx] + xlabels[xidx]];
+        if (d) {
+            for (var i = 0; i < d.length; i++) {
+                console.log(d[i].nphone, d[i].count, d[i].line.split('\t')[0])
+            }
+        }
+    }
+
+    function r(a, b, c, min, max) {
+        var d = max - min;
+        var d0 = b - a;
+        var r = d / d0;
+        return min + c * r;
+    }
+
+
+</script>

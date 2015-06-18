@@ -1,9 +1,7 @@
 var fs = require('fs');
+var _ = require('lodash');
 var utils = require('../utils');
 var random = require('../utils/random');
-var names = require('./names');
-var books = require('./books');
-var datetime = require('./datetime');
 
 function generate(infile, outfile, options, complete) {
   var stream = fs.createWriteStream(outfile);
@@ -11,15 +9,7 @@ function generate(infile, outfile, options, complete) {
     utils.readLines(infile, function (data) {
       if (data.indexOf('[') != -1) {
         for (var i = 0; i < 4; i++) {
-          var td = data;
-          options.props.forEach(function (o) {
-            for (var c = 0; c < 2; c++) {
-              if (o.values)
-                td = td.replace(o.exp, random.oneOf(o.values));
-              else if (o.f)
-                td = td.replace(o.exp, o.f(data));
-            }
-          });
+          var td = processRow(options.props, data);
           if (td.indexOf('[') != -1)
             console.log('could not expand ' + td);
           else
@@ -36,46 +26,77 @@ function generate(infile, outfile, options, complete) {
   });
 }
 
-console.log('//////////////////////////////////////////////////////////////////')
-
-var infile = __dirname + '/template.txt';
-var outfile = __dirname + '/template-0.txt';
-var props = [
-  {exp: /\[(familymember|familyname|babyname|julie)\.?]/, values: names.People},
-  {exp: /\[petname]/, values: names.Pets},
-  {exp: /\[story]/, values: books.Childrens},
-  {exp: /\[(DAY|dayofweek)]/, values: datetime.DaysOfWeek},
-  {exp: /\[HH:MM]/, f: generateTime}
-];
-generate(infile, outfile, {props: props}, function (err) {
-  console.log(err);
-});
-
-// util
-
-var T2W = require('../utils/numbers/number2text');
-var translator = new T2W("EN_US");
-
-function generateTime() {
-  if (random.yes(.05)) {
-    return random.yes() ? 'midnight' : 'noon';
-  }
-  var hr = random.int(1, 12);
-  var min = random.int(0, 59);
-  var s = translator.toWords(hr);
-  s += ' ';
-  if (min == 0)
-    s += 'oclock';
-  else if (min < 10)
-    s += 'oh ' + translator.toWords(min);
-  else
-    s += translator.toWords(min);
-  if (min != 0) {
-    s += ' ';
-    if (random.yes())
-      s += 'pm';
-    else
-      s += 'am';
-  }
-  return s;
+function processRow(props, data) {
+  var td = data;
+  props.forEach(function (o) {
+    if (o.values)
+      td = td.replace(o.exp, random.oneOf(o.values));
+    else if (o.f)
+      td = td.replace(o.exp, random.oneOf(o.f(td)));
+  });
+  return td;
 }
+
+function p2(s) {
+  var i = 0;
+  var reg = /\[(.*?)]/g;
+  var match = reg.exec(s);
+  var p = [];
+  var unq = {};
+  while (match != null) {
+    var ms = match[0];
+    p.push(s.substring(i, match.index));
+    p.push(ms);
+    unq[ms] = {};
+    i = match.index + ms.length;
+    match = reg.exec(s);
+  }
+  p.push(s.substring(i));
+  return {length: p.length, tokens: p, unique: unq};
+}
+
+function p3(props, s) {
+  var ps = p2(s);
+  if (ps.length == 1)
+    return ps.tokens;
+  for (var p in ps.unique) {
+    var psu = ps.unique[p];
+    props.forEach(function (o) {
+      if (p.match(o.exp)) {
+        if (!o.values || o.values.length == 0) {
+          console.log("CANT FIND VALUES FOR '" + p + "'");
+          return;
+        }
+        psu.values = _.shuffle(o.values);
+        psu.length = o.values.length;
+        psu.index = 0;
+      }
+    });
+  }
+  var r = [];
+  var going = true;
+  while (going) {
+    var x = '';
+    for (var i = 0; i < ps.length; i++) {
+      var t = ps.tokens[i];
+      if (ps.unique[t]) {
+        var psu = ps.unique[t];
+        try {
+          x += psu.values[psu.index % psu.length];
+          psu.index++;
+          if (psu.index == psu.length)
+            going = false;
+        } catch (e) {
+          console.log('?', t, psu, s)
+          return [];
+        }
+      }
+      else {
+        x += t;
+      }
+    }
+    r.push(x);
+  }
+  return r;
+}
+exports.processRow = p3;

@@ -9,7 +9,7 @@ function dollars2text(d) {
   var a = d.split(".");
   var d = Number(a[0]);
   var c = Number(a[1]);
-  var s = translator.toWords(d) + " dollars";
+  var s = translator.toWords(d) + " dollar" + (d == 1 ? "" : "s");
   if (c != 0)
     s += " and " + translator.toWords(c) + " cent" + (c == 1 ? "" : "s");
   return s;

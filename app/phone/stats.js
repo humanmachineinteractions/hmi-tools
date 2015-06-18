@@ -1,33 +1,49 @@
+var fs = require('fs');
 var _ = require('lodash');
 var ProgressBar = require('progress');
 var utils = require('../utils/index');
+var cons = require('../console');
+var Stream = require('../krawl/filestream').Stream;
 
-function unique(lines, n) {
-  var bar = new ProgressBar('Analyzing :current of :total', {total: lines.length});
-
+function unique(lines, options) {
+  if (typeof(options) == 'number')
+    options = {n: options};
   var unique = {};
   var c = 0;
-  lines.forEach(function (line) {
-    var s;
-    if (typeof(line) == 'string') {
-      if (line.indexOf('\t'))
-        s = line.split('\t')[1].split(' ');
-      else
-        s = line.split(' ');
-    }
-    else {
-      s = line.phones;
-    }
+  var bar = new ProgressBar('Analyzing :current of :total', {total: lines.length});
+  lines.forEach(function (line, idx) {
+    try {
+      var s;
+      if (typeof(line) == 'string') {
+        if (line.indexOf('\t'))
+          s = line.split('\t')[1].split(' ');
+        else
+          s = line.split(' ');
+      }
+      else {
+        s = line.phones;
+      }
+      if (options.removeStress) {
+        for (var i = 0; i < s.length; i++) {
+          if (s[i].match(/..[0-3]/)) {
+            s[i] = s[i].substring(0, 2);
+          }
+        }
+      }
 
-    forNphone(n, s, function (nph, phones, idx) {
-      var p = "";//Math.floor((idx / s.length) * 4);
-      if (unique[nph + p])
-        unique[nph + p].count++;
-      else
-        unique[nph + p] = {phones: phones, count: 1, position: p, idx: idx, line: line};
-    });
-    bar.tick();
-    c++;
+      forNphone(options.n, s, function (nph, phones, idx) {
+        if (unique[nph]) {
+          unique[nph].count++;
+          unique[nph].lines.push(line);
+        }
+        else
+          unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line, lines: [line]};
+      });
+      if (idx % 100 == 0)
+        bar.tick(100);
+      c++;
+    } catch (e) {
+    }
   });
   return unique;
 }
@@ -66,6 +82,25 @@ function diff(corpus_a, corpus_b, options, complete) {
   });
 }
 
+function diff2(alines, blines, options) {
+  var intersect = {length: 0};
+  var a = unique(alines, options);
+  var b = unique(blines, options);
+  for (var an in a) {
+    if (b[an]) {
+      intersect[an] = {a: a[an], b: b[an]};
+      intersect.length++;
+      delete a[an];
+      delete b[an];
+    }
+  }
+  return {intersect: intersect, only_in_a: a, only_in_b: b};
+}
+
+
+function index(lines, options) {
+  var n = options.n ? options.n : 3;
+}
 
 /**
  * tracks unique keys
@@ -107,35 +142,60 @@ Mapper.prototype.get = function () {
   return arr;
 }
 
+function compositeScript(scripts, complete) {
+  var bigscript = [];
+  utils.forEach(scripts, function (f, next) {
+    fs.exists(f, function (b) {
+      if (b)
+        utils.readLines(f, function (err, lines) {
+          bigscript = bigscript.concat(lines);
+          next();
+        }); else next()
+    });
+  }, function () {
+    complete(null, bigscript);
+  });
+}
+
 
 exports.Mapper = Mapper;
 exports.unique = unique;
 exports.forNphone = forNphone;
 exports.diff = diff;
+exports.diff2 = diff2;
+exports.composite = compositeScript;
 
 if (!module.parent) {
-  if (process.argv.length == 4) {
-    console.log('!reading ' + process.argv[2])
-    utils.readLines(process.argv[2], function (err, lines) {
-      console.log('processing ' + lines.length + ' lines');
-      var map = unique(lines, process.argv[3]);
-      var items = [];
-      for (var p in map) {
-        items.push(map[p]);
-      }
-      items.sort(function (a, b) {
-        return b.count - a.count
-      });
-      for (var i = 0; i < 100; i++) {
-        console.log(items[i].phones, items[i].count, items[i].position);
-        if (i < 3)
-          console.log(items[i].line)
-      }
-      console.log(items.length);
-    });
-  } else if (process.argv.length == 5) {
-    diff(process.argv[2], process.argv[3], {N: Number(process.argv[4])}, function (err, data) {
-      console.log(data.intersect.length, _.keys(data.only_in_a).length, _.keys(data.only_in_b).length);
-    });
+  cons.welcome('Phoneme statistics');
+  if (process.argv.length < 4) {
+    cons.log('Requires at least infile and number of phone symbols to track (1-n)');
+    return;
   }
+  //if (process.argv.length == 4) {
+  console.log('Reading ' + process.argv[2])
+  utils.readLines(process.argv[2], function (err, lines) {
+    console.log('Processing ' + lines.length + ' lines');
+    var map = unique(lines, {n: process.argv[3], removeStress: true});
+    var items = [];
+    for (var p in map) {
+      items.push(map[p]);
+    }
+    items.sort(function (a, b) {
+      return b.count - a.count
+    });
+    if (process.argv.length > 4)
+      new Stream(process.argv[4], function (out) {
+        out.writeln(JSON.stringify(items));
+      });
+    else
+      for (var i = 0; i < items.length && i < 300; i++) {
+        console.log(items[i].phones, items[i].count);
+      }
+    console.log(items.length);
+  });
+  //} else if (process.argv.length == 5) {
+  //  diff(process.argv[2], process.argv[3], {N: Number(process.argv[4])}, function (err, data) {
+  //    console.log(data.intersect.length, _.keys(data.only_in_a).length, _.keys(data.only_in_b).length);
+  //  });
+  //}
 }

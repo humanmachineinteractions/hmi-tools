@@ -1,0 +1,101 @@
+Atlanta
+Boston
+Brooklyn
+Charlotte
+Chicago
+Cleveland
+Dallas
+Denver
+Detroit
+Golden State
+Houston
+Indiana
+LA
+Memphis
+Miami
+Milwaukee
+Minnesota
+New Orleans
+New York
+Oklahoma City
+Orlando
+Philadelphia
+Phoenix
+Portland
+Sacramento
+San Antonio
+Toronto
+Utah
+Washington
+Arizona
+Atlanta
+Baltimore
+Boston
+Chicago
+Cinncinnati
+Cleveland
+Colorado
+Detroit
+Florida
+Houston
+Kansas City
+Los Angeles
+Los Angeles
+Milwaukee
+Minnesota
+New York
+New York
+Oakland
+Philadelphia
+Pittsburgh
+San Diego
+San Francisco
+Seattle
+St. Louis
+Tampa Bay
+Texas
+Toronto Blue
+Washington
+San Francisco
+Chicago
+Cincinnati
+Buffalo
+Denver
+Cleveland
+Tampa Bay
+Arizona
+San Diego
+Kansas City
+Indianapolis
+Dallas
+Miami
+Philadelphia
+Atlanta
+New York
+Jacksonville
+New York
+Detroit
+Green Bay
+Carolina
+New England
+Oakland
+St.Louis
+Baltimore
+Washington
+New Orleans
+Seattle
+Pittsburgh
+Houston
+Tennesse
+Minnesota
+Buffalo
+Calgary
+Columbus
+Detroit
+Edmonton
+Florida
+Montreal
+Ottawa
+Pittsburgh
+San Jose
+Toronto

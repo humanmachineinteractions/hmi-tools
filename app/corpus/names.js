@@ -1266,7 +1266,7 @@ var BABY2014 = [
   'Paloma', 'Urijah',
   'Aimee', 'Jaydon',
   'Kaya', 'Kyree',
-  '', 'Ariel',
+  'Ariel',
   'Tabitha', 'Braiden',
   'Denise', 'Cassius',
   'Hadassah', 'Triston',

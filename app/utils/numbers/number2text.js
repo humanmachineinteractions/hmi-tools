@@ -111,10 +111,11 @@ T2W.prototype.toWords = function (number) {
 T2W.prototype.tokenize = function (number, tokenLength) {
 
   if (!Number.isInteger(number)) {
-    throw {
-      name: "NumberFormatExceprion",
-      message: "'" + number + "' is not Integer."
-    };
+    //throw {
+    //  name: "NumberFormatExceprion",
+    //  message: "'" + number + "' is not Integer."
+    //};
+    return [number];
   }
 
   if (number === 0) {
@@ -319,7 +320,7 @@ T2W.EN_US.DICTIONARY = {
   tens: ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"],
   hundred: "hundred",
   radix: ["", "thousand", "million"],
-  delimiters: ["-", "and"]
+  delimiters: [" ", ""]//["-","and"]
 };
 
 /**
@@ -347,10 +348,11 @@ T2W.EN_US.prototype.translate = function (numbers) {
 
   // Check max value
   if (numbers.length * T2W.EN_US.TOKEN_LENGTH > T2W.EN_US.MAX_NUMBERS) {
-    throw {
-      name: "Error",
-      message: "The length of numbers is longer than the maximum value(" + T2W.EN_US.MAX_NUMBERS + ")."
-    };
+    return 'unknown'
+    //throw {
+    //  name: "Error",
+    //  message: "The length of numbers is longer than the maximum value(" + T2W.EN_US.MAX_NUMBERS + ")."
+    //};
   }
 
   // Deal with zero value
@@ -383,7 +385,7 @@ T2W.EN_US.prototype._getTrio = function (numbers, index, max) {
 
   if (numbers[T2W.HUNDRED_INDEX]) {
     hundred = numbers[T2W.TEN_INDEX] || numbers[T2W.SINGLE_INDEX]
-      ? this._getOnes(numbers[T2W.HUNDRED_INDEX]) + " " + T2W.EN_US.DICTIONARY.hundred + ' ' + T2W.EN_US.DICTIONARY.delimiters[1] + ' '
+      ? this._getOnes(numbers[T2W.HUNDRED_INDEX]) + " " + T2W.EN_US.DICTIONARY.hundred + ' '// + T2W.EN_US.DICTIONARY.delimiters[1] + ' '
       : this._getOnes(numbers[T2W.HUNDRED_INDEX]) + " " + T2W.EN_US.DICTIONARY.hundred;
   }
 
@@ -406,7 +408,7 @@ T2W.EN_US.prototype._getTrio = function (numbers, index, max) {
   }
 
   if (index === 0 && index + 1 < max && !numbers[T2W.HUNDRED_INDEX] && (numbers[T2W.TEN_INDEX] || numbers[T2W.SINGLE_INDEX] )) {
-    hundred = ' ' + T2W.EN_US.DICTIONARY.delimiters[1] + ' ';
+    hundred = ' ';// + T2W.EN_US.DICTIONARY.delimiters[1] + ' ';
   }
 
   return hundred + ten + single + radix;

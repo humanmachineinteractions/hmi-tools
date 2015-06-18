@@ -33,3 +33,4 @@ app/build/data/voice-dv
 app/build/data
 dump
 dump.tar
+gen-*

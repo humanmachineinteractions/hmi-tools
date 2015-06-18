@@ -1,0 +1,501 @@
+Asparagus
+Broccoli
+Carrots
+Cauliflower
+Celery
+Corn
+Cucumbers
+Lettuce
+Greens
+Mushrooms
+Onions
+Peppers
+Potatoes
+Spinach
+Squash
+Zucchini
+Tomatoes
+BBQ sauce
+Gravy
+Honey
+Hot sauce
+Jam
+Jelly
+Preserves
+Ketchup
+Mustard
+Mayo
+Mayonnaise
+Pasta sauce
+Relish
+Salad dressing
+Salsa
+Soy sauce
+Steak sauce
+Syrup
+Worcestershire sauce
+Butter
+Margarine
+Cottage cheese
+Half & half
+Milk
+Sour cream
+Whipped cream
+Yogurt
+Bagels
+Croissants
+Buns
+Rolls
+Cake
+Cookies
+Donuts
+Pastries
+Fresh bread
+Pie
+Pita bread
+Sliced bread
+Antipersperant
+Deodorant
+Bath soap
+Soap
+Hand soap
+Condoms
+Cosmetics
+Cotton swabs
+Cotton balls
+Facial cleanser
+Facial tissue
+Kleenex
+Feminine products
+Floss
+Hair gel
+Hair spray
+Lip balm
+Moisturizing lotion
+Mouthwash
+Razors
+Shaving cream
+Shampoo
+Conditioner
+Sunblock
+Toilet paper
+Toothpaste
+Vitamins
+Supplements
+Air freshener
+Bathroom cleaner
+Bleach
+Detergent
+Dishwasher soap
+Garbage bags
+Glass cleaner
+Mop head
+Vacuum bags
+Sponges
+Scrubbers
+Steel wool
+Bleu cheese
+Cheddar
+Cottage cheese
+Cream cheese
+Feta
+Goat cheese
+Mozzarella
+Parmesan
+Provolone
+Ricotta
+Sandwich slices
+Swiss
+Baking powder
+Baking soda
+Bread crumbs
+Cake mix
+Brownie mix
+Icing
+Decorations
+Chocolate chips
+Cocoa
+Flour
+Shortening
+Sugar
+Sugar substitute
+Yeast
+CDRs
+DVDRs
+Notepad
+Envelopes
+Glue
+Tape
+Printer paper
+Pens
+Pencils
+Postage stamps
+Stamps
+Apples
+Avocados
+Bananas
+Berries
+Cherries
+Grapefruit
+Grapes
+Kiwis
+Lemons
+Limes
+Melon
+Nectarines
+Potatoes
+Oranges
+Peaches
+Pears
+Plums
+Bouillon cubes
+Cereal
+Coffee
+Coffee filters
+Instant potatoes
+Lemon juice
+Lime juice
+Mac & cheese
+Olive oil
+Packaged meals
+Pancake mix
+Waffle mix
+Pasta
+Peanut butter
+Pickles
+Rice
+Tea
+Vegetable oil
+Vinegar
+Bacon
+Sausage
+Beef
+Chicken
+Ground beef
+Ground turkey
+Ham
+Pork
+Hot dogs
+Lunchmeat
+Turkey
+Candy
+Gum
+Cookies
+Crackers
+Dried fruit
+Granola bars
+Trail mix
+Peanuts
+Cashews
+Sunflower seeds
+Walnuts
+Almonds
+Smoked almonds
+Raw almonds
+Oatmeal
+Popcorn
+Potato chips
+Corn chips
+Doritos
+Fritos
+Funyuns
+Pretzels
+Allergy medication
+Antibiotics
+Antidiarrheal medication
+Aspirin
+Antacid
+Band-aids
+Cold medicine
+Flu medication
+Sinus medication
+Pain reliever
+Prescription pick-up
+Cigarettes
+Car oil
+Batteries
+Charcoal
+Propane
+Flowers
+Greeting card
+Insect repellent
+Light bulbs
+Newspaper
+Magazine
+Bagels
+Chip dip
+Eggs
+English muffins
+Fruit juice
+Hummus
+Ready-bake breads
+Tofu
+Tortillas
+Applesauce
+Baked beans
+Broth
+Fruit
+Olives
+Tinned meats
+Chicken
+Tuna
+Chili night
+Soup
+Tomatoes
+Veggies
+Catfish
+Crab
+Lobster
+Mussels
+Oysters
+Salmon
+Shrimp
+Tilapia
+Tuna
+Burger night
+Chili night
+Pizza night
+Spaghetti night
+Taco night
+Take-out deli food
+Aluminum foil
+Napkins
+Non-stick spray
+Paper towels
+Plastic wrap
+Freezer bags
+Sandwich bags
+Wax paper
+Breakfasts
+Burritos
+Fish sticks
+Tater tots
+Fries
+French fries
+Sorbet
+Ice cream
+Juice concentrate
+Pizza
+Pizza Rolls
+Popsicles
+TV dinners
+Vegetables
+Basil
+Black pepper
+Cilantro
+Cinnamon
+Garlic
+Ginger
+Mint
+Oregano
+Paprika
+Parsley
+Red pepper
+Salt
+Vanilla extract
+Beer
+Tonic water
+Club soda
+Champagne
+Gin
+Juice
+Mixers
+White wine
+Red wine
+Rum
+Saké
+Soda pop
+Sports drink
+Whiskey
+Vodka
+Baby food
+Diapers
+Formula
+Lotion
+Baby wash
+Wipes
+Cat treats
+Cat food
+Cat litter
+Dog treats
+Dog food
+Flea treatment
+Pet shampoo
+Ice
+Organic
+Natural
+100% natural
+Grain fed
+Free range
+No GMOs
+Romaine
+Romaine lettuce
+Bib
+Bib lettuce
+Iceberg
+Iceberg lettuce
+Salad fixins
+Red onions
+Yellow onions
+Bell peppers
+Jalapeno peppers
+Fingerling potatoes
+Fingerlings
+Sun ripened tomatoes
+Vine ripened tomatoes
+Taco sauce
+Tobasco sauce
+Green tobasco sauce
+Grape jam
+Strawberry jam
+Apricot preserves
+Heinz 57
+Grey poupon
+Stone ground mustard
+Spicy mustard
+Hellman's mayo
+Ragu sauce
+Dill relish
+Sweet relish
+Italian dressing
+Blue cheese dressing
+Thousand island dressing
+Ranch dressing
+Low sodium soy sauce
+A1 sauce
+Aunt Jemima's syrup
+Unsalted butter
+Whole milk
+Two percent milk
+One percent milk
+Skim milk
+Almond milk
+Soy milk
+Dannon
+Chobani
+Hot dog buns
+Hamburger buns
+Oreos
+Chocolate chip cookies
+Animal crackers
+French bread
+Panini
+Flat bread
+Pita bread
+Rye bread
+Gillette
+Old Spice
+Regular
+Large
+Extra large
+Normal
+Small
+Extra small
+Dial
+Irish spring
+Dove
+Eye liner
+Eye shadow
+Lipstick
+Rouge
+Blush
+Mascara
+Neutrogena
+Dental floss
+Toothbrushes
+Toothbrush
+Chapstick
+Listerine
+Scope
+TP
+Colgate
+Crest
+Arm and hammer
+Vitamin A
+Vitamin B
+Vitamin C
+Vitamin D
+Fish oil
+Cod liver oil
+Dish soap
+Dish detergent
+Scrubbies
+Cheddar cheese
+Shredded cheese
+Mozzarella cheese
+Feta cheese
+Roast beef
+Sliced turkey
+Duncan hines
+Betty crocker
+Swiss cheese
+Carob chips
+Whole wheat flour
+Oleo
+Brown sugar
+Powdered sugar
+Natural sugar
+Splenda
+Stevia
+Truvia
+Sweet n' low
+Brewer's yeast
+Elmer's glue
+Super glue
+Paste
+Delicious apples
+Fuji apples
+Granny smith apples
+Organic bananas
+Ground coffee
+Whole bean coffee
+Starbucks coffee
+Peet's coffee
+Hot chocolate
+Macaroni and cheese
+Nature valley
+Extra virgin olive oil
+Virgin olive oil
+Spaghetti
+Angel hair
+Whole wheat spaghetti
+Whole wheat pasta
+Brown rice
+Precooked rice
+Instant rice
+Instant coffee
+Apple cider vinegar
+Turkey bacon
+Sausage links
+Sausage patties
+Extra lean ground beef
+Lean ground beef
+Smoked ham
+Virginia ham
+Pastrami
+Snickers
+Skittles
+Milky Way
+M&Ms
+Hard candy
+Hard candies
+Dry roasted peanuts
+Salted peanuts
+Peanuts roasted in shell
+Pretzels
+Pepsi
+Coke
+Coca cola
+Coke one
+Root beer
+7-up
+Sprite
+Red Bull
+Pringles
+Special K
+Cheerios
+Life
+Kit Kat
+Uncle Ben's
+Tea
+Camomille

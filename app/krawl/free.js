@@ -37,7 +37,6 @@ new Stream('data/films.txt', function (fstream) {
             console.log(b.id, ids[b.id])
             return;
           }
-          // console.log("* ", b);
           fstream.writeln(b.name.value);
           //b.starring.forEach(function (e) {
           //  astream.writeln(e.actor[0]);
