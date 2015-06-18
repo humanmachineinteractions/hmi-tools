@@ -22,7 +22,7 @@ translator.init(function () {
       var name = path.basename(file, ext);
       if (ext == '.mlf') {
         c++;
-        if (c > 500)
+        if (c > 3500)
           return next();
         fs.readFile(input_dir + '/' + file, 'cp437', function (err, data) {
           var lines = data.split('\n');
