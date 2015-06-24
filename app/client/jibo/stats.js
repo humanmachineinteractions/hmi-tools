@@ -105,4 +105,15 @@ function find() {
 }
 
 //compare(false, true);
-find();
+//find();
+
+stats.composite(b, function (err, bs) {
+  var bsdi = stats.unique(bs, {n: 2, removeStress: true});
+  var bstri = stats.unique(bs, {n: 3, removeStress: true});
+  stats.composite(p, function (err, js) {
+    var jsdi = stats.unique(js, {n: 2, removeStress: true});
+    console.log(">j di " + _.keys(jsdi).length + " out of " + _.keys(bsdi).length)
+    var jstri = stats.unique(js, {n: 3, removeStress: true});
+    console.log(">j tri", _.keys(jstri).length + " out of " + _.keys(bstri).length);
+  });
+});

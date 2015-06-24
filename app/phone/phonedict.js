@@ -61,6 +61,8 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   var phs = new model.SymbolList();
   var wordInSentence;
   var nextNe = null;
+  if (sentence.charAt(0) == '[')
+    sentence = JSON.parse(sentence);
   if (Array.isArray(sentence)) {
     wordInSentence = sentence;
   } else {
@@ -75,10 +77,12 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       return next();
     } else if (!wordInfo.ne && wordInfo.word.match(/\$/)) {
       nextNe = 'DOLLARS';
-      return next();
+      process.nextTick(next);
+      return;
     } else if (!wordInfo.ne && wordInfo.word.match(/#/)) {
       nextNe = 'EVERY';
-      return next();
+      process.nextTick(next);
+      return;
     } else {
       var words;
       if (wordInfo.word.match(/-?\d[\d,\.:]*/)) {
@@ -89,7 +93,8 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
       }
       utils.forEach(words, function (word, next) {
         if (word.word.match(model.NON_VOICED)) {
-          return next();
+          process.nextTick(next);
+          return;
         }
         var WORD = word.word.toUpperCase();
         var lex_entry = self.entries[WORD];
@@ -97,27 +102,35 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
           s.push(lex_entry.getString(0));
           phs.push('_');
           phs = phs.concat(lex_entry.get(0));
-          return next();
+          process.nextTick(next);
+          return;
         } else {
           unknown.push(word.word);
           if (self.phonesaurus)
             Phonesaurus.get_transcriptions(WORD, function (err, ss) {
               if (ss.length == 0) {
-                return next();
+                process.nextTick(next);
+                return;
               }
               self.entries[WORD] = new PhoneDictEntry(WORD, ss[0].split(' '), true); // next time it will be 'cached' TODO improve this!
               s.push(ss[0]);
               phs.push('_');
               phs = phs.concat(ss[0].split(' '));
-              return next();
+              process.nextTick(next);
+              return;
             });
-          else
-            return next();
+          else {
+            process.nextTick(next);
+            return;
+
+          }
         }
-      }, next);
+      }, function () {
+        process.nextTick(next);
+        return;
+      });
     }
   }, function () {
-
     complete(null, {text: sentence, transcription: s, phones: phs, unknown: unknown});
   });
 }

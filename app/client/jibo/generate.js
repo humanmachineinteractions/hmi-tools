@@ -65,7 +65,7 @@ function createScripts(which) {
         return;
       var r = corpus.processRow(data[title], row);
       r.forEach(function (s) {
-        ///console.log(s);
+        console.log(s);
         stream.writeln(s);
       });
       if (c % 100 == 0)
@@ -85,10 +85,11 @@ function createTranscript(which) {
       m[w + '.txt'] = true;
     });
   }
-  fs.readdir(BP, function (err, files) {
+  fs.readdir(BP + '/gen', function (err, files) {
     utils.forEach(files, function (file, next) {
+      console.log(file)
       if (!m || m[file]) {
-        transcribe(BP + file, phoneFile(file), {lexonly: false}, function () { //{}
+        transcribe(BP + '/gen/' + file, phoneFile(file), {lexonly: false}, function () { //{}
           console.log("!", file);
           next();
         });
@@ -105,9 +106,11 @@ var scripts = require('./scripts');
 
 function doGreedy(which) {
   var scriptPaths = [];
-  scripts.jibo.forEach(function (s) {
-    scriptPaths.push(rankedFile(s))
+  scripts.jibo.forEach(function (s, i) {
+    if (i < 7)
+      scriptPaths.push(rankedFile(s))
   });
+  console.log(scriptPaths)
 
   stats.composite(scriptPaths, function (err, composite) {
     console.log('Loaded composite ' + composite.length + ' lines');
@@ -205,7 +208,6 @@ var d;
 // /home/vagrant/sw/festival/bin/festival --script ~/deploy/dump.scm "text"
 
 function finalize() {
-  var processFinalRow = processFinalRowFFE;
   var PhoneDict = require('../../phone/phonedict');
   d = new PhoneDict();
   d.on('ready', function () {
@@ -273,7 +275,6 @@ function finalize1(which) {
       m[w] = true;
     });
   }
-  var processFinalRow = processFinalRowFFE;
   var PhoneDict = require('../../phone/phonedict');
   d = new PhoneDict();
   d.on('ready', function () {
@@ -293,7 +294,7 @@ function finalize1(which) {
               next();
             });
           } else {
-            console.log('skip '+title)
+            console.log('skip ' + title)
             next();
           }
         },
@@ -307,7 +308,42 @@ function finalize1(which) {
         },
         function (err, c) {
           console.log('processed some of ' + c + ' s...');
+        });
+    });
+  });
+}
 
+function finalize2() {
+  var PhoneDict = require('../../phone/phonedict');
+  d = new PhoneDict();
+  d.on('ready', function () {
+    translator.init(function () {
+      var goo = require('./goo-sheet');
+      var title, tt, cc;
+      var ci = -1;
+      goo.processSheet2('1qEZkFvOu8C-4auLmuw2xCy8_JHRdzInnvqFwwMVuJvo',
+        function (sheet, next) {
+          title = sheet.title;
+          tt = 'pc';
+          if (stream)
+            stream.end();
+          ci++;
+          new Stream(tsvFile(tt + ABC[ci] + '.tsv'), function (out) {
+            cc = -1;
+            stream = out;
+            next();
+          });
+        },
+        function (row, c, next) {
+          if (row.title.match(/Row: \d+/))
+            return next();
+          cc++;
+          processFinalRow(title, tt + ABC[ci], row, cc, next);
+        },
+        function () {
+          console.log('done final');
+          if (stream)
+            stream.end();
         });
     });
   });
@@ -347,6 +383,7 @@ function processFinalRowHFE(title, tt, row, c, next) {
   });
 }
 
+
 function lineCount() {
   var scriptPaths = [];
   scripts.jibo.forEach(function (s) {
@@ -371,6 +408,8 @@ if (process.argv.length > 3) {
     which.push(process.argv[i]);
 }
 
+var processFinalRow = processFinalRowHFE;
+
 if (process.argv[2] == 'script')
   createScripts(which);
 else if (process.argv[2] == 'transcript')
@@ -383,5 +422,7 @@ else if (process.argv[2] == 'final')
   finalize();
 else if (process.argv[2] == 'final1')
   finalize1(which);
+else if (process.argv[2] == 'final2')
+  finalize2();
 else if (process.argv[2] == 'count')
   lineCount();

@@ -15,34 +15,38 @@ function unique(lines, options) {
     try {
       var s;
       if (typeof(line) == 'string') {
-        if (line.indexOf('\t'))
-          s = line.split('\t')[1].split(' ');
-        else
-          s = line.split(' ');
+        if (line.indexOf('\t') != -1) {
+          var sl = line.split('\t');
+          if (sl.length > 1)
+            s = sl[sl.length - 1].split(' ');
+        }
       }
       else {
         s = line.phones;
       }
-      if (options.removeStress) {
-        for (var i = 0; i < s.length; i++) {
-          if (s[i].match(/..[0-3]/)) {
-            s[i] = s[i].substring(0, 2);
+      if (s) {
+        if (options.removeStress) {
+          for (var i = 0; i < s.length; i++) {
+            if (s[i].match(/..[0-3]/)) {
+              s[i] = s[i].substring(0, 2);
+            }
           }
         }
-      }
 
-      forNphone(options.n, s, function (nph, phones, idx) {
-        if (unique[nph]) {
-          unique[nph].count++;
-          unique[nph].lines.push(line);
-        }
-        else
-          unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line, lines: [line]};
-      });
+        forNphone(options.n, s, function (nph, phones, idx) {
+          if (unique[nph]) {
+            unique[nph].count++;
+          }
+          else {
+            unique[nph] = {nphone: nph, phones: phones, count: 1, idx: idx, line: line};
+          }
+        });
+      }
       if (idx % 100 == 0)
         bar.tick(100);
       c++;
     } catch (e) {
+      console.log("ERROR", e)
     }
   });
   return unique;
