@@ -15,29 +15,32 @@ function convert(input_dir, output_dir, done) {
         var section, sections = [], m, pm, o = {}, l = 0;
         lines.forEach(function (line) {
           if (line.match(/# /)) {
-            //console.log("!!! " + line.substring(2))
             section = line.substring(2);
             sections.push(section);
             o[section] = [];
             pm = null;
           } else if (m = line.match(/(\d+\.\d+) (\d+\.\d+) (\w+)/)) {
-            //console.log("!", m[1], m[2], m[3]);
             o[section].push([m[1], m[2], m[3]]);
             l = Math.max(l, m[2]);
           } else if (m = line.match(/(\d+\.\d+) (.+)/)) {
+            var w = m[2];
+            if (w == 'NONE')
+              w = '';
+            else if (w.indexOf(";") != -1)
+              w = w.substring(m[2].length - 2);
             if (pm) {
-              //console.log("!", pm[1], m[1], m[2]);
-              o[section].push([pm[1], m[1], m[2]]);
+              o[section].push([pm[1], m[1], w]);
             } else {
-              //console.log("!", 0, m[1], m[2]);
-              o[section].push([0, m[1], m[2]]);
+              o[section].push([0, m[1], w]);
             }
             pm = m;
           }
         });
         var tg = praat_tg(l, sections, o);
-        new Stream(output_dir+'/'+file+'.TextGrid', function(out){
+        new Stream(output_dir + '/' + name + '.TextGrid', function (out) {
           out.writeln(tg);
+          out.end();
+          next();
         })
       });
     });
@@ -45,18 +48,18 @@ function convert(input_dir, output_dir, done) {
 }
 
 function praat_tg(l, sections, data) {
-  var s = '"Praat chronological TextGrid text file"\n\
-0 ' + l + '  ! Time domain.\n\
-' + sections.length + ' ! Number of tiers.\n';
+  var s = '"Praat chronological TextGrid text file"\n';
+  s += '0 ' + l + '  ! Time domain.\n';
+  s += sections.length + ' ! Number of tiers.\n';
   sections.forEach(function (section) {
     s += '"IntervalTier" "' + section + '" 0 ' + l + '\n';
   })
   s += '\n';
   sections.forEach(function (section, idx) {
-    data[section].forEach(function(line){
-      s += '! '+section+':\n';
-      s += ''+(idx+1)+' '+line[0]+' '+line[1]+'\n';
-      s += '"'+line[2].trim()+'"\n\n';
+    data[section].forEach(function (line) {
+      s += '! ' + section + ':\n';
+      s += '' + (idx + 1) + ' ' + line[0] + ' ' + line[1] + '\n';
+      s += '"' + line[2].trim() + '"\n\n';
     })
   })
   return s;
