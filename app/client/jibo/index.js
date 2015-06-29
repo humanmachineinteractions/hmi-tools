@@ -1,4 +1,5 @@
 var fs = require('fs');
+var _ = require('lodash');
 var transcribe = require('../../phone/transcribe').transcribeText;
 var translator = require('../../phone/translate');
 var greedy = require('../../phone/greedy').greedy;
@@ -401,6 +402,120 @@ function lineCount() {
   });
 }
 
+function createPDF() {
+  var PhoneDict = require('../../phone/phonedict');
+  d = new PhoneDict();
+  d.on('ready', function () {
+    translator.init(function () {
+      var goo = require('./goo-sheet');
+      var all = [];
+      goo.processSheet2('1IE4FqscIhr22Cyjc-mHc8DKKqj4OEuwC6UsayL14MkA',
+        function (sheet, next) {
+          console.log(sheet);
+          next();
+        },
+        function (row, c, next) {
+          all.push([row.uid, row.text, row.transcription]);
+          next();
+        },
+        function () {
+          console.log('done with ' + all.length);
+          var sall = _.shuffle(all);
+          for (var i = 0; i < 300; i += 100) { //|| i < sall.length
+            var is = '0000' + i;
+            writePDF(sall.slice(i, i + 100), 'pdf/script' + is.substring(is.length - 4) + '.pdf');
+          }
+        });
+    });
+  });
+
+}
+
+function writePDF(a, p) {
+  var pp = 15;
+  var tableBody = [];
+  var content = [];
+  var docDefinition = {
+    pageSize: 'A4',
+    pageOrientation: 'landscape',
+    content: content,
+    footer: function (page, pages) {
+      return {
+        columns: [
+          {text: 'JIBO / ' + p.substring(4, p.length-4)},
+          {
+            alignment: 'right',
+            text: [
+              {text: page.toString()}, ' of ',
+              {text: pages.toString()}
+            ]
+          }
+        ],
+        margin: [40, 0]
+      };
+    }
+  }
+  for (var h = 0; h < a.length; h += pp) {
+    var tableBody = [];
+    for (var i = h; i < h + pp && i < a.length; i++) {
+      var row = a[i];
+      var s = 11;
+      var c = i % 2 == 0 ? '#cccccc' : 'white';
+      tableBody.push([
+        {text: row[0], fontSize: s, fillColor: c},
+        {text: row[1], fontSize: s, fillColor: c},
+        {text: row[2], fontSize: s, fillColor: c}])
+    }
+    var o = {
+      table: {
+        widths: [70, '*', '*'],
+        body: tableBody
+      },
+      layout: glayout
+    }
+    if (h + pp < a.length)
+      o.pageBreak = 'after';
+    content.push([o]);
+  }
+  //console.log(tableBody)
+  var fonts = {
+    Roboto: {
+      normal: '../../fonts/dejavu/DejaVuSans.ttf',
+      //bold: '../../fonts/Roboto-Medium.ttf',
+      //italics: '../../fonts/Roboto-Italic.ttf',
+      //bolditalics: '../../fonts/Roboto-Italic.ttf'
+    }
+  };
+
+  var PdfPrinter = require('pdfmake');
+  var printer = new PdfPrinter(fonts);
+  var pdfDoc = printer.createPdfKitDocument(docDefinition);
+  pdfDoc.pipe(fs.createWriteStream(p));
+  pdfDoc.end();
+}
+var glayout = {
+  hLineWidth: function (i, node) {
+    return 0;
+  },
+  vLineWidth: function (i, node) {
+    return 0;
+  },
+  //hLineColor: function (i, node) {
+  //  return 'black';
+  //},
+  //vLineColor: function (i, node) {
+  //  return 'black';
+  //},
+  // paddingLeft: function(i, node) { return 4; },
+  // paddingRight: function(i, node) { return 4; },
+  paddingTop: function (i, node) {
+    return 3;
+  },
+  paddingBottom: function (i, node) {
+    return 6;
+  }
+}
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];
@@ -426,3 +541,6 @@ else if (process.argv[2] == 'final2')
   finalize2();
 else if (process.argv[2] == 'count')
   lineCount();
+else if (process.argv[2] == 'pdf')
+  createPDF();
+//writePDF([['aa', 'Theres one thing on the roadmap for v2 (no deadline however) - make the library hackable, so you can write plugins to:', 'map for v2 (no deadline however) - make the library hackable, so you can write plu'], ['dd', 'ee', 'ff']]);
