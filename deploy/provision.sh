@@ -4,7 +4,6 @@ apt-get install -y git
 apt-get install build-essential python-dev python-twisted python-software-properties python-pip --no-install-recommends
 apt-get install -y redis-server --no-install-recommends
 apt-get install -y openjdk-7-jdk maven
-#update-alternatives --config java
 add-apt-repository ppa:chris-lea/node.js
 add-apt-repository ppa:dhor/myway
 apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
@@ -17,7 +16,8 @@ apt-get install python-pip
 pip install pymongo
 apt-get install -y openjdk-7-jdk maven
 update-alternatives --config java
-apt-get install speech-tools
+apt-get install -y libsnack2-alsa
+apt-get install -y speech-tools
 #checkout MITIE & build
 #checkout marytts & build
 cd /home/vagrant

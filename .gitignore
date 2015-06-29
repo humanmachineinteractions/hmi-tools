@@ -34,3 +34,7 @@ app/build/data
 dump
 dump.tar
 gen-*
+app/client/jibo/data
+app/client/jibo/pdf
+app/krawl/data
+app/phone/data

@@ -2,3 +2,4 @@ exports.jibo = ['be', 'messaging', 'cameraman', 'videoconferencing', 'storytelli
 exports.jibopc = ['pca', 'pcb', 'pcc', 'pcd'];
 exports.biggy = ['news', 'tech', 'ent', 'long'];
 exports.biggy2 = ['news', 'tech', 'ent', 'long', 'sports'];
+
