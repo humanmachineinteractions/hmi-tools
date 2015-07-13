@@ -1,6 +1,6 @@
 var fs = require('fs');
 var path = require('path');
-var utils = require('../utils');
+var utils = require('../../utils/index');
 var sax = require('sax');
 
 function convert(input_dir, output_dir, done) {

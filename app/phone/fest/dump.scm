@@ -99,5 +99,6 @@
 
 
 
-(pp (fopen (car argv) "w") (car (cdr argv)))
+;(pp (fopen (car argv) "w") (car (cdr argv)))
+(pp (fopen "-" "w") (car argv))
 

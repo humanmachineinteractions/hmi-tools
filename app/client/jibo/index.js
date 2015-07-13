@@ -7,7 +7,7 @@ var stats = require('../../phone/stats');
 var Stream = require('../../krawl/filestream').Stream;
 var utils = require('../../utils');
 var corpus = require('../../corpus');
-
+var fest = require('../../phone/fest')
 var BP = __dirname + '/data';
 var title = null;
 var stream;
@@ -208,7 +208,7 @@ var d;
 
 // /home/vagrant/sw/festival/bin/festival --script ~/deploy/dump.scm "text"
 
-function finalize() {
+function finalize(processFinalRow) {
   var PhoneDict = require('../../phone/phonedict');
   d = new PhoneDict();
   d.on('ready', function () {
@@ -268,7 +268,7 @@ function finalize() {
   });
 }
 
-function finalize1(which) {
+function finalize1(which, processFinalRow) {
   var m = null;
   if (which) {
     m = {};
@@ -358,14 +358,22 @@ function processFinalRowFFE(title, tt, row, c, next) {
   }
   var p = '0000' + c;
   p = p.substring(p.length - 4, p.length);
-  exec('/home/vagrant/sw/festival/bin/festival --script ~/deploy/dump.scm "' + row.title + '"', function (error, stdout, stderr) {
-    var phs = stdout.trim().split(' ');
-    var tphs = translator.translate(phs, {from: 'FESTVOX', to: 'IPA'}).replace(/_/g, ' ').trim();
+  fest_trans_from_text(row.title, function (err, phs, tphs) {
     stream.writeln(tt + p + '\t' + row.title + '\t' + tphs);
     console.log(tt + p + '\t' + row.title + '\t' + tphs)
     process.nextTick(next);
   });
 }
+
+function fest_trans_from_text(t, complete) {
+  fest.transcriptionFromText(t, function (err, data) {
+    if (err) return complete(error);
+    var phs = data.split(' ');
+    var tphs = translator.translate(phs, {from: 'FESTVOX', to: 'IPA'}).replace(/_/g, ' ').trim();
+    complete(null, row.title, tphs)
+  })
+}
+
 
 function processFinalRowHFE(title, tt, row, c, next) {
   if (FINAL_LENGTHS[title] < c) {
@@ -402,7 +410,9 @@ function lineCount() {
   });
 }
 
-function createPDF() {
+var ROW_MATCH = {};
+
+function createPDFs() {
   var PhoneDict = require('../../phone/phonedict');
   d = new PhoneDict();
   d.on('ready', function () {
@@ -421,19 +431,28 @@ function createPDF() {
         function () {
           console.log('done with ' + all.length);
           var sall = _.shuffle(all);
-          for (var i = 0; i < 300; i += 100) { //|| i < sall.length
-            var is = '0000' + i;
-            writePDF(sall.slice(i, i + 100), 'pdf/script' + is.substring(is.length - 4) + '.pdf');
+          var segs = [];
+          for (var i = 0; i < sall.length; i += 100) {
+            var is = '00000' + (i + 100);
+            segs.push({script: sall.slice(i, i + 100), i: i, fnum: is.substring(is.length - 5)});
           }
+          utils.forEach(segs, function (seg, next) {
+            console.log(seg.fnum);
+            writePDF(seg.script, 'pdf/script' + seg.fnum + '.pdf', next);
+          }, function () {
+            new Stream('pdf/map.json', function (out) {
+              out.writeln(JSON.stringify(ROW_MATCH));
+              out.end();
+            })
+          });
         });
     });
   });
 
 }
 
-function writePDF(a, p) {
+function writePDF(a, p, complete) {
   var pp = 15;
-  var tableBody = [];
   var content = [];
   var docDefinition = {
     pageSize: 'A4',
@@ -442,7 +461,7 @@ function writePDF(a, p) {
     footer: function (page, pages) {
       return {
         columns: [
-          {text: 'JIBO / ' + p.substring(4, p.length-4)},
+          {text: 'JIBO / ' + p.substring(4, p.length - 4)},
           {
             alignment: 'right',
             text: [
@@ -455,20 +474,25 @@ function writePDF(a, p) {
       };
     }
   }
+  ROW_MATCH[p] = {};
   for (var h = 0; h < a.length; h += pp) {
     var tableBody = [];
     for (var i = h; i < h + pp && i < a.length; i++) {
       var row = a[i];
       var s = 11;
       var c = i % 2 == 0 ? '#cccccc' : 'white';
+      var l = '0000' + (i + 1);
+      var uid = row[0];
+      ROW_MATCH[p][l] = uid;
       tableBody.push([
-        {text: row[0], fontSize: s, fillColor: c},
+        {text: l.substring(l.length - 4), fontSize: s, fillColor: c},
+        {text: uid, fontSize: s, fillColor: c},
         {text: row[1], fontSize: s, fillColor: c},
         {text: row[2], fontSize: s, fillColor: c}])
     }
     var o = {
       table: {
-        widths: [70, '*', '*'],
+        widths: [70, 70, '*', '*'],
         body: tableBody
       },
       layout: glayout
@@ -492,6 +516,7 @@ function writePDF(a, p) {
   var pdfDoc = printer.createPdfKitDocument(docDefinition);
   pdfDoc.pipe(fs.createWriteStream(p));
   pdfDoc.end();
+  pdfDoc.once('end', complete);
 }
 var glayout = {
   hLineWidth: function (i, node) {
@@ -516,6 +541,90 @@ var glayout = {
   }
 }
 
+function featuresToXlabelToPraat(dir, outdir, complete) {
+  var xltotg = require('../../phone/praat/xltotg');
+  translator.init(function () {
+    fs.readdir(dir, function (err, files) {
+      if (err) return complete(err);
+      files.forEach(function (file) {
+        fest.dumpFromUtterance(dir + file, function (err, feats) {
+          if (err) return complete(err);
+          var tg = xltotg.convert(feats, translator);
+          new Stream(outdir + file.substring(0, file.length - 4) + ".TextGrid", function (o) {
+            o.writeln(tg);
+          });
+        });
+      });
+    });
+  });
+}
+
+var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits/";
+function createMonoLabels(which) {
+  translator.init(function () {
+    var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
+    var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
+    createLabels2(which, script_by_uid, work_package_line_number_to_uid);
+  });
+}
+
+function createLabels2(which, all, map) {
+  var praat = require("../../phone/praat")
+  fs.readdir(audio_root, function (err, files) {
+    var dirs = [];
+    files.forEach(function (f) {
+      if (fs.lstatSync(audio_root + "/" + f).isDirectory()) {
+        dirs.push(f);
+      }
+    });
+    utils.forEach(which, function (dir, next) {
+      var no2uid = map["pdf/" + dir + ".pdf"];
+      for (var p in no2uid) {
+        var uid = no2uid[p];
+        p = p.substring(p.length - 4);
+        var w = audio_root + "/" + dir + "/" + p + ".wav";
+        if (fs.existsSync(w)) {
+          if (!all[uid])
+            throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
+          fest.wordFeaturesFromText(all[uid][1], function (err, w) {
+            console.log(w);
+            //aggregate into regions and write praat file
+            var tg = praat.TextGrid(0.0, ['IPA','ARPABET'], {IPA:[[0,0,'x']], ARPABET:[[0,0,'y']]});
+            console.log(tg);
+          });
+        }
+        else
+          throw new Error("CANT FIND WAV " + w);
+      }
+      next();
+    }, function () {
+
+    })
+  });
+}
+
+
+function getFinalScriptFromGoo(complete) {
+  var goo = require('./goo-sheet');
+  var all = {};
+  goo.processSheet2('1IE4FqscIhr22Cyjc-mHc8DKKqj4OEuwC6UsayL14MkA',
+    function (sheet, next) {
+      console.log(sheet.title);
+      next();
+    },
+    function (row, c, next) {
+      all[row.uid] = [c, row.text, row.transcription];
+      next();
+    },
+    function () {
+      new Stream(__dirname + "/data/final.json", function (out) {
+        out.writeln(JSON.stringify(all));
+        out.end();
+        complete(null, all)
+      })
+    });
+}
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];
@@ -523,7 +632,6 @@ if (process.argv.length > 3) {
     which.push(process.argv[i]);
 }
 
-var processFinalRow = processFinalRowHFE;
 
 if (process.argv[2] == 'script')
   createScripts(which);
@@ -534,13 +642,18 @@ else if (process.argv[2] == 'greedy')
 else if (process.argv[2] == 'tsv')
   genCsv(which);
 else if (process.argv[2] == 'final')
-  finalize();
+  finalize(processFinalRowHFE);
 else if (process.argv[2] == 'final1')
-  finalize1(which);
+  finalize1(which, processFinalRowHFE);
 else if (process.argv[2] == 'final2')
   finalize2();
 else if (process.argv[2] == 'count')
   lineCount();
 else if (process.argv[2] == 'pdf')
-  createPDF();
-//writePDF([['aa', 'Theres one thing on the roadmap for v2 (no deadline however) - make the library hackable, so you can write plugins to:', 'map for v2 (no deadline however) - make the library hackable, so you can write plu'], ['dd', 'ee', 'ff']]);
+  createPDFs();
+else if (process.argv[2] == 'labels')
+  createMonoLabels(which);
+else if (process.argv[2] == 'feats')
+  featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
+    console.log(err, c)
+  });
