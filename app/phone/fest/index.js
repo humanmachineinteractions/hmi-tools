@@ -15,8 +15,8 @@ function fest_feats_from_utt(utt, complete) {
   });
 }
 
-function fest_word_feats_from_text(utt, complete) {
-  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordfeats.scm "' + utt + '"', function (error, stdout, stderr) {
+function fest_word_feats_from_text(t, complete) {
+  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
     if (error) return complete(error);
     complete(null, stdout);

@@ -465,7 +465,8 @@ function writePDF(a, p, complete) {
           {
             alignment: 'right',
             text: [
-              {text: page.toString()}, ' of ',
+              {text: page.toString()},
+              ' of ',
               {text: pages.toString()}
             ]
           }
@@ -488,7 +489,8 @@ function writePDF(a, p, complete) {
         {text: l.substring(l.length - 4), fontSize: s, fillColor: c},
         {text: uid, fontSize: s, fillColor: c},
         {text: row[1], fontSize: s, fillColor: c},
-        {text: row[2], fontSize: s, fillColor: c}])
+        {text: row[2], fontSize: s, fillColor: c}
+      ])
     }
     var o = {
       table: {
@@ -559,7 +561,7 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
   });
 }
 
-var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits/";
+var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 function createMonoLabels(which) {
   translator.init(function () {
     var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
@@ -579,24 +581,38 @@ function createLabels2(which, all, map) {
     });
     utils.forEach(which, function (dir, next) {
       var no2uid = map["pdf/" + dir + ".pdf"];
-      for (var p in no2uid) {
+      var keys = [];
+      for (var p in no2uid)
+        keys.push(p);
+      utils.forEach(keys, function (p, next) {
         var uid = no2uid[p];
         p = p.substring(p.length - 4);
         var w = audio_root + "/" + dir + "/" + p + ".wav";
         if (fs.existsSync(w)) {
           if (!all[uid])
             throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
+          console.log(w + " " + all[uid][1]);
           fest.wordFeaturesFromText(all[uid][1], function (err, w) {
-            console.log(w);
+            var ss = w.split("\n");
+            ss.forEach(function (s) {
+              console.log(s);
+            })
             //aggregate into regions and write praat file
-            var tg = praat.TextGrid(0.0, ['IPA','ARPABET'], {IPA:[[0,0,'x']], ARPABET:[[0,0,'y']]});
+            var tg = praat.TextGrid(0.0, ['IPA', 'ARPABET'],
+              {
+                IPA: [
+                  [0, 0, 'x']
+                ],
+                ARPABET: [
+                  [0, 0, 'y']
+                ]});
             console.log(tg);
+            next();
           });
         }
         else
           throw new Error("CANT FIND WAV " + w);
-      }
-      next();
+      }, next);
     }, function () {
 
     })
@@ -651,6 +667,9 @@ else if (process.argv[2] == 'count')
   lineCount();
 else if (process.argv[2] == 'pdf')
   createPDFs();
+else if (process.argv[2] == 'final3')
+  getFinalScriptFromGoo(function () {
+  })
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'feats')
