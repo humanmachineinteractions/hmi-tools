@@ -566,19 +566,17 @@ var build_root = "/home/vagrant/builds";
 function createMonoLabels(which) {
   var shortid = require('shortid');
   shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.');
-  translator.init(function () {
-    var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
-    var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
-    var build_id = shortid.generate();
-    var dir = build_root + "/" + build_id;
-    fs.mkdir(dir, function () {
-      var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + which.join("");
-      fest.execFestvox(cmd, function (err, stdout, stderr) {
-        console.log(err, stdout, stderr)
-        createLabels2(which, dir, script_by_uid, work_package_line_number_to_uid);
-      })
+  var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
+  var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
+  var build_id = shortid.generate();
+  var dir = build_root + "/" + build_id;
+  fs.mkdir(dir, function () {
+    var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + which.join("");
+    fest.execFestvox(cmd, function (err, stdout, stderr) {
+      console.log(err, stdout, stderr)
+      createLabels2(which, dir, script_by_uid, work_package_line_number_to_uid);
     })
-  });
+  })
 }
 
 function createLabels2(which, build_dir, script, work_pkg_map) {
@@ -607,7 +605,10 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
           throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
         //console.log(w + " " + script[uid][1]);
         b += "( " + uid + "  \"" + script[uid][1] + "\" )\n"
-        exec('sox ' + w + ' -r 16000 ' + build_dir + "/wav/" + uid + ".wav", function (err, out) {
+        var sil = __dirname + "/slug_300ms.wav";
+        var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 ' + build_dir + "/wav/" + uid + ".wav";
+        console.log(cmd);
+        exec(cmd, function (err, out) {
           next();
         });
       }, next);
@@ -615,40 +616,66 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
       new Stream(build_dir + "/etc/txt.done.data", function (out) {
         out.writeln(b);
         out.end();
-        createLabels3(build_dir);
+        createLabels3(which, build_dir, script, work_pkg_map);
       })
     })
   });
 }
 
-function createLabels3(build_dir) {
+function createLabels3(which, build_dir, script, work_pkg_map) {
   fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
     console.log(err, stdout, stderr)
   });
 }
 
 
-function getTg(all, uid, next) {
+function getTg(line, next) {
   var praat = require("../../phone/praat")
-  fest.wordFeaturesFromText(all[uid][1], function (err, w) {
-    if (err) return next(err);
-    var ss = w.split("\n");
-    ss.forEach(function (s) {
-      console.log(s);
-    });
-    //aggregate into regions and write praat file
-    var tg = praat.TextGrid(0.0, ['IPA', 'ARPABET'],
-      {
-        IPA: [
-          [0, 0, 'x']
-        ],
-        ARPABET: [
-          [0, 0, 'y']
-        ]
+  translator.init(function () {
+    fest.wordFeaturesFromText(line, function (err, w) {
+      if (err) return next(err);
+      var ss = w.split("\n");
+      var words = [];
+      var word = null;
+      var word_phs;
+      var word_begin = 0;
+      var word_end;
+      ss.forEach(function (s) {
+        s = s.split(" ");
+        //var phone_begin = Number(s[0]);
+        //var phone_end = Number(s[1]);
+        var we = Number(s[2]);
+        console.log(we);
+        var t = s[3];
+        if (t == "syl") {
+
+        } else if (we != 0) {
+          if (word) {
+            words.push({word: word, phs: word_phs, begin: word_begin, end: word_end});
+            word_begin = word_end;
+          }
+          word = t;
+          word_phs = "";
+          word_end = we;
+        } else {
+          word_phs += t + " ";
+        }
       });
-    console.log(tg);
-    next(null, tg);
+      //aggregate into regions and write praat file
+      var text = [], arpabet = [], ipa = [];
+      words.forEach(function (word) {
+        text.push([word.begin, word.end, word.word]);
+        arpabet.push([word.begin, word.end, word.phs]);
+        ipa.push([word.begin, word.end, translator.translate(word.phs, {from: 'FESTVOX', to: 'IPA'})]);
+      });
+      var tg = praat.TextGrid(words[words.length - 1].end,
+        ['TEXT', 'ARPABET', 'IPA'],
+        {TEXT: text, ARPABET: arpabet, IPA: ipa});
+      console.log(tg);
+      next(null, tg);
+    });
   });
+
 }
 
 
@@ -704,6 +731,9 @@ else if (process.argv[2] == 'final3')
   getFinalScriptFromGoo()
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
+else if (process.argv[2] == 'fff')
+  getTg(which.join(" "), function () {
+  });
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)
