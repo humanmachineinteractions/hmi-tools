@@ -15,6 +15,14 @@ function fest_feats_from_utt(utt, complete) {
   });
 }
 
+function fest_word_feats_from_utt(t, complete) {
+  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans1.scm "' + t + '"', function (error, stdout, stderr) {
+    if (stderr) return complete(stderr)
+    if (error) return complete(error);
+    complete(null, stdout);
+  });
+}
+
 function fest_word_feats_from_text(t, complete) {
   exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
@@ -26,10 +34,9 @@ function fest_word_feats_from_text(t, complete) {
 function execFestvox(cmd, complete) {
   exec(cmd, {
     env: {
-      LD_LIBRARY_PATH: '/usr/local/lib',
       ESTDIR: '/home/vagrant/sw/speech_tools',
       FESTVOXDIR: '/home/vagrant/sw/festvox',
-      SPTKDIR: '/usr/local/bin',
+      SPTKDIR: '/usr/local',
       FLITEDIR: '/home/vagrant/sw/flite-2.0.0-release'
     }
   }, function (err, stdout, stderr) {
@@ -40,26 +47,25 @@ function execFestvox(cmd, complete) {
 function execFestvoxStream(dir, cmd, complete) {
   var util = require('util'),
     spawn = require('child_process').spawn,
-    ls = spawn(cmd,[], {
+    fcmd = spawn(cmd,[], {
       cwd: dir,
       env: {
-        LD_LIBRARY_PATH: '/usr/local/lib',
         ESTDIR: '/home/vagrant/sw/speech_tools',
         FESTVOXDIR: '/home/vagrant/sw/festvox',
-        SPTKDIR: '/usr/local/bin',
+        SPTKDIR: '/usr/local',
         FLITEDIR: '/home/vagrant/sw/flite-2.0.0-release'
       }
     });
 
-  ls.stdout.on('data', function (data) {
+  fcmd.stdout.on('data', function (data) {
     console.log('stdout: ' + data);
   });
 
-  ls.stderr.on('data', function (data) {
+  fcmd.stderr.on('data', function (data) {
     console.log('stderr: ' + data);
   });
 
-  ls.on('exit', function (code) {
+  fcmd.on('exit', function (code) {
     console.log('child process exited with code ' + code);
     complete();
   });
@@ -67,6 +73,7 @@ function execFestvoxStream(dir, cmd, complete) {
 
 exports.transcriptionFromText = fest_trans_from_text;
 exports.wordFeaturesFromText = fest_word_feats_from_text;
+exports.wordFeaturesFromUtt = fest_word_feats_from_utt;
 exports.dumpFromUtterance = fest_feats_from_utt;
 exports.execFestvox = execFestvox;
 exports.execFestvoxStream = execFestvoxStream;
