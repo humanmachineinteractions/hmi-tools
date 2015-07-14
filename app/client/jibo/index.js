@@ -562,16 +562,26 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
 }
 
 var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
+var build_root = "/home/vagrant/builds";
 function createMonoLabels(which) {
+  var shortid = require('shortid');
+  shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.');
   translator.init(function () {
     var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
     var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
-    createLabels2(which, script_by_uid, work_package_line_number_to_uid);
+    var build_id = shortid.generate();
+    var dir = build_root + "/" + build_id;
+    fs.mkdir(dir, function () {
+      var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + which.join("");
+      fest.execFestvox(cmd, function (err, stdout, stderr) {
+        console.log(err, stdout, stderr)
+        createLabels2(which, dir, script_by_uid, work_package_line_number_to_uid);
+      })
+    })
   });
 }
 
-function createLabels2(which, all, map) {
-  var praat = require("../../phone/praat")
+function createLabels2(which, build_dir, script, work_pkg_map) {
   fs.readdir(audio_root, function (err, files) {
     var dirs = [];
     files.forEach(function (f) {
@@ -579,8 +589,11 @@ function createLabels2(which, all, map) {
         dirs.push(f);
       }
     });
+    var b = "";
     utils.forEach(which, function (dir, next) {
-      var no2uid = map["pdf/" + dir + ".pdf"];
+      var no2uid = work_pkg_map["pdf/" + dir + ".pdf"];
+      if (!no2uid)
+        throw new Error("NO " + dir);
       var keys = [];
       for (var p in no2uid)
         keys.push(p);
@@ -588,34 +601,53 @@ function createLabels2(which, all, map) {
         var uid = no2uid[p];
         p = p.substring(p.length - 4);
         var w = audio_root + "/" + dir + "/" + p + ".wav";
-        if (fs.existsSync(w)) {
-          if (!all[uid])
-            throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
-          console.log(w + " " + all[uid][1]);
-          fest.wordFeaturesFromText(all[uid][1], function (err, w) {
-            var ss = w.split("\n");
-            ss.forEach(function (s) {
-              console.log(s);
-            })
-            //aggregate into regions and write praat file
-            var tg = praat.TextGrid(0.0, ['IPA', 'ARPABET'],
-              {
-                IPA: [
-                  [0, 0, 'x']
-                ],
-                ARPABET: [
-                  [0, 0, 'y']
-                ]});
-            console.log(tg);
-            next();
-          });
-        }
-        else
+        if (!fs.existsSync(w))
           throw new Error("CANT FIND WAV " + w);
+        if (!script[uid])
+          throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
+        //console.log(w + " " + script[uid][1]);
+        b += "( " + uid + "  \"" + script[uid][1] + "\" )\n"
+        exec('sox ' + w + ' -r 16000 ' + build_dir + "/wav/" + uid + ".wav", function (err, out) {
+          next();
+        });
       }, next);
     }, function () {
-
+      new Stream(build_dir + "/etc/txt.done.data", function (out) {
+        out.writeln(b);
+        out.end();
+        createLabels3(build_dir);
+      })
     })
+  });
+}
+
+function createLabels3(build_dir) {
+  fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
+    console.log(err, stdout, stderr)
+  });
+}
+
+
+function getTg(all, uid, next) {
+  var praat = require("../../phone/praat")
+  fest.wordFeaturesFromText(all[uid][1], function (err, w) {
+    if (err) return next(err);
+    var ss = w.split("\n");
+    ss.forEach(function (s) {
+      console.log(s);
+    });
+    //aggregate into regions and write praat file
+    var tg = praat.TextGrid(0.0, ['IPA', 'ARPABET'],
+      {
+        IPA: [
+          [0, 0, 'x']
+        ],
+        ARPABET: [
+          [0, 0, 'y']
+        ]
+      });
+    console.log(tg);
+    next(null, tg);
   });
 }
 
@@ -636,7 +668,8 @@ function getFinalScriptFromGoo(complete) {
       new Stream(__dirname + "/data/final.json", function (out) {
         out.writeln(JSON.stringify(all));
         out.end();
-        complete(null, all)
+        if (complete)
+          complete(null, all)
       })
     });
 }
@@ -668,8 +701,7 @@ else if (process.argv[2] == 'count')
 else if (process.argv[2] == 'pdf')
   createPDFs();
 else if (process.argv[2] == 'final3')
-  getFinalScriptFromGoo(function () {
-  })
+  getFinalScriptFromGoo()
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'feats')
