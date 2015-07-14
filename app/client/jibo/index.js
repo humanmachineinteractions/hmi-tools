@@ -609,7 +609,8 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
         out.writeln(b);
         out.end();
         fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
-          console.log(err, stdout, stderr)
+          console.log("///////////////////////////////////////////////////////////////////////////////")
+          console.log("BUILD VOICE COMPLETE " + build_dir)
         });
       })
     })
@@ -688,12 +689,12 @@ function getTg(utt, next) {
       var text = [], arpabet = [], ipa = [];
       words.forEach(function (word) {
         text.push([word.begin, word.end, word.word]);
-        arpabet.push([word.begin, word.end, word.phs]);
+        arpabet.push([word.begin, word.end, word.phs.toUpperCase()]);
         ipa.push([word.begin, word.end, translator.translate(word.phs, {from: 'FESTVOX', to: 'IPA'})]);
       });
       var tg = praat.TextGrid(words[words.length - 1].end,
-        ['TEXT', 'ARPABET', 'IPA'],
-        {TEXT: text, ARPABET: arpabet, IPA: ipa});
+        ['IPA', 'ARPABET'],
+        {IPA: ipa, ARPABET: arpabet});
       next(null, tg);
     });
   });
