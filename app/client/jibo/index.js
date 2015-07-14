@@ -617,7 +617,39 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
 }
 
 function createLabels3(festDir) {
-  fs.readdir(festDir+"/")
+  var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
+  var work_package_by_uid = {};
+  for (var p in work_package_line_number_to_uid) {
+    var s = p.substring(4, p.length - 4);
+    work_package_line_number_to_uid[s] = work_package_line_number_to_uid[p];
+    for (var q in work_package_line_number_to_uid[p]) {
+      var u = work_package_line_number_to_uid[p][q];
+      work_package_by_uid[u] = {script: s, line: q.substring(q.length - 4)};
+    }
+  }
+  fs.mkdir(festDir + "/hmi/", function () {
+    fs.readdir(festDir + "/festival/utts_hmm", function (err, files) {
+      utils.forEach(files, function (file, next) {
+        var idx = file.lastIndexOf(".");
+        var name = file.substring(0, idx);
+        var wp = work_package_by_uid[name];
+        getTg(festDir + "/festival/utts_hmm/" + file, function (err, tg) {
+          fs.mkdir(festDir + "/hmi/" + wp.script, function () {
+            var out = festDir + "/hmi/" + wp.script + "/" + wp.line + ".TextGrid";
+            new Stream(out, function (o) {
+              o.writeln(tg);
+              o.end();
+              exec("cp " + festDir + "/wav/" + name + ".wav " + festDir + "/hmi/" + wp.script + "/" + wp.line + ".wav", function () {
+                next();
+              });
+            });
+          });
+        });
+      }, function () {
+
+      });
+    });
+  });
 }
 
 
@@ -637,7 +669,6 @@ function getTg(utt, next) {
         //var phone_begin = Number(s[0]);
         //var phone_end = Number(s[1]);
         var we = Number(s[2]);
-        console.log(we);
         var t = s[3];
         if (t == "syl") {
 
@@ -663,7 +694,6 @@ function getTg(utt, next) {
       var tg = praat.TextGrid(words[words.length - 1].end,
         ['TEXT', 'ARPABET', 'IPA'],
         {TEXT: text, ARPABET: arpabet, IPA: ipa});
-      console.log(tg);
       next(null, tg);
     });
   });
@@ -724,8 +754,7 @@ else if (process.argv[2] == 'final3')
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'fff')
-  getTg(which[0], function () {
-  });
+  createLabels3(which[0]);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)

@@ -50,6 +50,7 @@ function execFestvoxStream(dir, cmd, complete) {
     fcmd = spawn(cmd,[], {
       cwd: dir,
       env: {
+        PATH: '/home/vagrant/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin',
         ESTDIR: '/home/vagrant/sw/speech_tools',
         FESTVOXDIR: '/home/vagrant/sw/festvox',
         SPTKDIR: '/usr/local',
