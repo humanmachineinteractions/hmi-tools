@@ -527,14 +527,6 @@ var glayout = {
   vLineWidth: function (i, node) {
     return 0;
   },
-  //hLineColor: function (i, node) {
-  //  return 'black';
-  //},
-  //vLineColor: function (i, node) {
-  //  return 'black';
-  //},
-  // paddingLeft: function(i, node) { return 4; },
-  // paddingRight: function(i, node) { return 4; },
   paddingTop: function (i, node) {
     return 3;
   },
@@ -573,7 +565,7 @@ function createMonoLabels(which) {
   fs.mkdir(dir, function () {
     var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + which.join("");
     fest.execFestvox(cmd, function (err, stdout, stderr) {
-      console.log(err, stdout, stderr)
+      console.log(err, stdout, stderr);
       createLabels2(which, dir, script_by_uid, work_package_line_number_to_uid);
     })
   })
@@ -606,7 +598,7 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
         //console.log(w + " " + script[uid][1]);
         b += "( " + uid + "  \"" + script[uid][1] + "\" )\n"
         var sil = __dirname + "/slug_300ms.wav";
-        var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 ' + build_dir + "/wav/" + uid + ".wav";
+        var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 -b 16 ' + build_dir + "/wav/" + uid + ".wav";
         console.log(cmd);
         exec(cmd, function (err, out) {
           next();
@@ -616,23 +608,23 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
       new Stream(build_dir + "/etc/txt.done.data", function (out) {
         out.writeln(b);
         out.end();
-        createLabels3(which, build_dir, script, work_pkg_map);
+        fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
+          console.log(err, stdout, stderr)
+        });
       })
     })
   });
 }
 
-function createLabels3(which, build_dir, script, work_pkg_map) {
-  fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
-    console.log(err, stdout, stderr)
-  });
+function createLabels3(festDir) {
+  fs.readdir(festDir+"/")
 }
 
 
-function getTg(line, next) {
+function getTg(utt, next) {
   var praat = require("../../phone/praat")
   translator.init(function () {
-    fest.wordFeaturesFromText(line, function (err, w) {
+    fest.wordFeaturesFromUtt(utt, function (err, w) {
       if (err) return next(err);
       var ss = w.split("\n");
       var words = [];
@@ -732,7 +724,7 @@ else if (process.argv[2] == 'final3')
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'fff')
-  getTg(which.join(" "), function () {
+  getTg(which[0], function () {
   });
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
