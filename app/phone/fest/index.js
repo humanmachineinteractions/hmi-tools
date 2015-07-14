@@ -47,7 +47,7 @@ function execFestvox(cmd, complete) {
 function execFestvoxStream(dir, cmd, complete) {
   var util = require('util'),
     spawn = require('child_process').spawn,
-    fcmd = spawn(cmd,[], {
+    fcmd = spawn(cmd, [], {
       cwd: dir,
       env: {
         PATH: '/home/vagrant/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/opt/vagrant_ruby/bin',
@@ -59,11 +59,11 @@ function execFestvoxStream(dir, cmd, complete) {
     });
 
   fcmd.stdout.on('data', function (data) {
-    console.log('stdout: ' + data);
+    console.log(data);
   });
 
   fcmd.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
+    console.error(data);
   });
 
   fcmd.on('exit', function (code) {
