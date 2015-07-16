@@ -767,6 +767,7 @@ function createRelationsFromTextGrid(tgFile, complete) {
     var t = "#\n";
     for (var i = 0; i < words.length; i++) {
       var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+      txt = txt.replace(/\.|\?|!|,|'|"|-|–|—/g, "");
       var ss = txt.split(" ");
       var m = (words[i].xmax - words[i].xmin) / ss.length;
       for (var j = 0; j < ss.length; j++) {
