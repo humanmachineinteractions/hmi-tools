@@ -18,5 +18,4 @@
   (format fw "%f %f %f %s \n" b e d n )
 )
 
-
 (pp (fopen "-" "w") (car argv))

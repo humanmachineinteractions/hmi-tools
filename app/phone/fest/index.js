@@ -32,12 +32,16 @@ function get_words(w) {
   var word_end;
   ss.forEach(function (s) {
     s = s.split(" ");
-    //var phone_begin = Number(s[0]);
-    //var phone_end = Number(s[1]);
+    var phone_begin = Number(s[0]);
+    var phone_end = Number(s[1]);
     var we = Number(s[2]);
     var t = s[3];
-    if (t == "syl") {
-
+    if (phone_begin == 0 && phone_end == 0 && we == 0) {
+      if (t == "syl") {
+        // could track
+      } else {
+        word += t;
+      }
     } else if (we != 0) {
       if (word) {
         words.push({word: word, phs: word_phs, begin: word_begin, end: word_end});

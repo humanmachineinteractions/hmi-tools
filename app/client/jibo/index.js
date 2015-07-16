@@ -536,6 +536,7 @@ var glayout = {
   }
 }
 
+//old, outdated...
 function featuresToXlabelToPraat(dir, outdir, complete) {
   var xltotg = require('../../phone/praat/xltotg');
   translator.init(function () {
@@ -553,6 +554,8 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
     });
   });
 }
+
+// the following build a clustergen project, extract phonetic info, export textgrids, then convert from textgrid to xlabel
 
 var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 var build_root = "/home/vagrant/builds";
@@ -686,7 +689,6 @@ function createLabels3(festDir) {
   });
 }
 
-
 function getTg(utt, next) {
   translator.init(function () {
     fest.wordFeaturesFromUtt(utt, function (err, w) {
@@ -700,14 +702,12 @@ function getTg(utt, next) {
         ipa.push([word.begin, word.end, translator.translate(word.phs, {from: 'FESTVOX', to: 'IPA'})]);
       });
       var tg = praat.TextGrid(words[words.length - 1].end,
-        ['IPA', 'ARPABET'],
-        {IPA: ipa, ARPABET: arpabet});
+        ['IPA', 'ARPABET', 'WORD'],
+        {IPA: ipa, ARPABET: arpabet, WORD: text});
       next(null, tg);
     });
   });
-
 }
-
 
 function createRelations() {
   fs.readdir(final_root + "/hmi", function (err, files) {
@@ -723,10 +723,8 @@ function createRelations() {
             createRelationsFromTextGrid(final_root + "/hmi/" + dir + "/" + tgfile, function (err, uid, words, segs) {
               new Stream(final_root + "/relations/Word/" + uid + ".Word", function (wo) {
                 wo.writeln(words);
-                wo.end();
                 new Stream(final_root + "/relations/Segment/" + uid + ".Segment", function (so) {
                   so.writeln(segs);
-                  so.end();
                   next();
                 })
               })
@@ -737,65 +735,75 @@ function createRelations() {
         }, next);
       });
     }, function () {
-
+      console.log("complete")
     });
   });
 }
 function createRelationsFromTextGrid(tgFile, complete) {
   var wpln = get_wp_etc();
+  var data = praat.readTextGrid(tgFile);
+  var words = data["ARPABET"];
+  var festwords = data["WORD"];
   var fp = tgFile.split("/");
   var script = fp[fp.length - 2];
   var filename = fp[fp.length - 1];
   var line = filename.substring(0, 4);
   var uid = wpln.getUid(script, line);
-  var utt_file = final_root + "/utts/" + uid + ".utt";
-  var utt_hmm_file = final_root + "/utts_hmm/" + uid + ".utt";
-  fest.wordFeaturesFromUtt(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, w) {
-    if (err) return complete(err);
-    var festwords = fest.getWords(w);
-    var data = praat.readTextGrid(tgFile);
-    var words = data["ARPABET"];
-    if (festwords.length != words.length) {
-      console.log("EEEK " + uid + " " + words);
-      return complete();
-    }
-    if (words[0].xmax < .3) {
-      console.log("?????" + words[0])
-      return complete();
-    }
-    words[0].xmin = .3;
-    var mod = false;
-    for (var i = 0; i < words.length; i++) {
-      var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
-      if (txt.toLowerCase() != festwords[i].phs.trim()) {
-        mod = true;
-        break;
+  if (festwords != null) {
+    complete(null, uid, createWordRelation(words, festwords), createSegRelation(words));
+  } else {
+    var utt_file = final_root + "/utts/" + uid + ".utt";
+    var utt_hmm_file = final_root + "/utts_hmm/" + uid + ".utt";
+    fest.wordFeaturesFromUtt(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, w) {
+      if (err) return complete(err);
+      festwords = fest.getWords(w);
+      if (festwords.length != words.length) {
+        console.log("EEEK " + uid + " " + words);
+        return complete();
       }
-    }
-    if (mod)
-      console.log("Transcript modified for " + uid + " / " + script + ":" + line);
-    var s = "#\n";
-    for (var i = 0; i < words.length; i++) {
-      s += Number(words[i].xmax).toFixed(6) + " 121 " + festwords[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
-    }
-    console.log(s);
-    var t = "#\n";
-    t += "0.300000 121 pau \n";
-    for (var i = 0; i < words.length; i++) {
-      var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
-      var ss = txt.split(" ");
-      console.log(ss);
-      var m = (words[i].xmax - words[i].xmin) / ss.length;
-      for (var j = 0; j < ss.length; j++) {
-        var ff = (Number(words[i].xmin) + (j + 1) * m);
-        var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
-        if (sj == "") sj = "pau";
-        t += ff.toFixed(6) + " 121 " + sj + " \n";
+      if (words[0].xmax < .3) {
+        console.log("?????" + words[0])
+        return complete();
       }
+      words[0].xmin = .3;
+      var mod = false;
+      for (var i = 0; i < words.length; i++) {
+        var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+        if (txt.toLowerCase() != festwords[i].phs.trim()) {
+          mod = true;
+          break;
+        }
+      }
+      if (mod)
+        console.log("Transcript modified for " + uid + " / " + script + ":" + line);
+      complete(null, uid, createWordRelation(words, festwords), createSegRelation(words));
+    });
+  }
+}
+
+function createWordRelation(ph_words, txt_words) {
+  var s = "#\n";
+  for (var i = 0; i < ph_words.length; i++) {
+    s += Number(ph_words[i].xmax).toFixed(6) + " 121 " + txt_words[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
+  }
+  return s;
+}
+
+function createSegRelation(words) {
+  var t = "#\n";
+  t += "0.300000 121 pau \n";
+  for (var i = 0; i < words.length; i++) {
+    var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+    var ss = txt.split(" ");
+    var m = (words[i].xmax - words[i].xmin) / ss.length;
+    for (var j = 0; j < ss.length; j++) {
+      var ff = (Number(words[i].xmin) + (j + 1) * m);
+      var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
+      if (sj == "") sj = "pau";
+      t += ff.toFixed(6) + " 121 " + sj + " \n";
     }
-    console.log(t);
-    complete(null, uid, s, t);
-  });
+  }
+  return t;
 }
 
 function getFinalScriptFromGoo(complete) {

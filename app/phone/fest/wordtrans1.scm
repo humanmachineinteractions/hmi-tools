@@ -13,10 +13,8 @@
   (set! n (item.feat seg 'name))
   (set! b (item.feat seg 'segment_start))
   (set! e (item.feat seg 'segment_end))
-  (set! t (item.feat seg 'R:SylStructure.tobi_endtone))
   (set! d (item.feat seg 'R:SylStructure.daughtern.daughtern.end))
   (format fw "%f %f %f %s \n" b e d n )
 )
-
 
 (pp (fopen "-" "w") (car argv))
