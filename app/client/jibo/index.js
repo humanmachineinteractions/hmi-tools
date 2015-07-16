@@ -709,18 +709,28 @@ function getTg(utt, next) {
 }
 
 
-function createRelations(root) {
-  fs.readdir(root, function (err, files) {
+function createRelations() {
+  fs.readdir(final_root + "/hmi", function (err, files) {
     var dirs = [];
     files.forEach(function (f) {
-      if (fs.lstatSync(root + "/" + f).isDirectory())
+      if (fs.lstatSync(final_root + "/hmi/" + f).isDirectory())
         dirs.push(f);
     });
     utils.forEach(dirs, function (dir, next) {
-      fs.readdir(root + "/" + dir, function (err, tgfiles) {
+      fs.readdir(final_root + "/hmi/" + dir, function (err, tgfiles) {
         utils.forEach(tgfiles, function (tgfile, next) {
           if (tgfile.indexOf(".TextGrid") != -1) {
-            createRelationsFromTextGrid(root + "/" + dir + "/" + tgfile, next);
+            createRelationsFromTextGrid(final_root + "/hmi/" + dir + "/" + tgfile, function (err, uid, words, segs) {
+              new Stream(final_root + "/relations/Word/" + uid + ".Word", function (wo) {
+                wo.writeln(words);
+                wo.end();
+                new Stream(final_root + "/relations/Segment/" + uid + ".Segment", function (so) {
+                  so.writeln(segs);
+                  so.end();
+                  next();
+                })
+              })
+            });
           } else {
             next();
           }
@@ -749,6 +759,11 @@ function createRelationsFromTextGrid(tgFile, complete) {
       console.log("EEEK " + uid + " " + words);
       return complete();
     }
+    if (words[0].xmax < .3) {
+      console.log("?????" + words[0])
+      return complete();
+    }
+    words[0].xmin = .3;
     var mod = false;
     for (var i = 0; i < words.length; i++) {
       var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
@@ -761,21 +776,25 @@ function createRelationsFromTextGrid(tgFile, complete) {
       console.log("Transcript modified for " + uid + " / " + script + ":" + line);
     var s = "#\n";
     for (var i = 0; i < words.length; i++) {
-      s += words[i].xmax + " 121 " + festwords[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
+      s += Number(words[i].xmax).toFixed(6) + " 121 " + festwords[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
     }
     console.log(s);
     var t = "#\n";
+    t += "0.300000 121 pau \n";
     for (var i = 0; i < words.length; i++) {
       var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
-      txt = txt.replace(/\.|\?|!|,|'|"|-|–|—/g, "");
       var ss = txt.split(" ");
+      console.log(ss);
       var m = (words[i].xmax - words[i].xmin) / ss.length;
       for (var j = 0; j < ss.length; j++) {
-        t += (Number(words[i].xmin) + j * m) + " 121 " + ss[j].toLowerCase() + " \n";
+        var ff = (Number(words[i].xmin) + (j + 1) * m);
+        var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
+        if (sj == "") sj = "pau";
+        t += ff.toFixed(6) + " 121 " + sj + " \n";
       }
     }
     console.log(t);
-    complete();
+    complete(null, uid, s, t);
   });
 }
 
@@ -833,8 +852,10 @@ else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'fff')
   createLabels3(which[0]);
-else if (process.argv[2] == 'ttt')
+else if (process.argv[2] == 'ttu')
   createRelationsFromTextGrid(which[0]);
+else if (process.argv[2] == 'ttt')
+  createRelations();
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)
