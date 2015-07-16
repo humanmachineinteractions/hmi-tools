@@ -7,7 +7,8 @@ var stats = require('../../phone/stats');
 var Stream = require('../../krawl/filestream').Stream;
 var utils = require('../../utils');
 var corpus = require('../../corpus');
-var fest = require('../../phone/fest')
+var fest = require('../../phone/fest');
+var praat = require("../../phone/praat");
 var BP = __dirname + '/data';
 var title = null;
 var stream;
@@ -555,23 +556,55 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
 
 var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 var build_root = "/home/vagrant/builds";
+var final_root = "/home/vagrant/app/client/jibo/data/";
+
+function get_wp_etc() {
+  var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
+  var work_package_by_uid = {};
+  for (var p in work_package_line_number_to_uid) {
+    var s = p.substring(4, p.length - 4);
+    work_package_line_number_to_uid[s] = work_package_line_number_to_uid[p];
+    delete work_package_line_number_to_uid[p];
+    for (var pl in work_package_line_number_to_uid[s]) {
+      var spl = pl.substring(pl.length - 4);
+      work_package_line_number_to_uid[s][spl] = work_package_line_number_to_uid[s][pl];
+      delete work_package_line_number_to_uid[s][pl];
+    }
+    for (var q in work_package_line_number_to_uid[s]) {
+      var u = work_package_line_number_to_uid[s][q];
+      work_package_by_uid[u] = {script: s, line: q.substring(q.length - 4)};
+    }
+  }
+  return {
+    getScript: function (script) {
+      return work_package_line_number_to_uid[script];
+    },
+    getUid: function (script, line) {
+      return work_package_line_number_to_uid[script][line];
+    },
+    getByUid: function (uid) {
+      return work_package_by_uid[uid];
+    }
+  }
+}
+
 function createMonoLabels(which) {
   var shortid = require('shortid');
   shortid.characters('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.');
   var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
-  var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
-  var build_id = shortid.generate();
+  var build_id = which.join("");
   var dir = build_root + "/" + build_id;
   fs.mkdir(dir, function () {
-    var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + which.join("");
+    var cmd = "cd " + dir + "; /home/vagrant/sw/festvox/src/clustergen/setup_cg hmi us " + build_id;
     fest.execFestvox(cmd, function (err, stdout, stderr) {
       console.log(err, stdout, stderr);
-      createLabels2(which, dir, script_by_uid, work_package_line_number_to_uid);
+      createLabels2(which, dir, script_by_uid);
     })
   })
 }
 
-function createLabels2(which, build_dir, script, work_pkg_map) {
+function createLabels2(which, build_dir, script) {
+  var wpetc = get_wp_etc();
   fs.readdir(audio_root, function (err, files) {
     var dirs = [];
     files.forEach(function (f) {
@@ -581,7 +614,7 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
     });
     var b = "";
     utils.forEach(which, function (dir, next) {
-      var no2uid = work_pkg_map["pdf/" + dir + ".pdf"];
+      var no2uid = wpetc.getScript(dir)
       if (!no2uid)
         throw new Error("NO " + dir);
       var keys = [];
@@ -589,7 +622,6 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
         keys.push(p);
       utils.forEach(keys, function (p, next) {
         var uid = no2uid[p];
-        p = p.substring(p.length - 4);
         var w = audio_root + "/" + dir + "/" + p + ".wav";
         if (!fs.existsSync(w))
           throw new Error("CANT FIND WAV " + w);
@@ -611,6 +643,7 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
         fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
           console.log("///////////////////////////////////////////////////////////////////////////////")
           console.log("BUILD VOICE COMPLETE " + build_dir)
+          createLabels3(build_dir);
         });
       })
     })
@@ -618,23 +651,16 @@ function createLabels2(which, build_dir, script, work_pkg_map) {
 }
 
 function createLabels3(festDir) {
-  var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
-  var work_package_by_uid = {};
-  for (var p in work_package_line_number_to_uid) {
-    var s = p.substring(4, p.length - 4);
-    work_package_line_number_to_uid[s] = work_package_line_number_to_uid[p];
-    for (var q in work_package_line_number_to_uid[p]) {
-      var u = work_package_line_number_to_uid[p][q];
-      work_package_by_uid[u] = {script: s, line: q.substring(q.length - 4)};
-    }
-  }
+  var wpetc = get_wp_etc();
   fs.mkdir(festDir + "/hmi/", function () {
-    fs.readdir(festDir + "/festival/utts_hmm", function (err, files) {
+    fs.readdir(festDir + "/festival/utts", function (err, files) {
       utils.forEach(files, function (file, next) {
         var idx = file.lastIndexOf(".");
         var name = file.substring(0, idx);
-        var wp = work_package_by_uid[name];
-        getTg(festDir + "/festival/utts_hmm/" + file, function (err, tg) {
+        var wp = wpetc.getByUid(name);
+        var utt_file = festDir + "/festival/utts/" + file;
+        var utt_hmm_file = festDir + "/festival/utts_hmm/" + file;
+        getTg(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, tg) {
           fs.mkdir(festDir + "/hmi/" + wp.script, function () {
             var out = festDir + "/hmi/" + wp.script + "/" + wp.line + ".TextGrid";
             new Stream(out, function (o) {
@@ -647,7 +673,14 @@ function createLabels3(festDir) {
           });
         });
       }, function () {
-
+        console.log("WOW!");
+        exec("cp -rf " + festDir + "/hmi " + final_root, function () {
+          exec("cp -rf " + festDir + "/festival/utts_hmm " + final_root, function () {
+            exec("cp -rf " + festDir + "/festival/utts " + final_root, function () {
+              console.log("...whew")
+            });
+          });
+        });
       });
     });
   });
@@ -655,36 +688,10 @@ function createLabels3(festDir) {
 
 
 function getTg(utt, next) {
-  var praat = require("../../phone/praat")
   translator.init(function () {
     fest.wordFeaturesFromUtt(utt, function (err, w) {
       if (err) return next(err);
-      var ss = w.split("\n");
-      var words = [];
-      var word = null;
-      var word_phs;
-      var word_begin = 0;
-      var word_end;
-      ss.forEach(function (s) {
-        s = s.split(" ");
-        //var phone_begin = Number(s[0]);
-        //var phone_end = Number(s[1]);
-        var we = Number(s[2]);
-        var t = s[3];
-        if (t == "syl") {
-
-        } else if (we != 0) {
-          if (word) {
-            words.push({word: word, phs: word_phs, begin: word_begin, end: word_end});
-            word_begin = word_end;
-          }
-          word = t;
-          word_phs = "";
-          word_end = we;
-        } else {
-          word_phs += t + " ";
-        }
-      });
+      var words = fest.getWords(w);
       //aggregate into regions and write praat file
       var text = [], arpabet = [], ipa = [];
       words.forEach(function (word) {
@@ -701,6 +708,75 @@ function getTg(utt, next) {
 
 }
 
+
+function createRelations(root) {
+  fs.readdir(root, function (err, files) {
+    var dirs = [];
+    files.forEach(function (f) {
+      if (fs.lstatSync(root + "/" + f).isDirectory())
+        dirs.push(f);
+    });
+    utils.forEach(dirs, function (dir, next) {
+      fs.readdir(root + "/" + dir, function (err, tgfiles) {
+        utils.forEach(tgfiles, function (tgfile, next) {
+          if (tgfile.indexOf(".TextGrid") != -1) {
+            createRelationsFromTextGrid(root + "/" + dir + "/" + tgfile, next);
+          } else {
+            next();
+          }
+        }, next);
+      });
+    }, function () {
+
+    });
+  });
+}
+function createRelationsFromTextGrid(tgFile, complete) {
+  var wpln = get_wp_etc();
+  var fp = tgFile.split("/");
+  var script = fp[fp.length - 2];
+  var filename = fp[fp.length - 1];
+  var line = filename.substring(0, 4);
+  var uid = wpln.getUid(script, line);
+  var utt_file = final_root + "/utts/" + uid + ".utt";
+  var utt_hmm_file = final_root + "/utts_hmm/" + uid + ".utt";
+  fest.wordFeaturesFromUtt(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, w) {
+    if (err) return complete(err);
+    var festwords = fest.getWords(w);
+    var data = praat.readTextGrid(tgFile);
+    var words = data["ARPABET"];
+    if (festwords.length != words.length) {
+      console.log("EEEK " + uid + " " + words);
+      return complete();
+    }
+    var mod = false;
+    for (var i = 0; i < words.length; i++) {
+      var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+      if (txt.toLowerCase() != festwords[i].phs.trim()) {
+        mod = true;
+        break;
+      }
+    }
+    if (mod)
+      console.log("Transcript modified for " + uid + " / " + script + ":" + line);
+    var s = "#\n";
+    for (var i = 0; i < words.length; i++) {
+      s += words[i].xmax + " 121 " + festwords[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
+    }
+    console.log(s);
+    var t = "#\n";
+    for (var i = 0; i < words.length; i++) {
+      var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+      var ss = txt.split(" ");
+      var m = (words[i].xmax - words[i].xmin) / ss.length;
+      for (var j = 0; j < ss.length; j++) {
+        t += (Number(words[i].xmin) + j * m) + " 121 " + ss[j].toLowerCase() + " \n";
+      }
+    }
+    console.log(t);
+    complete();
+  });
+}
 
 function getFinalScriptFromGoo(complete) {
   var goo = require('./goo-sheet');
@@ -756,6 +832,8 @@ else if (process.argv[2] == 'labels')
   createMonoLabels(which);
 else if (process.argv[2] == 'fff')
   createLabels3(which[0]);
+else if (process.argv[2] == 'ttt')
+  createRelationsFromTextGrid(which[0]);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)

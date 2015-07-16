@@ -23,6 +23,37 @@ function fest_word_feats_from_utt(t, complete) {
   });
 }
 
+function get_words(w) {
+  var ss = w.split("\n");
+  var words = [];
+  var word = null;
+  var word_phs;
+  var word_begin = 0;
+  var word_end;
+  ss.forEach(function (s) {
+    s = s.split(" ");
+    //var phone_begin = Number(s[0]);
+    //var phone_end = Number(s[1]);
+    var we = Number(s[2]);
+    var t = s[3];
+    if (t == "syl") {
+
+    } else if (we != 0) {
+      if (word) {
+        words.push({word: word, phs: word_phs, begin: word_begin, end: word_end});
+        word_begin = word_end;
+      }
+      word = t;
+      word_phs = "";
+      word_end = we;
+    } else {
+      word_phs += t + " ";
+    }
+  });
+  return words;
+}
+
+
 function fest_word_feats_from_text(t, complete) {
   exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
@@ -59,11 +90,11 @@ function execFestvoxStream(dir, cmd, complete) {
     });
 
   fcmd.stdout.on('data', function (data) {
-    console.log(data);
+    console.log(data + "");
   });
 
   fcmd.stderr.on('data', function (data) {
-    console.error(data);
+    console.error(data + "");
   });
 
   fcmd.on('exit', function (code) {
@@ -76,5 +107,6 @@ exports.transcriptionFromText = fest_trans_from_text;
 exports.wordFeaturesFromText = fest_word_feats_from_text;
 exports.wordFeaturesFromUtt = fest_word_feats_from_utt;
 exports.dumpFromUtterance = fest_feats_from_utt;
+exports.getWords = get_words;
 exports.execFestvox = execFestvox;
 exports.execFestvoxStream = execFestvoxStream;
