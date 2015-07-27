@@ -3,7 +3,7 @@ var _ = require('lodash');
 var colors = require('colors');
 var stats = require('../../phone/stats');
 var search = require('../../phone/search');
-var Stream = require('../../krawl/filestream').Stream;
+var Stream = require('../../utils/filestream').Stream;
 var utils = require('../../utils');
 var scripts = require('./scripts');
 

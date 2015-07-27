@@ -57,7 +57,6 @@ Stream.prototype.end = function () {
     this._end();
 }
 Stream.prototype._end = function () {
-  console.log("end "+this.fname)
   this.stream.end();
 }
 exports.Stream = Stream;

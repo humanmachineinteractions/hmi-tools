@@ -34,7 +34,7 @@ m	M	m	m		m	m	m	m	m
 n	N	n	n		n	n	n	n	n
 ŋ	NG	ng	N		nK	N	N	N	G
 l	L	l	l		l	l	l	l	l
-ʔ	Q		?		?				
+ʔ	Q	q	?		?				
 θ	TH	th	T		T	T	T	T	T
 ð	DH	dh	D		D	D	D	D	D
 ɹ	R	r	r\	r	R+	r	r	9r	r

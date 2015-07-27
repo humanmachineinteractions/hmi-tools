@@ -30,15 +30,16 @@ var fs = require('fs');
 var PR_INIT = 0;
 var PR_ITEM = 1;
 var PR_INTERVALS = 2;
-function praat_read_tg(file) {
-  var s = fs.readFileSync(file).toString().split('\n');
+function praat_read_tg(file, enc) {
+  var o = {encoding: enc ? enc : "utf8"};
+  var s = fs.readFileSync(file, o).toString().split('\n');
   var state = PR_INIT;
   var data = {};
   var sections = [];
   var section = null;
   var current_line = null;
-  s.forEach(function (tg_line) {
-    tg_line = tg_line.trim();
+  for (var i = 0; i < s.length; i++) {
+    var tg_line = s[i].trim();
     if (tg_line.indexOf(" = ") != -1) {
       var nv = tg_line.split(" = ");
       switch (state) {
@@ -46,7 +47,7 @@ function praat_read_tg(file) {
           break
         case PR_ITEM:
           if (nv[0] == "name") {
-            section = nv[1].substring(1, nv[1].length-1);
+            section = nv[1].substring(1, nv[1].length - 1);
             sections.push(section);
             data[section] = [];
           }
@@ -65,8 +66,9 @@ function praat_read_tg(file) {
         data[section].push(current_line);
       }
     }
-  });
+  }
   data._items = sections;
+  data._txt = s;
   return data;
 }
 

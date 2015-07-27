@@ -3,10 +3,10 @@ var util = require('util');
 var _ = require('lodash');
 var mongoose = require('mongoose');
 var NLP = require('../phone/stanford/StanfordNLP');
-var utils = require('../utils/index');
+var utils = require('../utils');
+var Stream = require('../utils/filestream').Stream;
 var crawl = require('../crawl/models');
 var stats = require('../phone/stats');
-var Stream = require('./filestream').Stream;
 var coreNLP = null;
 
 

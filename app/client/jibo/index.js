@@ -4,7 +4,7 @@ var transcribe = require('../../phone/transcribe').transcribeText;
 var translator = require('../../phone/translate');
 var greedy = require('../../phone/greedy').greedy;
 var stats = require('../../phone/stats');
-var Stream = require('../../krawl/filestream').Stream;
+var Stream = require('../../utils/filestream').Stream;
 var utils = require('../../utils');
 var corpus = require('../../corpus');
 var fest = require('../../phone/fest');
@@ -561,6 +561,7 @@ var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 var build_root = "/home/vagrant/builds";
 var final_root = "/home/vagrant/app/client/jibo/data/";
 
+
 function get_wp_etc() {
   var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
   var work_package_by_uid = {};
@@ -634,7 +635,6 @@ function createLabels2(which, build_dir, script) {
         b += "( " + uid + "  \"" + script[uid][1] + "\" )\n"
         var sil = __dirname + "/slug_300ms.wav";
         var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 -b 16 ' + build_dir + "/wav/" + uid + ".wav";
-        console.log(cmd);
         exec(cmd, function (err, out) {
           next();
         });
@@ -709,82 +709,54 @@ function getTg(utt, next) {
   });
 }
 
-function createRelations() {
-  fs.readdir(final_root + "/hmi", function (err, files) {
-    var dirs = [];
-    files.forEach(function (f) {
-      if (fs.lstatSync(final_root + "/hmi/" + f).isDirectory())
-        dirs.push(f);
-    });
-    utils.forEach(dirs, function (dir, next) {
-      fs.readdir(final_root + "/hmi/" + dir, function (err, tgfiles) {
-        utils.forEach(tgfiles, function (tgfile, next) {
-          if (tgfile.indexOf(".TextGrid") != -1) {
-            createRelationsFromTextGrid(final_root + "/hmi/" + dir + "/" + tgfile, function (err, uid, words, segs) {
-              new Stream(final_root + "/relations/Word/" + uid + ".Word", function (wo) {
-                wo.writeln(words);
-                new Stream(final_root + "/relations/Segment/" + uid + ".Segment", function (so) {
-                  so.writeln(segs);
-                  next();
-                })
-              })
-            });
-          } else {
-            next();
-          }
-        }, next);
+var iconv = require('iconv-lite');
+iconv.extendNodeEncodings();
+function createRelations(which) {
+  var wpetc = get_wp_etc();
+  var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
+  translator.init(function () {
+    exec("mkdir " + final_root + "/jibo_db/wrd; mkdir " + final_root + "/jibo_db/lab; mkdir " + final_root + "/jibo_db/wav", function () {
+      new Stream(final_root + "/jibo_db/txt.done.data", function (txtdone) {
+        utils.forEach(which, function (dir, next) {
+          fs.readdir(final_root + "/hmi/" + dir, function (err, tgfiles) {
+            utils.forEach(tgfiles, function (tgfile, next) {
+              if (tgfile.indexOf(".TextGrid") != -1) {
+                console.log(dir, tgfile);
+                var data = praat.readTextGrid(final_root + "/hmi/" + dir + "/" + tgfile, "utf16");
+                var words = data["ARPABET"];
+                var ortho = data["WORD"];
+                //console.log(data);
+                if (words == null) {
+                  console.log("CANT READ FILE", data._txt);
+                  return next();
+                }
+                var script = dir;
+                var filename = tgfile;
+                var line = filename.substring(0, 4);
+                var uid = wpetc.getUid(script, line);
+                txtdone.writeln("( " + uid + " \"" + script_by_uid[uid][1] + "\" )");
+                fs.writeFileSync(final_root + "/jibo_db/wrd/" + uid + ".wrd", createWordRelation(words, ortho), 'utf8');
+                fs.writeFileSync(final_root + "/jibo_db/lab/" + uid + ".lab", createSegRelation(words), 'utf8');
+                next();
+              } else {
+                next();
+              }
+            }, next);
+          });
+        }, function () {
+          console.log("complete")
+        });
       });
-    }, function () {
-      console.log("complete")
     });
   });
-}
-function createRelationsFromTextGrid(tgFile, complete) {
-  var wpln = get_wp_etc();
-  var data = praat.readTextGrid(tgFile);
-  var words = data["ARPABET"];
-  var festwords = data["WORD"];
-  var fp = tgFile.split("/");
-  var script = fp[fp.length - 2];
-  var filename = fp[fp.length - 1];
-  var line = filename.substring(0, 4);
-  var uid = wpln.getUid(script, line);
-  if (festwords != null) {
-    complete(null, uid, createWordRelation(words, festwords), createSegRelation(words));
-  } else {
-    var utt_file = final_root + "/utts/" + uid + ".utt";
-    var utt_hmm_file = final_root + "/utts_hmm/" + uid + ".utt";
-    fest.wordFeaturesFromUtt(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, w) {
-      if (err) return complete(err);
-      festwords = fest.getWords(w);
-      if (festwords.length != words.length) {
-        console.log("EEEK " + uid + " " + words);
-        return complete();
-      }
-      if (words[0].xmax < .3) {
-        console.log("?????" + words[0])
-        return complete();
-      }
-      words[0].xmin = .3;
-      var mod = false;
-      for (var i = 0; i < words.length; i++) {
-        var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
-        if (txt.toLowerCase() != festwords[i].phs.trim()) {
-          mod = true;
-          break;
-        }
-      }
-      if (mod)
-        console.log("Transcript modified for " + uid + " / " + script + ":" + line);
-      complete(null, uid, createWordRelation(words, festwords), createSegRelation(words));
-    });
-  }
+
 }
 
-function createWordRelation(ph_words, txt_words) {
+
+function createWordRelation(phs, ortho) {
   var s = "#\n";
-  for (var i = 0; i < ph_words.length; i++) {
-    s += Number(ph_words[i].xmax).toFixed(6) + " 121 " + txt_words[i].word + " ; wordlab \"" + (i + 1) + "\" ;\n";
+  for (var i = 0; i < phs.length; i++) {
+    s += Number(phs[i].xmax).toFixed(6) + " 121 " + ortho[i].text + " ; wordlab \"" + (i + 1) + "\" ;\n";
   }
   return s;
 }
@@ -800,9 +772,16 @@ function createSegRelation(words) {
       var ff = (Number(words[i].xmin) + (j + 1) * m);
       var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
       if (sj == "") sj = "pau";
-      t += ff.toFixed(6) + " 121 " + sj + " \n";
+      // is sj a valid phone?
+      if (translator.isValid(sj, "FESTVOX")) {
+        t += ff.toFixed(6) + " 121 " + sj + " \n";
+      } else {
+        console.log("???? not a valid phone " + sj);
+      }
     }
   }
+  var ls = ff + .3;
+  t += ls.toFixed(6) + " 121 pau \n";
   return t;
 }
 
@@ -862,8 +841,8 @@ else if (process.argv[2] == 'fff')
   createLabels3(which[0]);
 else if (process.argv[2] == 'ttu')
   createRelationsFromTextGrid(which[0]);
-else if (process.argv[2] == 'ttt')
-  createRelations();
+else if (process.argv[2] == 'relations')
+  createRelations(which);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)

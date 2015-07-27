@@ -13,7 +13,7 @@ var places = new GooglePlaces('AIzaSyCqvRYeoVDM0rlFh3DhqEHsYwU7xAlEMsg');
 // pick a random city and search term
 var uscities = require('./data/cities');
 
-var Stream = require('./filestream').Stream;
+var Stream = require('../utils/filestream').Stream;
 
 new Stream('data/city.txt', function (cities) {
   new Stream('data/street.txt', function (streets) {

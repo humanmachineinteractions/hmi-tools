@@ -2,7 +2,7 @@ var fs = require('fs');
 var utils = require('../utils/index');
 var PhoneDict = require('./phonedict');
 var stats = require('./stats');
-var Stream = require('../krawl/filestream').Stream;
+var Stream = require('../utils/filestream').Stream;
 var cons = require('../console');
 
 function transcribeJson(infile, outfile, options, complete) {

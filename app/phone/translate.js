@@ -80,6 +80,11 @@ var Translator = {
     });
     return ls;
   },
+  isValid: function (ph, type) {
+    var idx = Translator.find(type);
+    var f = Translator.M[idx + ph];
+    return f != null;
+  },
   split: function (line, type) {
     var r = [];
     var idx = Translator.find(type);
