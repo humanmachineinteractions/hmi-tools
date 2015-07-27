@@ -4,7 +4,6 @@ var extractor = require('unfluff');
 var url = require('url');
 var moment = require('moment');
 var _ = require('lodash');
-var mongoose = require('mongoose');
 var later = require('later');
 var ffmpeg = require('fluent-ffmpeg');
 var tts = require('../ndev/tts');
@@ -175,19 +174,6 @@ function convert_to_mp3(job, source, dest, done) {
     })
     .saveToFile(dir + dest);
 }
-
-// ffmpeg info
-// The 'progress' event is emitted every time FFmpeg
-// reports progress information. 'progress' contains
-// the following information:
-// - 'frames': the total processed frame count
-// - 'currentFps': the framerate at which FFmpeg is currently processing
-// - 'currentKbps': the throughput at which FFmpeg is currently processing
-// - 'targetSize': the current size of the target file in kilobytes
-// - 'timemark': the timestamp of the current frame in seconds
-// - 'percent': an estimation of the progress
-
-
 
 
 
