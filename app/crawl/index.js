@@ -73,13 +73,22 @@ function get_feed_content(_id, url, source, done) {
     feedparser.on('readable', function () {
       var stream = this, meta = this.meta, item;
       while (item = stream.read()) {
-        jobs.create('save_content', {
-          feed_id: _id,
-          //source: meta.title,
-          source: source,
-          url: item.origlink ? item.origlink : item.link
-        }).save(function (err) {
-          if (err) console.log(err);
+        var url = item.origlink ? item.origlink : item.link;
+        get_content(url, function (err, c) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          if (!c) {
+            jobs.create('save_content', {
+              feed_id: _id,
+              //source: meta.title,
+              source: source,
+              url: url
+            }).save(function (err) {
+              if (err) console.error(err);
+            });
+          }
         });
       }
     });
@@ -90,21 +99,39 @@ function get_feed_content(_id, url, source, done) {
   }
 }
 
+function get_content(origlink, complete) {
+  var s = url.parse(origlink);
+  Content.findOne({host: s.host, path: s.path}).exec(complete);
+}
 
 function save_one(feed_id, source, origlink, complete) {
+  if (origlink.indexOf("times.com") != -1)
+    return complete();
+  console.log("REQUEST " + origlink)
   request(origlink, function (error, response, body) {
-    if (error || response.statusCode != 200)
-      return complete(new Error('no go ' + origlink));
+    if (error || response.statusCode != 200) {
+      console.log("COULDNT GET " + origlink);
+      return complete();
+    }
     Feed.findOne({_id: feed_id}).exec(function (err, f) {
-      if (err) return complete(err);
+      if (err) {
+        console.error(err);
+        return complete(err);
+      }
       var data = extractor.lazy(body, 'en');
-      var s = url.parse(origlink);
-      Content.findOne({host: s.host, path: s.path}).exec(function (err, c) {
-        if (err) return complete(err);
-        if (c) return complete();
+      get_content(origlink, function (err, c) {
+        if (err) {
+          console.error(err);
+          return complete(err);
+        }
+        if (c) {
+          console.log("...IN DB")
+          return complete();
+        }
         var title = data.title();
         var text = data.text();
         if (!title || !text) return complete();
+        var s = url.parse(origlink);
         new Content({
           feed: f,
           host: s.host,
@@ -134,22 +161,24 @@ function save_one(feed_id, source, origlink, complete) {
 
 
 function render_tts_wav(cid, voice, complete) {
-  console.log('rendering', cid);
   Content.findOne({_id: cid}).exec(function (err, content) {
     if (err) return complete(err);
     if (!content) return complete(new Error('no content'));
     var text = content.title + ' from ' + content.source + '. ' + content.text;
     var wav_file = voice + '-' + cid + '.wav';
+    console.log("RENDER " + wav_file);
     tts.render(text, cms.config.resourcePath + wav_file, voice, function (err) {
       if (err) return complete(err);
       content.audio = {Zoe: true};
       content.save(function (err, c2) {
         if (err) return complete(err);
+        var d = voice + '-' + cid + '.mp3';
         jobs.create('convert_to_mp3', {
           source: wav_file,
-          dest: voice + '-' + cid + '.mp3'
+          dest: d
         }).save(function (err) {
           if (err) return complete(err);
+          console.log('**SAVE', d);
           return complete();
         });
       });
@@ -179,7 +208,6 @@ function convert_to_mp3(job, source, dest, done) {
 }
 
 
-
 // KUE
 
 var kue = require('kue')
@@ -206,7 +234,7 @@ jobs.on('job complete', function (id, result) {
     if (err) return;
     job.remove(function (err) {
       if (err) throw err;
-     //console.log('removed completed job #%d', job.id);
+      console.log('removed completed job #%d', job.id);
     });
   });
 });
@@ -224,7 +252,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/content', function (req, res, next) {
   var last = moment().subtract(12, 'hours');
-  res.redirect('/content/'+last.format());
+  res.redirect('/content/' + last.format());
 });
 
 app.get('/content/:datetime', function (req, res, next) {
@@ -255,11 +283,11 @@ app.get('/content/:datetime', function (req, res, next) {
 });
 
 app.get('/admin/refresh', function (req, res, next) {
-    check_feeds();
+  check_feeds();
 });
 
 app.get('/audio/:id', function (req, res, next) {
-    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.mp3');
+  res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.mp3');
 });
 
 app.get('/resource/:id', function (req, res, next) {
