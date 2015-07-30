@@ -1,14 +1,15 @@
 var exec = require('child_process').exec;
+var FESTIVALDIR = process.env['FESTIVALDIR'] || '/home/vagrant/sw/festival/bin/';
 
 function fest_trans_from_text(t, complete) {
-  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/trans.scm "' + t + '"', function (error, stdout, stderr) {
+  exec(FESTIVALDIR + 'festival --script ~/app/phone/fest/trans.scm "' + t + '"', function (error, stdout, stderr) {
     if (error) return complete(error);
     complete(null, stdout.trim())
   });
 }
 
 function fest_feats_from_utt(utt, complete) {
-  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/dump.scm "' + utt + '"', function (error, stdout, stderr) {
+  exec(FESTIVALDIR + 'festival --script ~/app/phone/fest/dump.scm "' + utt + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
     if (error) return complete(error);
     complete(null, stdout);
@@ -16,7 +17,7 @@ function fest_feats_from_utt(utt, complete) {
 }
 
 function fest_word_feats_from_utt(t, complete) {
-  exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans1.scm "' + t + '"', function (error, stdout, stderr) {
+  exec(FESTIVALDIR + 'festival --script ~/app/phone/fest/wordtrans1.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
     if (error) return complete(error);
     complete(null, stdout);
