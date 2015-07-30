@@ -631,8 +631,11 @@ function createLabels2(which, build_dir, script) {
           throw new Error("CANT FIND WAV " + w);
         if (!script[uid])
           throw new Error("CAN FIND SCRIPT LINE WITH UID " + uid);
-        //console.log(w + " " + script[uid][1]);
-        b += "( " + uid + "  \"" + script[uid][1] + "\" )\n"
+        var txt = script[uid][1];
+        txt = txt.replace(/"/g, '');
+        if (txt.indexOf('"') != -1)
+          console.log(uid + " " + w + " " + txt);
+        b += "( " + uid + "  \"" + txt + "\" )\n"
         var sil = __dirname + "/slug_300ms.wav";
         var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 -b 16 ' + build_dir + "/wav/" + uid + ".wav";
         exec(cmd, function (err, out) {
@@ -641,6 +644,8 @@ function createLabels2(which, build_dir, script) {
       }, next);
     }, function () {
       new Stream(build_dir + "/etc/txt.done.data", function (out) {
+        //console.log(build_dir + "/etc/txt.done.data");
+        //console.log(b);
         out.writeln(b);
         out.end();
         fest.execFestvoxStream(build_dir, "./bin/build_cg_voice", function (err, stdout, stderr) {
