@@ -190,6 +190,7 @@ function doGreedy(lines, unique, covered, out, complete) {
 
 
 exports.greedy = greedy;
+exports.doGreedy = doGreedy;
 
 
 if (!module.parent) {
