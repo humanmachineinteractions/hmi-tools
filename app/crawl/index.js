@@ -14,6 +14,9 @@ var reader = {
   workflow: null,
   permissions: {}
 };
+
+var RENDER_TTS_WAV = true;
+
 var cms = new current.Cms(reader);
 var Content = cms.meta.model('ReaderContent');
 var Feed = cms.meta.model('ReaderFeed');
@@ -114,7 +117,7 @@ function save_one(feed_id, source, origlink, complete) {
         }).save(function (err, c) {
             if (err) return complete(err);
             console.log("***ADD", c.title);
-            if (true)
+            if (!RENDER_TTS_WAV)
               return complete();
             else
               jobs.create('render_tts_wav', { //var job =
