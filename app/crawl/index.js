@@ -6,6 +6,7 @@ var moment = require('moment');
 var _ = require('lodash');
 var later = require('later');
 var ffmpeg = require('fluent-ffmpeg');
+var findRemoveSync = require('find-remove');
 var tts = require('../ndev/tts');
 var current = require('../../../currentcms');
 var reader = {
@@ -55,6 +56,11 @@ function check_feeds() {
     }
     _channels = _.indexBy(channels, '_id');
   });
+  //
+  var r = findRemoveSync(cms.config.resourcePath, {extension: '.wav'});
+  console.log("find-remove",cms.config.resourcePath,r);
+  r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 86400*5}, extension: '.mp3'});
+  console.log("find-remove",cms.config.resourcePath,r);
 }
 
 function get_feed_content(_id, url, source, done) {
