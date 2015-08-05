@@ -57,7 +57,7 @@ function check_feeds() {
     _channels = _.indexBy(channels, '_id');
   });
   //
-  var r = findRemoveSync(cms.config.resourcePath, {extensions: ['.wav']});
+  var r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 3600}, extensions: ['.wav']});
   console.log("find-remove",cms.config.resourcePath,r);
   r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 86400*5}, extensions: ['.mp3']});
   console.log("find-remove",cms.config.resourcePath,r);
