@@ -668,7 +668,8 @@ function createLabels3(festDir) {
         var wp = wpetc.getByUid(name);
         var utt_file = festDir + "/festival/utts/" + file;
         var utt_hmm_file = festDir + "/festival/utts_hmm/" + file;
-        getTg(fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file, function (err, tg) {
+        var an_utt_file = fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file;
+        getTg(an_utt_file, function (err, tg) {
           fs.mkdir(festDir + "/hmi/" + wp.script, function () {
             var out = festDir + "/hmi/" + wp.script + "/" + wp.line + ".TextGrid";
             new Stream(out, function (o) {
@@ -790,6 +791,53 @@ function createSegRelation(words) {
   return t;
 }
 
+
+function createBoundaryTG(utts_dir, utts_hmm_dir, out_dir) {
+  console.log("!", utts_dir)
+  console.log("!", utts_hmm_dir)
+  var wpetc = get_wp_etc();
+  fs.readdir(utts_dir, function (err, files) {
+    utils.forEach(files, function (file, next) {
+      var idx = file.lastIndexOf(".");
+      if (idx == -1) return next();
+      var name = file.substring(0, idx);
+      if (!name) return next();
+      console.log(name);
+      var wp = wpetc.getByUid(name)
+      console.log(">", file, name, wp)
+      var utt_file = utts_dir + '/' + file;
+      var utt_hmm_file = utts_hmm_dir + '/' + file;
+      var an_utt_file = fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file;
+      getTg2(an_utt_file, function (err, tg) {
+        var out = out_dir + "/" + wp.script + "/" + wp.line + "-b.TextGrid";
+        console.log(out)
+        new Stream(out, function (o) {
+          o.writeln(tg);
+          o.end();
+          next();
+        });
+      });
+    }, function () {
+      console.log("complete!");
+    });
+  });
+}
+
+function getTg2(utt, next) {
+  fest.wordFeaturesFromUtt(utt, function (err, w) {
+    if (err) return next(err);
+    var segs = fest.getSegments(w);
+    var arpabet = [];
+    segs.forEach(function (seg) {
+      arpabet.push([seg.begin, seg.end, seg.ph.toUpperCase()]);
+    });
+    var tg = praat.TextGrid(segs[segs.length - 1].end,
+      ['ARPABET'],
+      {ARPABET: arpabet});
+    next(null, tg);
+  });
+}
+
 function getFinalScriptFromGoo(complete) {
   var goo = require('./goo-sheet');
   var all = {};
@@ -842,12 +890,14 @@ else if (process.argv[2] == 'final3')
   getFinalScriptFromGoo()
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
-else if (process.argv[2] == 'fff')
-  createLabels3(which[0]);
-else if (process.argv[2] == 'ttu')
-  createRelationsFromTextGrid(which[0]);
+//else if (process.argv[2] == 'fff')
+//  createLabels3(which[0]);
+//else if (process.argv[2] == 'ttu')
+//  createRelationsFromTextGrid(which[0]);
 else if (process.argv[2] == 'relations')
   createRelations(which);
+else if (process.argv[2] == 'boundaries')
+  createBoundaryTG(process.argv[3], process.argv[4], process.argv[5]);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)

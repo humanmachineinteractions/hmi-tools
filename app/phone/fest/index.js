@@ -59,6 +59,23 @@ function get_words(w) {
 }
 
 
+function get_segs(w) {
+  var ss = w.split("\n");
+  var segs = [];
+  ss.forEach(function (s) {
+    s = s.split(" ");
+    var phone_begin = Number(s[0]);
+    var phone_end = Number(s[1]);
+    var we = Number(s[2]);
+    var t = s[3];
+    if (phone_begin != 0 && phone_end != 0 && we == 0) {
+      segs.push({ph: t, begin: phone_begin, end: phone_end});
+    }
+  });
+  return segs;
+}
+
+
 function fest_word_feats_from_text(t, complete) {
   exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
@@ -113,5 +130,6 @@ exports.wordFeaturesFromText = fest_word_feats_from_text;
 exports.wordFeaturesFromUtt = fest_word_feats_from_utt;
 exports.dumpFromUtterance = fest_feats_from_utt;
 exports.getWords = get_words;
+exports.getSegments = get_segs;
 exports.execFestvox = execFestvox;
 exports.execFestvoxStream = execFestvoxStream;
