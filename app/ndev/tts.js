@@ -20,9 +20,10 @@ exports.render = function (text, output, voice, complete) {
     method: 'POST',
     body: text
   }).pipe(file).on('close', function () {
-      complete();
+    complete();
   }).on('error', function (e) {
-      complete(e)
+    console.log(e);
+    complete(e)
   });
 
 }

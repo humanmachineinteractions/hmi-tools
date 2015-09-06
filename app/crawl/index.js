@@ -175,11 +175,12 @@ function render_tts_wav(cid, voice, complete) {
     console.log("RENDER " + wav_file);
     tts.render(text, cms.config.resourcePath + wav_file, voice, function (err) {
       if (err) return complete(err);
-      content.audio = {Zoe: true};
+      content.audio = {Zoe: true}; // TODO move to convert_to_mp3
       content.save(function (err, c2) {
         if (err) return complete(err);
         var d = voice + '-' + cid + '.mp3';
         jobs.create('convert_to_mp3', {
+          // TODO cid: cid,
           source: wav_file,
           dest: d
         }).save(function (err) {
@@ -192,7 +193,7 @@ function render_tts_wav(cid, voice, complete) {
   });
 }
 
-function convert_to_mp3(job, source, dest, done) {
+function convert_to_mp3(job, source, dest, done) { // TODO cid arg
   console.log('converting to mp3', source);
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
