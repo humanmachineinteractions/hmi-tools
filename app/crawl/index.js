@@ -58,9 +58,9 @@ function check_feeds() {
   });
   //
   var r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 3600}, extensions: ['.wav']});
-  console.log("find-remove",cms.config.resourcePath,r);
-  r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 86400*5}, extensions: ['.mp3']});
-  console.log("find-remove",cms.config.resourcePath,r);
+  console.log("find-remove", cms.config.resourcePath, r);
+  r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 86400 * 21}, extensions: ['.mp3']});
+  console.log("find-remove", cms.config.resourcePath, r);
 }
 
 function get_feed_content(_id, url, source, done) {
@@ -172,36 +172,39 @@ function render_tts_wav(cid, voice, complete) {
     if (!content) return complete(new Error('no content'));
     var text = content.title + ' from ' + content.source + '. ' + content.text;
     var wav_file = voice + '-' + cid + '.wav';
-    console.log("RENDER " + wav_file);
+    console.log("synthesize " + wav_file);
     tts.render(text, cms.config.resourcePath + wav_file, voice, function (err) {
       if (err) return complete(err);
-      content.audio = {Zoe: true}; // TODO move to convert_to_mp3
-      content.save(function (err, c2) {
+      var d = voice + '-' + cid + '.mp3';
+      jobs.create('convert_to_mp3', {
+        cid: cid,
+        source: wav_file,
+        dest: d
+      }).save(function (err) {
         if (err) return complete(err);
-        var d = voice + '-' + cid + '.mp3';
-        jobs.create('convert_to_mp3', {
-          // TODO cid: cid,
-          source: wav_file,
-          dest: d
-        }).save(function (err) {
-          if (err) return complete(err);
-          console.log('**SAVE', d);
-          return complete();
-        });
+        console.log('**SAVE', d);
+        return complete();
       });
     });
   });
 }
 
-function convert_to_mp3(job, source, dest, done) { // TODO cid arg
-  console.log('converting to mp3', source);
+function convert_to_mp3(job, cid, source, dest, done) {
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
     .withAudioCodec('libmp3lame') // libmp3lame // libfdk_aac
     .withAudioBitrate('64k') // :-) mp3 196k // 64k
     .withAudioChannels(1) // :-o
     .on('end', function () {
-      done();
+      Content.findOne({_id: cid}).exec(function (err, content) {
+        if (err) return done(err);
+        console.log('converted to mp3', source);
+        content.audio = {Zoe: true};
+        content.save(function (err, c2) {
+          if (err) return complete(err);
+          done();
+        });
+      });
     })
     .on('error', function (err) {
       console.log('encode error: ' + err.message);
@@ -233,7 +236,7 @@ jobs.process('render_tts_wav', 2, function (job, done) {
 });
 
 jobs.process('convert_to_mp3', 2, function (job, done) {
-  convert_to_mp3(job, job.data.source, job.data.dest, done);
+  convert_to_mp3(job, job.data.cid, job.data.source, job.data.dest, done);
 });
 
 jobs.on('job complete', function (id, result) {
