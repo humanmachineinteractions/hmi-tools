@@ -375,7 +375,6 @@ function fest_trans_from_text(t, complete) {
   })
 }
 
-
 function processFinalRowHFE(title, tt, row, c, next) {
   if (FINAL_LENGTHS[title] < c) {
     process.nextTick(next);
@@ -392,7 +391,6 @@ function processFinalRowHFE(title, tt, row, c, next) {
     process.nextTick(next);
   });
 }
-
 
 function lineCount() {
   var scriptPaths = [];
@@ -560,7 +558,9 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
 var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 var build_root = "/home/vagrant/builds";
 var final_root = "/home/vagrant/app/client/jibo/data/";
-
+var jibo_repo = "/home/vagrant/jibo-repo";
+var osx_root = "/Users/posttool/Documents/github/hmi-www/app/client/jibo/data/hmi/";
+var osx_jibo_root = "/Users/posttool/Documents/github/jibo/";
 
 function get_wp_etc() {
   var work_package_line_number_to_uid = JSON.parse(fs.readFileSync(__dirname + "/pdf/map.json"));
@@ -580,6 +580,12 @@ function get_wp_etc() {
     }
   }
   return {
+    getScripts: function () {
+      var s = [];
+      for (var p in work_package_line_number_to_uid)
+        s.push(p);
+      return s;
+    },
     getScript: function (script) {
       return work_package_line_number_to_uid[script];
     },
@@ -703,6 +709,11 @@ function getTg(utt, next) {
       //aggregate into regions and write praat file
       var text = [], arpabet = [], ipa = [];
       words.forEach(function (word) {
+        console.log(word)
+        if (!word.phs) {
+          console.log("PROBLEM WITH " + utt);
+          return;
+        }
         text.push([word.begin, word.end, word.word]);
         arpabet.push([word.begin, word.end, word.phs.toUpperCase()]);
         ipa.push([word.begin, word.end, translator.translate(word.phs, {from: 'FESTVOX', to: 'IPA'})]);
@@ -724,23 +735,29 @@ function createRelations(which) {
     exec("mkdir " + final_root + "/jibo_db/wrd; mkdir " + final_root + "/jibo_db/lab; mkdir " + final_root + "/jibo_db/wav", function () {
       new Stream(final_root + "/jibo_db/txt.done.data", function (txtdone) {
         utils.forEach(which, function (dir, next) {
-          fs.readdir(final_root + "/hmi/" + dir, function (err, tgfiles) {
+          fs.readdir(jibo_repo + "/" + dir, function (err, tgfiles) {
             utils.forEach(tgfiles, function (tgfile, next) {
-              if (tgfile.indexOf(".TextGrid") != -1) {
-                console.log(dir, tgfile);
-                var data = praat.readTextGrid(final_root + "/hmi/" + dir + "/" + tgfile, "utf16");
+              if (tgfile.match(/\d{4}\.TextGrid/)) {
+                var data = praat.readTextGrid(jibo_repo + "/" + dir + "/" + tgfile, "utf16");
                 var words = data["ARPABET"];
                 var ortho = data["WORD"];
-                //console.log(data);
+
                 if (words == null) {
-                  console.log("CANT READ FILE", data._txt);
+                  console.log("CANT READ FILE", jibo_repo + "/" + dir + "/" + tgfile);//data._txt
+                  return next();
+                }
+                var invalid = validateSegs(words);
+                if (invalid.length != 0) {
+                  console.log("Invalid phones", dir, tgfile, invalid);
                   return next();
                 }
                 var script = dir;
                 var filename = tgfile;
                 var line = filename.substring(0, 4);
                 var uid = wpetc.getUid(script, line);
-                txtdone.writeln("( " + uid + " \"" + script_by_uid[uid][1] + "\" )");
+                var ortho = script_by_uid[uid][1];
+                ortho = ortho.replace(/\(|\)|"/g, '');
+                txtdone.writeln("( " + uid + " \"" + ortho + "\" )");
                 fs.writeFileSync(final_root + "/jibo_db/wrd/" + uid + ".wrd", createWordRelation(words, ortho), 'utf8');
                 fs.writeFileSync(final_root + "/jibo_db/lab/" + uid + ".lab", createSegRelation(words), 'utf8');
                 next();
@@ -755,9 +772,23 @@ function createRelations(which) {
       });
     });
   });
-
 }
 
+function validateSegs(words) {
+  var invalid = [];
+  for (var i = 0; i < words.length; i++) {
+    var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
+    var ss = txt.split(" ");
+    for (var j = 0; j < ss.length; j++) {
+      var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
+      if (sj == "") sj = "pau";
+      if (!translator.isValid(sj, "FESTVOX")) {
+        invalid.push(sj);
+      }
+    }
+  }
+  return invalid;
+}
 
 function createWordRelation(phs, ortho) {
   var s = "#\n";
@@ -782,7 +813,7 @@ function createSegRelation(words) {
       if (translator.isValid(sj, "FESTVOX")) {
         t += ff.toFixed(6) + " 121 " + sj + " \n";
       } else {
-        console.log("???? not a valid phone " + sj);
+        console.log("!!!!!!!!!!!!!???? not a valid phone " + sj);
       }
     }
   }
@@ -791,10 +822,9 @@ function createSegRelation(words) {
   return t;
 }
 
-
 function createBoundaryTG(utts_dir, utts_hmm_dir, out_dir) {
-  console.log("!", utts_dir)
-  console.log("!", utts_hmm_dir)
+  console.log("!", utts_dir);
+  console.log("!", utts_hmm_dir);
   var wpetc = get_wp_etc();
   fs.readdir(utts_dir, function (err, files) {
     utils.forEach(files, function (file, next) {
@@ -803,14 +833,13 @@ function createBoundaryTG(utts_dir, utts_hmm_dir, out_dir) {
       var name = file.substring(0, idx);
       if (!name) return next();
       console.log(name);
-      var wp = wpetc.getByUid(name)
-      console.log(">", file, name, wp)
+      var wp = wpetc.getByUid(name);
+      console.log(">", file, name, wp);
       var utt_file = utts_dir + '/' + file;
       var utt_hmm_file = utts_hmm_dir + '/' + file;
       var an_utt_file = fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file;
       getTg2(an_utt_file, function (err, tg) {
         var out = out_dir + "/" + wp.script + "/" + wp.line + "-b.TextGrid";
-        console.log(out)
         new Stream(out, function (o) {
           o.writeln(tg);
           o.end();
@@ -827,14 +856,36 @@ function getTg2(utt, next) {
   fest.wordFeaturesFromUtt(utt, function (err, w) {
     if (err) return next(err);
     var segs = fest.getSegments(w);
+    var words = fest.getWords(w);
     var arpabet = [];
     segs.forEach(function (seg) {
       arpabet.push([seg.begin, seg.end, seg.ph.toUpperCase()]);
     });
+    var text = [];
+    words.forEach(function (word) {
+      text.push([word.begin, word.end, word.word]);
+    });
     var tg = praat.TextGrid(segs[segs.length - 1].end,
-      ['ARPABET'],
-      {ARPABET: arpabet});
+      ['ARPABET', 'WORD'],
+      {ARPABET: arpabet, WORD: text});
     next(null, tg);
+  });
+}
+
+function copyBoundaryTgToRepo(which) {
+  var hund = [];
+  for (var i = 1; i < 101; i++) hund.push(i);
+  utils.forEach(which, function (dir, next) {
+    utils.forEach(hund, function (h, next) {
+      var h0 = '0000000' + h;
+      var s0 = dir + '/' + h0.substring(h0.length - 4);
+      var b = s0 + "-b.TextGrid";
+      exec("cp " + osx_root + b + " " + osx_jibo_root + b, function () {
+        console.log(b);
+        next()
+      })
+    }, next)
+  }, function () {
   });
 }
 
@@ -860,13 +911,43 @@ function getFinalScriptFromGoo(complete) {
     });
 }
 
+function convertAudio(rate, dest_dir) {
+  var wpetc = get_wp_etc();
+  var scripts = wpetc.getScripts();
+  utils.forEach(scripts, function (script, next) {
+    var no2uid = wpetc.getScript(script)
+    var keys = [];
+    for (var p in no2uid)
+      keys.push(p);
+    utils.forEach(keys, function (p, next) {
+      var uid = no2uid[p];
+      var w = audio_root + "/" + script + "/" + p + ".wav";
+      if (!fs.existsSync(w)) {
+        process.nextTick(next);
+        return;
+      }
+      var dest_wav = dest_dir + "/" + uid + ".wav";
+      if (fs.existsSync(dest_wav)) {
+        process.nextTick(next);
+        return;
+      }
+      var sil = __dirname + "/slug_300ms.wav";
+      var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r ' + rate + ' -b 16 ' + dest_wav;
+      exec(cmd, function (err, out) {
+        console.log(cmd, err, out);
+        process.nextTick(next);
+      });
+    }, next);
+  }, function () {
+  });
+}
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];
   for (var i = 3; i < process.argv.length; i++)
     which.push(process.argv[i]);
 }
-
 
 if (process.argv[2] == 'script')
   createScripts(which);
@@ -890,14 +971,29 @@ else if (process.argv[2] == 'final3')
   getFinalScriptFromGoo()
 else if (process.argv[2] == 'labels')
   createMonoLabels(which);
-//else if (process.argv[2] == 'fff')
-//  createLabels3(which[0]);
+else if (process.argv[2] == 'fff')
+  createLabels3(which[0]);
+else if (process.argv[2] == 'ffg')
+  getTg(which[0], function () {
+  });
 //else if (process.argv[2] == 'ttu')
 //  createRelationsFromTextGrid(which[0]);
-else if (process.argv[2] == 'relations')
+else if (process.argv[2] == 'relations') {
+  var s = Number(process.argv[3]);
+  which = [];
+  for (var i = 100; i <= s; i += 100) {
+    var lc = "00000000" + i;
+    lc = lc.substring(lc.length - 5);
+    which.push("script" + lc);
+  }
   createRelations(which);
+}
 else if (process.argv[2] == 'boundaries')
   createBoundaryTG(process.argv[3], process.argv[4], process.argv[5]);
+else if (process.argv[2] == 'copyBoundaries')
+  copyBoundaryTgToRepo(which);
+else if (process.argv[2] == 'convertAudio')
+  convertAudio(process.argv[3], process.argv[4]);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)
