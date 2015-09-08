@@ -20,10 +20,11 @@ var RENDER_TTS_WAV = true;
 
 var cms = new current.Cms(reader);
 var Content = cms.meta.model('ReaderContent');
+//console.log(cms.meta.schemas);
+//cms.meta.schemas.ReaderContent.index({url: 1, host: 1}, {unique: true});
 var Feed = cms.meta.model('ReaderFeed');
 var Channel = cms.meta.model('Channel');
 var Resource = cms.meta.model('Resource');
-
 var _feeds = {}; // mapped by id
 var _channels = {};
 
@@ -113,7 +114,7 @@ function get_content(origlink, complete) {
 function save_one(feed_id, source, origlink, complete) {
   if (origlink.indexOf("times.com") != -1)
     return complete();
-  console.log("REQUEST " + origlink)
+  console.log("requesting " + origlink)
   request(origlink, function (error, response, body) {
     if (error || response.statusCode != 200) {
       console.log("COULDNT GET " + origlink);
@@ -167,6 +168,7 @@ function save_one(feed_id, source, origlink, complete) {
 
 
 function render_tts_wav(cid, voice, complete) {
+  console.log('rendering wav '+cid);
   Content.findOne({_id: cid}).exec(function (err, content) {
     if (err) return complete(err);
     if (!content) return complete(new Error('no content'));
@@ -190,6 +192,7 @@ function render_tts_wav(cid, voice, complete) {
 }
 
 function convert_to_mp3(job, cid, source, dest, done) {
+  console.log('converting to mp3 '+cid)
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
     .withAudioCodec('libmp3lame') // libmp3lame // libfdk_aac
@@ -197,11 +200,12 @@ function convert_to_mp3(job, cid, source, dest, done) {
     .withAudioChannels(1) // :-o
     .on('end', function () {
       Content.findOne({_id: cid}).exec(function (err, content) {
+        console.log(cid, err, content);
         if (err) return done(err);
         console.log('converted to mp3', source);
         content.audio = {Zoe: true};
         content.save(function (err, c2) {
-          if (err) return complete(err);
+          if (err) return done(err);
           done();
         });
       });
@@ -227,7 +231,7 @@ jobs.process('get_feed', 8, function (job, done) {
   get_feed_content(job.data._id, job.data.url, job.data.source, done);
 });
 
-jobs.process('save_content', 8, function (job, done) {
+jobs.process('save_content', 2, function(job, done){
   save_one(job.data.feed_id, job.data.source, job.data.url, done);
 });
 
