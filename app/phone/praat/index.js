@@ -16,10 +16,17 @@ function praat_tg(len, sections, data) {
       s += '        xmax = ' + len + '\n';
       s += '        intervals: size = ' + data[section].length + '\n';
       data[section].forEach(function (line, li) {
+        if (line.text && line.xmin && line.xmax) {
         s += '        intervals [' + (li + 1) + ']:\n';
-        s += '            xmin = ' + line[0] + ' \n';
+        s += '            xmin = ' + line.xmin + '\n';
+        s += '            xmax = ' + line.xmax + '\n';
+        s += '            text = ' + line.text + '\n';
+        } else {
+        s += '        intervals [' + (li + 1) + ']:\n';
+        s += '            xmin = ' + line[0] + '\n';
         s += '            xmax = ' + line[1] + '\n';
-        s += '            text = "' + line[2].trim() + '" \n';
+        s += '            text = "' + line[2].trim() + '"\n';
+          }
       });
     }
   });

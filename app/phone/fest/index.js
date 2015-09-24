@@ -75,6 +75,48 @@ function get_segs(w) {
   return segs;
 }
 
+function get_int_events(w) {
+  var ss = w.split("\n");
+  var int_e = [];
+  var reading = false;
+  ss.forEach(function (s) {
+    if (reading && s.indexOf("#") == 0) {
+      reading = false;
+      return;
+    }
+    if (s.indexOf("# IntEvents") == 0) {
+      reading = true;
+      return;
+    }
+    if (!reading)
+      return;
+    s = s.split(" ");
+    int_e.push({end: Number(s[0]), event: s[1]});
+  });
+  return int_e;
+}
+
+function get_phrase_events(w) {
+  var ss = w.split("\n");
+  var ph_e = [];
+  var reading = false;
+  ss.forEach(function (s) {
+    if (reading && s.indexOf("#") == 0) {
+      reading = false;
+      return;
+    }
+    if (s.indexOf("# Phrase") == 0) {
+      reading = true;
+      return;
+    }
+    if (!reading)
+      return;
+    s = s.split(" ");
+    ph_e.push({end: Number(s[0]), phrase: s[1]});
+  });
+  return ph_e;
+}
+
 
 function fest_word_feats_from_text(t, complete) {
   exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
@@ -131,5 +173,7 @@ exports.wordFeaturesFromUtt = fest_word_feats_from_utt;
 exports.dumpFromUtterance = fest_feats_from_utt;
 exports.getWords = get_words;
 exports.getSegments = get_segs;
+exports.getIntEvents = get_int_events;
+exports.getPhraseEvents = get_phrase_events;
 exports.execFestvox = execFestvox;
 exports.execFestvoxStream = execFestvoxStream;

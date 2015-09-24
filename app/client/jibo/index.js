@@ -4,11 +4,11 @@ var transcribe = require('../../phone/transcribe').transcribeText;
 var translator = require('../../phone/translate');
 var greedy = require('../../phone/greedy').greedy;
 var stats = require('../../phone/stats');
+var fest = require('../../phone/fest');
+var praat = require("../../phone/praat");
 var Stream = require('../../utils/filestream').Stream;
 var utils = require('../../utils');
 var corpus = require('../../corpus');
-var fest = require('../../phone/fest');
-var praat = require("../../phone/praat");
 var BP = __dirname + '/data';
 var title = null;
 var stream;
@@ -553,7 +553,7 @@ function featuresToXlabelToPraat(dir, outdir, complete) {
   });
 }
 
-// the following build a clustergen project, extract phonetic info, export textgrids, then convert from textgrid to xlabel
+// the following builds a clustergen project, extract phonetic info, export textgrids, then convert from textgrid to xlabel
 
 var audio_root = "/home/vagrant/jibo-audio/audio/audio_source_edits";
 var build_root = "/home/vagrant/builds";
@@ -826,20 +826,17 @@ function createBoundaryTG(utts_dir, utts_hmm_dir, out_dir) {
   console.log("!", utts_dir);
   console.log("!", utts_hmm_dir);
   var wpetc = get_wp_etc();
-  fs.readdir(utts_dir, function (err, files) {
+  fs.readdir(utts_hmm_dir, function (err, files) {
     utils.forEach(files, function (file, next) {
       var idx = file.lastIndexOf(".");
       if (idx == -1) return next();
       var name = file.substring(0, idx);
       if (!name) return next();
-      console.log(name);
       var wp = wpetc.getByUid(name);
-      console.log(">", file, name, wp);
-      var utt_file = utts_dir + '/' + file;
       var utt_hmm_file = utts_hmm_dir + '/' + file;
-      var an_utt_file = fs.existsSync(utt_hmm_file) ? utt_hmm_file : utt_file;
-      getTg2(an_utt_file, function (err, tg) {
+      getTg2(utt_hmm_file, function (err, tg) {
         var out = out_dir + "/" + wp.script + "/" + wp.line + "-b.TextGrid";
+        console.log(">", out);
         new Stream(out, function (o) {
           o.writeln(tg);
           o.end();
@@ -942,6 +939,70 @@ function convertAudio(rate, dest_dir) {
   });
 }
 
+function createProsodicTgs(input, utts_hmm_dir, out_dir) {
+  var wp = get_wp_etc();
+  var s = fs.readFileSync(input).toString().split('\n');
+  utils.forEach(s, function (t, next) {
+    var c = t.split('\t');
+    var x = wp.getByUid(c[0]);
+    try {
+      var data = praat.readTextGrid(jibo_repo + "/" + x.script + "/" + x.line + '.TextGrid', "utf16");
+      var words = data["ARPABET"];
+      var ortho = data["WORD"];
+      if (!words) {
+        throw new Error();
+      } else {
+        //console.log("!" + words);
+        var very_end = words[words.length - 1].xmax;
+        var utt_hmm_file = utts_hmm_dir + '/' + c[0] + ".utt";
+        fest.dumpFromUtterance(utt_hmm_file, function (err, w) {
+          //console.log(w);
+          var inte = fest.getIntEvents(w);
+          var int_tier = [];
+          for (var i = 0; i < inte.length; i++) {
+            int_tier.push([inte[i].end, (i == inte.length - 1) ? very_end : inte[i + 1].end, inte[i].event]);
+          }
+          console.log(int_tier)
+          var phe = fest.getPhraseEvents(w);
+          var phr_tier = [];
+          for (var i = 0; i < phe.length - 1; i++) {
+            phr_tier.push([phe[i].end, (i == phe.length - 2) ? very_end : phe[i + 1].end, phe[i].phrase ? phe[i].phrase : "?"]);
+          }
+          var tg = praat.TextGrid(very_end,
+            ['ARPABET', 'WORD', 'INT', 'PHRASE'],
+            {ARPABET: words, WORD: ortho, INT: int_tier, PHRASE: phr_tier});
+          var out = out_dir + "/" + c[0] + ".TextGrid";
+          new Stream(out, function (o) {
+            o.writeln(tg);
+            o.end();
+            var w = audio_root + "/" + x.script + "/" + x.line + ".wav";
+            console.log("cp " + w + " " + out_dir + "/" + c[0] + ".wav")
+        var sil = __dirname + "/slug_300ms.wav";
+        var cmd = 'sox ' + sil + ' ' + w + ' ' + sil + ' -r 16000 -b 16 ' + out_dir + "/" + c[0] + ".wav";
+        exec(cmd, function (err, out) {
+              next();
+            });
+          });
+        });
+      }
+    } catch (e) {
+      console.log("NO " + c[0] + " " + x.script + "/" + x.line);
+      next();
+    }
+  });
+}
+
+function scriptTo(n) {
+  var s = Number(n);
+  var which = [];
+  for (var i = 100; i <= s; i += 100) {
+    var lc = "00000000" + i;
+    lc = lc.substring(lc.length - 5);
+    which.push("script" + lc);
+  }
+  return which;
+}
+
 var which = null;
 if (process.argv.length > 3) {
   which = [];
@@ -979,21 +1040,16 @@ else if (process.argv[2] == 'ffg')
 //else if (process.argv[2] == 'ttu')
 //  createRelationsFromTextGrid(which[0]);
 else if (process.argv[2] == 'relations') {
-  var s = Number(process.argv[3]);
-  which = [];
-  for (var i = 100; i <= s; i += 100) {
-    var lc = "00000000" + i;
-    lc = lc.substring(lc.length - 5);
-    which.push("script" + lc);
-  }
-  createRelations(which);
+  createRelations(scriptTo(process.argv[3]));
 }
 else if (process.argv[2] == 'boundaries')
   createBoundaryTG(process.argv[3], process.argv[4], process.argv[5]);
 else if (process.argv[2] == 'copyBoundaries')
-  copyBoundaryTgToRepo(which);
+  copyBoundaryTgToRepo(scriptTo(process.argv[3]));
 else if (process.argv[2] == 'convertAudio')
   convertAudio(process.argv[3], process.argv[4]);
+else if (process.argv[2] == 'prosodic')
+  createProsodicTgs(process.argv[3], process.argv[4], process.argv[5]);
 else if (process.argv[2] == 'feats')
   featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
     console.log(err, c)
