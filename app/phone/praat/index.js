@@ -8,26 +8,47 @@ function praat_tg(len, sections, data) {
   s += 'size = ' + sections.length + ' \n';
   s += 'item []: \n';
   sections.forEach(function (section, si) {
-    if (data[section]) {
-      s += '    item [' + (si + 1) + ']:\n';
-      s += '        class = "IntervalTier" \n';
-      s += '        name = "' + section + '" \n';
-      s += '        xmin = 0 \n';
-      s += '        xmax = ' + len + '\n';
-      s += '        intervals: size = ' + data[section].length + '\n';
-      data[section].forEach(function (line, li) {
-        if (line.text && line.xmin && line.xmax) {
-        s += '        intervals [' + (li + 1) + ']:\n';
-        s += '            xmin = ' + line.xmin + '\n';
-        s += '            xmax = ' + line.xmax + '\n';
-        s += '            text = ' + line.text + '\n';
-        } else {
-        s += '        intervals [' + (li + 1) + ']:\n';
-        s += '            xmin = ' + line[0] + '\n';
-        s += '            xmax = ' + line[1] + '\n';
-        s += '            text = "' + line[2].trim() + '"\n';
+    var sdata = data[section];
+    if (sdata) {
+      var slen = sdata.length
+      if (slen == 0) {
+        console.log("TextGrid empty section:", section);
+        return;
+      }
+      var sdatalen = sdata[0].length;
+      if (sdatalen == 2) {
+        s += '    item [' + (si + 1) + ']:\n';
+        s += '        class = "TextTier" \n';
+        s += '        name = "' + section + '" \n';
+        s += '        xmin = 0 \n';
+        s += '        xmax = ' + len + '\n';
+        s += '        points: size = ' + sdata.length + '\n';
+        sdata.forEach(function (line, li) {
+          s += '        points [' + (li + 1) + ']:\n';
+          s += '            number = ' + line[0] + '\n';
+          s += '            mark = "' + line[1].trim() + '"\n';
+        });
+      } else if (sdatalen == 3 || sdata[0].text) {
+        s += '    item [' + (si + 1) + ']:\n';
+        s += '        class = "IntervalTier" \n';
+        s += '        name = "' + section + '" \n';
+        s += '        xmin = 0 \n';
+        s += '        xmax = ' + len + '\n';
+        s += '        intervals: size = ' + sdata.length + '\n';
+        sdata.forEach(function (line, li) {
+          if (line.text && line.xmin && line.xmax) {
+            s += '        intervals [' + (li + 1) + ']:\n';
+            s += '            xmin = ' + line.xmin + '\n';
+            s += '            xmax = ' + line.xmax + '\n';
+            s += '            text = ' + line.text + '\n';
+          } else {
+            s += '        intervals [' + (li + 1) + ']:\n';
+            s += '            xmin = ' + line[0] + '\n';
+            s += '            xmax = ' + line[1] + '\n';
+            s += '            text = "' + line[2].trim() + '"\n';
           }
-      });
+        });
+      }
     }
   });
   return s;

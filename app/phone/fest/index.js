@@ -62,7 +62,7 @@ function get_words(w) {
 function get_segs(w) {
   var ss = w.split("\n");
   var segs = [];
-  ss.forEach(function (s) {
+  ss.forEach(function (s, i) {
     s = s.split(" ");
     var phone_begin = Number(s[0]);
     var phone_end = Number(s[1]);
@@ -90,8 +90,8 @@ function get_int_events(w) {
     }
     if (!reading)
       return;
-    s = s.split(" ");
-    int_e.push({end: Number(s[0]), event: s[1]});
+    var ss = s.split(" ");
+    int_e.push({end: Number(ss[0]), event: ss[1]});
   });
   return int_e;
 }
@@ -111,8 +111,8 @@ function get_phrase_events(w) {
     }
     if (!reading)
       return;
-    s = s.split(" ");
-    ph_e.push({end: Number(s[0]), phrase: s[1]});
+    var ss = s.split(" ");
+    ph_e.push({end: Number(ss[0]), phrase: ss[1]});
   });
   return ph_e;
 }
