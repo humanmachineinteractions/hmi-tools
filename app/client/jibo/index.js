@@ -738,13 +738,17 @@ function createRelations(which) {
           fs.readdir(jibo_repo + "/" + dir, function (err, tgfiles) {
             utils.forEach(tgfiles, function (tgfile, next) {
               if (tgfile.match(/\d{4}\.TextGrid/)) {
+                console.log("Processing " + dir + "/" + tgfile);
                 var data = praat.readTextGrid(jibo_repo + "/" + dir + "/" + tgfile, "utf16");
                 var words = data["ARPABET"];
-                var ortho = data["WORD"];
-
                 if (words == null) {
-                  console.log("CANT READ FILE", jibo_repo + "/" + dir + "/" + tgfile);//data._txt
-                  return next();
+                  var data8 = praat.readTextGrid(jibo_repo + "/" + dir + "/" + tgfile, "utf8"); // try utf8
+                  words = data8["ARPABET"];
+                  if (words == null) {
+                    console.log("CANT READ FILE", jibo_repo + "/" + dir + "/" + tgfile);//dont know what to do now
+                    console.log(data);
+                    return next();
+                  }
                 }
                 var invalid = validateSegs(words);
                 if (invalid.length != 0) {
@@ -767,6 +771,7 @@ function createRelations(which) {
             }, next);
           });
         }, function () {
+          txtdone.end();
           console.log("complete")
         });
       });
@@ -917,6 +922,7 @@ function getFinalScriptFromGoo(complete) {
 }
 
 function convertAudio(rate, dest_dir) {
+  console.log("convertAudio")
   var wpetc = get_wp_etc();
   var scripts = wpetc.getScripts();
   utils.forEach(scripts, function (script, next) {
@@ -1029,6 +1035,48 @@ function createProsodicTgs(input, utts_hmm_dir, out_dir) {
   });
 }
 
+
+function copyProsodicTgs(in_dir, repo_dir) {
+  fs.readdir(in_dir, function (err, files) {
+    utils.forEach(files, function (file, next) {
+      if (fs.existsSync(repo_dir+'/'+file)) {
+          console.log('skipping '+file);
+       next();
+      } else {
+        exec('cp '+in_dir+'/'+file+' '+repo_dir+'/'+file, function(){
+         console.log(repo_dir+'/'+file);
+         next();
+        });
+      }
+    });
+  });
+}
+
+function createProsodicRelations(tg_dir, out_dir) {
+  fs.readdir(tg_dir, function (err, files) {
+    utils.forEach(files, function (file, next) {
+      if (!file.match(/\d{4}\.TextGrid/)) {
+        next();
+      } else {
+        var data = praat.readTextGrid(tg_dir + "/" + file, "utf8");
+        console.log(data);
+        var fname = file.substring(0, file.length - 9);
+        new Stream(out_dir + '/' + fname + '.int', function (out) {
+          out.writeln("#");
+          data['INT'].forEach(function (int_event) {
+            var time = int_event['time'] ? int_event['time'] : int_event['number'];
+            var tobi = int_event['mark'].replace(/"/g, '');
+            tobi = tobi ? tobi : "NONE";
+            out.writeln(time + "  " + tobi);
+          });
+          out.end();
+          next();
+        })
+      }
+    });
+  });
+}
+
 function scriptTo(n) {
   var s = Number(n);
   var which = [];
@@ -1084,10 +1132,18 @@ else if (process.argv[2] == 'convertAudio')
   convertAudio(process.argv[3], process.argv[4]);
 else if (process.argv[2] == 'prosodic')
   createProsodicTgs(process.argv[3], process.argv[4], process.argv[5]);
+else if (process.argv[2] == 'copyProsodic')
+  copyProsodicTgs(process.argv[3], process.argv[4]);
+else if (process.argv[2] == 'prosodicRelations')
+  createProsodicRelations(process.argv[3], process.argv[4]);
 else if (process.argv[2] == 'convert') {
   var wp = get_wp_etc();
   var uid = wp.getUid(process.argv[3], process.argv[4]);//convert script00100 0004
   console.log(">", uid);
+} else if (process.argv[2] == 'xxx') {
+  var data = praat.readTextGrid(jibo_repo + "/script09200/0089.TextGrid", "utf8");
+  var words = data["ARPABET"];
+  console.log(words);
 }
 //else if (process.argv[2] == 'feats')
 //  featuresToXlabelToPraat('/home/vagrant/app/client/jibo/utts/', '/home/vagrant/app/client/jibo/tg/', function (err, c) {
