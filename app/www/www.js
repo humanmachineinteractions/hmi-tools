@@ -16,8 +16,6 @@ if (useCluster && cluster.isMaster) {
 
 } else {
 
-
-
   express()
     .use(express.vhost('hmi.ai', require('./public').app))
     .use(express.vhost('www.hmi.ai', require('./public').app))

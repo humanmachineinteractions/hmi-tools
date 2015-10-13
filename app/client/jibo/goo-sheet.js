@@ -1,6 +1,6 @@
 var utils = require('../../utils');
+var Stream = require('../../utils/filestream').Stream;
 var GoogleSpreadsheet = require("google-spreadsheet");
-var Stream = require('../../krawl/filestream').Stream;
 
 function processSheet(wid, sheetf, rowf, complete) {
   var C = 0;

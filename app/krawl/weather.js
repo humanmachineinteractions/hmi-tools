@@ -1,5 +1,5 @@
 var request = require('request');
-var Stream = require('./filestream').Stream;
+var Stream = require('../utils/filestream').Stream;
 
 function discussion_for_state(state, out) {
   var url = "http://www.nws.noaa.gov/view/prodsByState.php?prodtype=discussion&state=";

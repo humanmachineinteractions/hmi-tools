@@ -1,3 +1,2 @@
 https://github.com/AdolfVonKleist/Phonetisaurus
 # stanford corenlp
-# do we want https://github.com/katakombi/rnnlid

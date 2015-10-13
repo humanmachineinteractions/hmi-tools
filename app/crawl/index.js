@@ -4,9 +4,9 @@ var extractor = require('unfluff');
 var url = require('url');
 var moment = require('moment');
 var _ = require('lodash');
-var mongoose = require('mongoose');
 var later = require('later');
 var ffmpeg = require('fluent-ffmpeg');
+var findRemoveSync = require('find-remove');
 var tts = require('../ndev/tts');
 var current = require('../../../currentcms');
 var reader = {
@@ -15,12 +15,16 @@ var reader = {
   workflow: null,
   permissions: {}
 };
+
+var RENDER_TTS_WAV = true;
+
 var cms = new current.Cms(reader);
 var Content = cms.meta.model('ReaderContent');
+//console.log(cms.meta.schemas);
+//cms.meta.schemas.ReaderContent.index({url: 1, host: 1}, {unique: true});
 var Feed = cms.meta.model('ReaderFeed');
 var Channel = cms.meta.model('Channel');
 var Resource = cms.meta.model('Resource');
-
 var _feeds = {}; // mapped by id
 var _channels = {};
 
@@ -53,6 +57,11 @@ function check_feeds() {
     }
     _channels = _.indexBy(channels, '_id');
   });
+  //
+  var r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 3600}, extensions: ['.wav']});
+  console.log("find-remove", cms.config.resourcePath, r);
+  r = findRemoveSync(cms.config.resourcePath, {age: {seconds: 86400 * 21}, extensions: ['.mp3']});
+  console.log("find-remove", cms.config.resourcePath, r);
 }
 
 function get_feed_content(_id, url, source, done) {
@@ -71,13 +80,22 @@ function get_feed_content(_id, url, source, done) {
     feedparser.on('readable', function () {
       var stream = this, meta = this.meta, item;
       while (item = stream.read()) {
-        jobs.create('save_content', {
-          feed_id: _id,
-          //source: meta.title,
-          source: source,
-          url: item.origlink ? item.origlink : item.link
-        }).save(function (err) {
-          if (err) console.log(err);
+        var url = item.origlink ? item.origlink : item.link;
+        get_content(url, function (err, c) {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          if (!c) {
+            jobs.create('save_content', {
+              feed_id: _id,
+              //source: meta.title,
+              source: source,
+              url: url
+            }).save(function (err) {
+              if (err) console.error(err);
+            });
+          }
         });
       }
     });
@@ -88,21 +106,39 @@ function get_feed_content(_id, url, source, done) {
   }
 }
 
+function get_content(origlink, complete) {
+  var s = url.parse(origlink);
+  Content.findOne({host: s.host, path: s.path}).exec(complete);
+}
 
 function save_one(feed_id, source, origlink, complete) {
+  if (origlink.indexOf("times.com") != -1)
+    return complete();
+  console.log("requesting " + origlink)
   request(origlink, function (error, response, body) {
-    if (error || response.statusCode != 200)
-      return complete(new Error('no go ' + origlink));
+    if (error || response.statusCode != 200) {
+      console.log("COULDNT GET " + origlink);
+      return complete();
+    }
     Feed.findOne({_id: feed_id}).exec(function (err, f) {
-      if (err) return complete(err);
+      if (err) {
+        console.error(err);
+        return complete(err);
+      }
       var data = extractor.lazy(body, 'en');
-      var s = url.parse(origlink);
-      Content.findOne({host: s.host, path: s.path}).exec(function (err, c) {
-        if (err) return complete(err);
-        if (c) return complete();
+      get_content(origlink, function (err, c) {
+        if (err) {
+          console.error(err);
+          return complete(err);
+        }
+        if (c) {
+          console.log("...IN DB")
+          return complete();
+        }
         var title = data.title();
         var text = data.text();
         if (!title || !text) return complete();
+        var s = url.parse(origlink);
         new Content({
           feed: f,
           host: s.host,
@@ -115,7 +151,7 @@ function save_one(feed_id, source, origlink, complete) {
         }).save(function (err, c) {
             if (err) return complete(err);
             console.log("***ADD", c.title);
-            if (true)
+            if (!RENDER_TTS_WAV)
               return complete();
             else
               jobs.create('render_tts_wav', { //var job =
@@ -132,38 +168,47 @@ function save_one(feed_id, source, origlink, complete) {
 
 
 function render_tts_wav(cid, voice, complete) {
-  console.log('rendering', cid);
+  console.log('rendering wav '+cid);
   Content.findOne({_id: cid}).exec(function (err, content) {
     if (err) return complete(err);
     if (!content) return complete(new Error('no content'));
     var text = content.title + ' from ' + content.source + '. ' + content.text;
     var wav_file = voice + '-' + cid + '.wav';
+    console.log("synthesize " + wav_file);
     tts.render(text, cms.config.resourcePath + wav_file, voice, function (err) {
       if (err) return complete(err);
-      content.audio = {Zoe: true};
-      content.save(function (err, c2) {
+      var d = voice + '-' + cid + '.mp3';
+      jobs.create('convert_to_mp3', {
+        cid: cid,
+        source: wav_file,
+        dest: d
+      }).save(function (err) {
         if (err) return complete(err);
-        jobs.create('convert_to_mp3', {
-          source: wav_file,
-          dest: voice + '-' + cid + '.mp3'
-        }).save(function (err) {
-          if (err) return complete(err);
-          return complete();
-        });
+        console.log('**SAVE', d);
+        return complete();
       });
     });
   });
 }
 
-function convert_to_mp3(job, source, dest, done) {
-  console.log('converting to mp3', source);
+function convert_to_mp3(job, cid, source, dest, done) {
+  console.log('converting to mp3 '+cid)
   var dir = cms.config.resourcePath;
   new ffmpeg({source: dir + source})
     .withAudioCodec('libmp3lame') // libmp3lame // libfdk_aac
     .withAudioBitrate('64k') // :-) mp3 196k // 64k
     .withAudioChannels(1) // :-o
     .on('end', function () {
-      done();
+      Content.findOne({_id: cid}).exec(function (err, content) {
+        console.log(cid, err, content);
+        if (err) return done(err);
+        console.log('converted to mp3', source);
+        content.audio = {Zoe: true};
+        content.save(function (err, c2) {
+          if (err) return done(err);
+          done();
+        });
+      });
     })
     .on('error', function (err) {
       console.log('encode error: ' + err.message);
@@ -176,20 +221,6 @@ function convert_to_mp3(job, source, dest, done) {
     .saveToFile(dir + dest);
 }
 
-// ffmpeg info
-// The 'progress' event is emitted every time FFmpeg
-// reports progress information. 'progress' contains
-// the following information:
-// - 'frames': the total processed frame count
-// - 'currentFps': the framerate at which FFmpeg is currently processing
-// - 'currentKbps': the throughput at which FFmpeg is currently processing
-// - 'targetSize': the current size of the target file in kilobytes
-// - 'timemark': the timestamp of the current frame in seconds
-// - 'percent': an estimation of the progress
-
-
-
-
 
 // KUE
 
@@ -200,7 +231,7 @@ jobs.process('get_feed', 8, function (job, done) {
   get_feed_content(job.data._id, job.data.url, job.data.source, done);
 });
 
-jobs.process('save_content', 8, function (job, done) {
+jobs.process('save_content', 2, function(job, done){
   save_one(job.data.feed_id, job.data.source, job.data.url, done);
 });
 
@@ -209,7 +240,7 @@ jobs.process('render_tts_wav', 2, function (job, done) {
 });
 
 jobs.process('convert_to_mp3', 2, function (job, done) {
-  convert_to_mp3(job, job.data.source, job.data.dest, done);
+  convert_to_mp3(job, job.data.cid, job.data.source, job.data.dest, done);
 });
 
 jobs.on('job complete', function (id, result) {
@@ -217,7 +248,7 @@ jobs.on('job complete', function (id, result) {
     if (err) return;
     job.remove(function (err) {
       if (err) throw err;
-     //console.log('removed completed job #%d', job.id);
+      console.log('removed completed job #%d', job.id);
     });
   });
 });
@@ -235,7 +266,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/content', function (req, res, next) {
   var last = moment().subtract(12, 'hours');
-  res.redirect('/content/'+last.format());
+  res.redirect('/content/' + last.format());
 });
 
 app.get('/content/:datetime', function (req, res, next) {
@@ -266,11 +297,11 @@ app.get('/content/:datetime', function (req, res, next) {
 });
 
 app.get('/admin/refresh', function (req, res, next) {
-    check_feeds();
+  check_feeds();
 });
 
 app.get('/audio/:id', function (req, res, next) {
-    res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.mp3');
+  res.sendfile(cms.config.resourcePath + 'Zoe-' + req.params.id + '.mp3');
 });
 
 app.get('/resource/:id', function (req, res, next) {

@@ -1,7 +1,7 @@
 var freebase = require('freebase');
 var APIKEY = 'AIzaSyCoRa-naBDIOmwg71Q7WgqZQVv2XvvUmms';
 
-var Stream = require('./filestream').Stream;
+var Stream = require('../utils/filestream').Stream;
 
 var query = [{
   "id": null,

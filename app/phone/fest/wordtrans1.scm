@@ -1,8 +1,8 @@
 (load (path-append libdir "init.scm"))
 
-(define (pp fw text)
-  (set! t (format nil "%s\n" text)) ; ha
-  (let ((u (utt.synth (eval (list 'Utterance 'Text t))))) ; ha
+(define (pp fw fn)
+  (set! t (format nil "%s\n" fn)) ; scheme sux
+  (let ((u (utt.load nil fn)))
     (mapcar (lambda (seg) (rsegs fw seg)) (utt.relation.items u 'SylStructure))
     (format fw "\n")
     t
@@ -13,7 +13,6 @@
   (set! n (item.feat seg 'name))
   (set! b (item.feat seg 'segment_start))
   (set! e (item.feat seg 'segment_end))
-  (set! t (item.feat seg 'R:SylStructure.tobi_endtone))
   (set! d (item.feat seg 'R:SylStructure.daughtern.daughtern.end))
   (format fw "%f %f %f %s \n" b e d n )
 )

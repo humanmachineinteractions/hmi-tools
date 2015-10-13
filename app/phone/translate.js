@@ -34,7 +34,7 @@ var Translator = {
           var ls = this._translate(line, in_idx, out_idx);
           stream.write(ls + '\n');
           console.log(ls);
-        })
+        });
       });
     });
   },
@@ -45,8 +45,19 @@ var Translator = {
     var in_idx = Translator.find(options.from);
     var out_idx = Translator.find(options.to);
     var ls = '';
+    var ignore = false;
     var phs = Array.isArray(line) ? line : line.indexOf(' ') != -1 ? line.split(' ') : line.split('');
     phs.forEach(function (s) {
+      if (s == "<") {
+        ignore = true;
+        return;
+      }
+      else if (s == ">") {
+        ignore = false;
+        return;
+      }
+      if (ignore)
+        return;
       var accent = null;
       var m = s.match(/([A-Z][A-Z])([0-3])/);
       if (m) {
@@ -54,9 +65,11 @@ var Translator = {
         accent = m[2];
       }
       var row = Translator.M[in_idx + s];
-      if (options.spaced && ls.length != 0 && ls.charAt(ls.length - 1) != ' ')
+      if (options.spaced && ls.length != 0 && ls.charAt(ls.length - 1) != ' ') {
         ls += ' ';
+      }
       if (!row) {
+        //throw new Error("DONT KNOW")
         ls += s;
       } else {
         var ts = row[out_idx];
@@ -66,6 +79,11 @@ var Translator = {
       }
     });
     return ls;
+  },
+  isValid: function (ph, type) {
+    var idx = Translator.find(type);
+    var f = Translator.M[idx + ph];
+    return f != null;
   },
   split: function (line, type) {
     var r = [];
@@ -83,8 +101,11 @@ var Translator = {
         }
         j--;
       }
-      if (i < line.length)
-        console.log("???", line, line.substring(i, i + 1));
+      if (i < line.length) {
+        var c = line.substring(i, i + 1);
+        console.log("???", c);
+        r.push(c);
+      }
       i++;
     }
     return r;

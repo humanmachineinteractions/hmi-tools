@@ -3,16 +3,19 @@ var useCluster = true;
 var _ = require('lodash');
 var extractor = require('unfluff');
 var url = require('url');
-var utils = require('../utils');
-var franc = require('franc');
-
+var utils = require('../../utils/index');
 
 
 var Content;
 
 if (useCluster && cluster.isMaster) {
+  var current = require('../../../../currently13/app/modules/cms/index');
+  var domain = require('../../cms/index');
+  var cms = new current.Cms(domain);
+  Content = cms.meta.model("Content");
   var cpuCount = 1;//require('os').cpus().length;
   for (var i = 0; i < cpuCount; i += 1) {
+    console.log('worker init')
     cluster.fork();
   }
   cluster.on('exit', function (worker) {
@@ -20,11 +23,6 @@ if (useCluster && cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  var current = require('../../../currently13/app/modules/cms');
-  var domain = require('../cms/index');
-  var cms = new current.Cms(domain);
-  Content = cms.meta.model("Content");
-  console.log('worker init')
   crawl();
 }
 
@@ -38,7 +36,7 @@ function crawl() {
 
   function err(msg, complete) {
     console.log("ERRRRR", msg, current_content);
-    Content.findOneAndUpdate({host: current_content.host, path: current_content.path }, {
+    Content.findOneAndUpdate({host: current_content.host, path: current_content.path}, {
         $set: {
           state: "crawled_error",
           body: msg
@@ -54,7 +52,7 @@ function crawl() {
   function do_request(complete) {
     //console.log('http://' + current_content.host +  current_content.path)
     jsdom.env({
-      url: 'http://'+ current_content.host + current_content.path,
+      url: 'http://' + current_content.host + current_content.path,
       //scripts: ["http://code.jquery.com/jquery.js"],
       done: function (errors, window) {
         if (errors) {
@@ -79,7 +77,7 @@ function crawl() {
   }
 
   function queue_one() {
-    setTimeout(function() {
+    setTimeout(function () {
       Content.find({state: "init"}).exec(function (err, results) {
         if (err || results == null || results.length == 0) {
           setTimeout(function () {
@@ -88,8 +86,8 @@ function crawl() {
           }, 2000);
           return;
         }
-        current_content = results[Math.floor(Math.random()*results.length)];
-        do_request(function(){
+        current_content = results[Math.floor(Math.random() * results.length)];
+        do_request(function () {
           queue_one();
         });
       });
@@ -131,12 +129,12 @@ function addPage(host, path, title, body, complete) {
     function (err, p) {
       console.log(err);
       if (err) return complete(err);
-   console.log("***ADD", p)
-     return complete();
+      console.log("***ADD", p)
+      return complete();
     });
 }
 
-var nofollowpaths = ['login','register','auth', 'adx/bin'];
+var nofollowpaths = ['login', 'register', 'auth', 'adx/bin'];
 function addPageStub(url, complete) {
   if (url == null || url.indexOf("http") != 0)
     return complete();

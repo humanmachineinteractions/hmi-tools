@@ -3,7 +3,7 @@ var _ = require('lodash');
 var ProgressBar = require('progress');
 var utils = require('../utils/index');
 var cons = require('../console');
-var Stream = require('../krawl/filestream').Stream;
+var Stream = require('../utils/filestream').Stream;
 
 function unique(lines, options) {
   if (typeof(options) == 'number')

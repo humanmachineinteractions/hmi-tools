@@ -1,8 +1,8 @@
 var fs = require('fs');
 var path = require('path');
 var praat = require('index');
-var utils = require('../../utils/index');
-var Stream = require('../../krawl/filestream').Stream;
+var utils = require('../../utils');
+var Stream = require('../../utils/filestream').Stream;
 
 function convert_dir(input_dir, output_dir, translator, done) {
   fs.readdir(input_dir, function (err, files) {
