@@ -19,9 +19,16 @@ Vagrant.configure("2") do |config|
   config.vm.network "private_network", ip: "10.11.12.25"
   config.vm.network "forwarded_port", guest: 8111, host: 8111
 
+
+  config.ssh.forward_agent = true
+  config.ssh.forward_x11 = true
+
+
   # nfs mounted app!
   config.vm.synced_folder "app", "/home/vagrant/app", :nfs => true, id: "app"
   config.vm.synced_folder "/Users/posttool/Google Drive/Jibo_project_data", "/home/vagrant/jibo-audio", :nfs => true, id: "jibo-audio"
+  config.vm.synced_folder "/Users/posttool/Google Drive/Jibo_training_data", "/home/vagrant/jibo-training-data", :nfs => true, id: "jibo-training-data"
+  config.vm.synced_folder "/Users/posttool/Documents/github/jibo", "/home/vagrant/jibo-repo", :nfs => true, id: "jibo-repo"
 
   config.vm.synced_folder "deploy", "/home/vagrant/deploy"
   #config.vm.synced_folder "../MITIE", "/home/MITIE"
