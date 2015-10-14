@@ -58,6 +58,7 @@ var fs = require('fs');
 var PR_INIT = 0;
 var PR_ITEM = 1;
 var PR_INTERVALS = 2;
+var PR_POINTS = 3;
 function praat_read_tg(file, enc) {
   var o = {encoding: enc ? enc : "utf8"};
   var s = fs.readFileSync(file, o).toString().split('\n');
@@ -65,6 +66,7 @@ function praat_read_tg(file, enc) {
   var data = {};
   var sections = [];
   var section = null;
+  var section_class = null;
   var current_line = null;
   for (var i = 0; i < s.length; i++) {
     var tg_line = s[i].trim();
@@ -78,9 +80,13 @@ function praat_read_tg(file, enc) {
             section = nv[1].substring(1, nv[1].length - 1);
             sections.push(section);
             data[section] = [];
+          } else if (nv[0] == "class") {
+            section_class = nv[1].substring(1, nv[1].length - 1);
           }
           break;
         case PR_INTERVALS:
+          current_line[nv[0]] = nv[1];
+        case PR_POINTS:
           current_line[nv[0]] = nv[1];
       }
     } else if (tg_line.match(/(\w+) \[(\d+)]:/)) {
@@ -90,6 +96,10 @@ function praat_read_tg(file, enc) {
         state = PR_ITEM;
       } else if (n == "intervals") {
         state = PR_INTERVALS;
+        current_line = {}
+        data[section].push(current_line);
+      } else if (n == "points") {
+        state = PR_POINTS;
         current_line = {}
         data[section].push(current_line);
       }
