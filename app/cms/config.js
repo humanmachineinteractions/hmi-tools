@@ -1,6 +1,6 @@
 var config = {
   development: {
-    name: 'HMI Reader',
+    name: 'HMI Aegis',
     serverPort: 3011,
     mongoConnectString: 'mongodb://localhost/reader2',
     sessionSecret: 'fdsdffdfdfds',
