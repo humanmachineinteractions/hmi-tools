@@ -16,6 +16,14 @@ function fest_feats_from_utt(utt, complete) {
   });
 }
 
+function fest_feats_from_text(text, complete) {
+  exec(FESTIVALDIR + 'festival --script ~/app/phone/fest/dump1.scm "' + text + '"', function (error, stdout, stderr) {
+    if (stderr) return complete(stderr)
+    if (error) return complete(error);
+    complete(null, stdout);
+  });
+}
+
 function fest_word_feats_from_utt(t, complete) {
   exec(FESTIVALDIR + 'festival --script ~/app/phone/fest/wordtrans1.scm "' + t + '"', function (error, stdout, stderr) {
     if (stderr) return complete(stderr)
@@ -75,46 +83,55 @@ function get_segs(w) {
   return segs;
 }
 
-function get_int_events(w) {
+function get_chunk(w, name) {
   var ss = w.split("\n");
-  var int_e = [];
+  var c = [];
   var reading = false;
   ss.forEach(function (s) {
     if (reading && s.indexOf("#") == 0) {
       reading = false;
       return;
     }
-    if (s.indexOf("# IntEvents") == 0) {
+    if (s.indexOf("# "+name) == 0) {
       reading = true;
       return;
     }
     if (!reading)
       return;
-    var ss = s.split(" ");
+    c.push(s.split(" "));
+  });
+  return c;
+}
+
+function get_int_events(w) {
+  var c = get_chunk(w, "IntEvents");
+  var int_e = [];
+  c.forEach(function (ss) {
     int_e.push({end: Number(ss[0]), event: ss[1]});
   });
   return int_e;
 }
 
 function get_phrase_events(w) {
-  var ss = w.split("\n");
+  var c = get_chunk(w, "Phrase");
   var ph_e = [];
-  var reading = false;
-  ss.forEach(function (s) {
-    if (reading && s.indexOf("#") == 0) {
-      reading = false;
-      return;
-    }
-    if (s.indexOf("# Phrase") == 0) {
-      reading = true;
-      return;
-    }
-    if (!reading)
-      return;
-    var ss = s.split(" ");
+  c.forEach(function (ss) {
     ph_e.push({end: Number(ss[0]), phrase: ss[1]});
   });
   return ph_e;
+}
+
+function get_words_2(w) {
+  var c = get_chunk(w, "Words");
+  var words = [];
+  var word_begin = 0, word_end;
+  for (var i=0; i<c.length; i++) {
+    var ss = c[i];
+    word_end = Number(ss[0]);
+    words.push({word: ss[1], begin: word_begin, end: word_end});
+    word_begin = word_end;
+  }
+  return words;
 }
 
 
@@ -171,7 +188,9 @@ exports.transcriptionFromText = fest_trans_from_text;
 exports.wordFeaturesFromText = fest_word_feats_from_text;
 exports.wordFeaturesFromUtt = fest_word_feats_from_utt;
 exports.dumpFromUtterance = fest_feats_from_utt;
+exports.dumpFromText = fest_feats_from_text;
 exports.getWords = get_words;
+exports.getWordsD = get_words_2;
 exports.getSegments = get_segs;
 exports.getIntEvents = get_int_events;
 exports.getPhraseEvents = get_phrase_events;
