@@ -5,6 +5,10 @@ var utils = require('../utils/index');
 var cons = require('../console');
 var Stream = require('../utils/filestream').Stream;
 
+/**
+ * returns a map of {nphone: nph, phones: phones, count: 1, idx: idx, line: line}
+ *   indexed by nphone
+ */
 function unique(lines, options) {
   if (typeof(options) == 'number')
     options = {n: options};

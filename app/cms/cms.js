@@ -8,6 +8,7 @@ var spawn = require('child_process').spawn;
 var http = require('http');
 
 var current = require('../../../currentcms');
+var utils = require('../../../currentcms/lib/utils');
 var useCluster = false;
 if (useCluster && cluster.isMaster) {
   var cpuCount = require('os').cpus().length;
@@ -19,126 +20,259 @@ if (useCluster && cluster.isMaster) {
     cluster.fork();
   });
 } else {
-  var server = express();
-  var domain = require('./index');
+  var app = express();
 
+  var domain = {
+    config: require('./config'),
+    models: require('./models'),
+    workflow: require('./workflow'),
+    permissions: require('./permission')
+  };
   var cms = new current.Cms(domain);
-  server.use(cms.app);
+  app.use(cms.app);
 
-  server.set('views', __dirname + '/views');
-  server.use(express.static(__dirname + '/public'));
+  var jobs = kue.createQueue(cms.kueConfigH);
 
-  var Corpus = cms.meta.model("Corpus");
+  var PhoneDict = require('../phone/phonedict');
+  var phoneDict = new PhoneDict({phonesaurus: false});
+  phoneDict.on('ready', function () {
+    console.log('phonedict ready')
+  });
+
+  app.set('views', __dirname + '/views');
+  app.use(express.static(__dirname + '/public'));
+
+  var Product = cms.meta.model("Product");
+  var Domain = cms.meta.model("Domain");
   var Script = cms.meta.model("Script");
   var Schema = cms.meta.model("Schema");
+  var Utterance = cms.meta.model("Utterance");
+  var Work = cms.meta.model("Work");
+  var Resource = cms.meta.model("Resource");
 
-  server.get('/schema/:seg_id', function(req, res, next){
-    Script.find({segments: new mongoose.Types.ObjectId(req.params.seg_id)}).exec(function (err, scripts) {
-      if (err) return next(err);
-      if (!scripts || scripts.length == 0) return next(new Error('no scripts for seg'));
-      Corpus.find({scripts: scripts[0]}).exec(function (err, corpora) {
-        if (err) return next(err);
-        if (!corpora || corpora.length == 0) return next(new Error('no corpora for seg/script'));
-        Schema.findById(corpora[0].scheme).populate('fields').exec(function(err, schema){
-          if (err) return next(err);
-          res.json(schema);
-        })
-      });
-    });
-  });
-  server.listen(domain.config.serverPort);
-
-
-  var test_server = spawn("python", [ "test1.py"], {cwd: __dirname + "/../"});
-    test_server.stdout.on('data', function (data) {
-      console.log("ts out> "+ data);
-    });
-    test_server.stderr.on('data', function (data) {
-      console.log("ts err> "+ data);
-    });
-    test_server.on('error', function (code) {
-      console.log("ts", code);
-    });
-    test_server.on('close', function (code) {
-      console.log("ts", code);
-    });
-
-
-  //
-  var jobs = kue.createQueue(cms.kueConfigH);
+  // wrap up job
   jobs.on('job complete', function(id,result){
     kue.Job.get(id, function (err, job) {
       if (err) return;
-      Corpus.findById(job.data.id).exec(function (err, corpus) {
-        console.log(corpus)
-      });
-
-//      job.remove(function (err) {
-//        if (err) throw err;
-//        console.log('completed job', job, result);
-//      });
+      Work.findOne({jobId: job.id}).exec(function(err, w){
+        if (err) return;
+        w.complete = true;
+        w.save(function(){
+          job.remove(function (err) {
+            if (err) throw err;
+            console.log('completed job', job.id, result);
+          });
+        });
+      })
     });
   });
 
-//  server.get('/cms/jobs', function(req, res, next){
-//    console.log(jobs.client);
-//  });
 
-  server.get('/cms/corpus/:id/train_ner', function (req, res, next) {
-    jobs.create('train_ner', {
-      id: req.params.id
+  function new_work(job, done) {
+    new Work({
+      refType: job.data.refType,
+      refId: job.data.refId,
+      jobId: job.id,
+      type: job.name,
+      kwargs: job.data.kwargs,
+      userId: job.userId,
+      created: new Date(),
+      complete: false}).save(done);
+  }
+
+  function find_work(type, id, complete, done) {
+    Work.find({refType: type, refId: id, complete: complete}).exec(done)
+  }
+
+  function createOrFind(T, q, done) {
+    T.findOne(q).exec(function(err, t){
+      if (!t) {
+        new T(q).save(function(err, t){
+          done(err, t);
+        })
+      } else {
+        done(err, t);
+      }
+    });
+  }
+  // compute a script
+  var computeScript = require('../phone/greedy');
+  var XLSX = require('xlsx');
+  var corpus = require('../corpus')
+  var D = require('../corpus/dynamic');
+  jobs.process('generate-script', function (job, done) {
+    job.name = 'generate-script';
+    // create work for (job.data.type, job.data.id )
+    new_work(job, function(err, work) {
+      // var socket = sockets[job.data.userId];
+      // socket.emit('work-new', work);
+      var workLog = function(msg) {
+        work.logs.push({message: msg, timestamp: new Date()});
+        work.save(function(err, w){
+          console.log('save work',err)
+        });
+        // socket.emit('work-log', {id: work._id, message: msg});
+      }
+      var processTemplates = function(templDone) {
+        Resource.find({_id: {$in: job.data.kwargs.templates}}).exec(function(err, templates){
+          utils.forEach(templates, function(t, next){
+            var workbook = XLSX.readFile(domain.config.fileConfig.basePath + '/' + t.path);
+            utils.forEach(workbook.SheetNames, function(sheet, next){
+              var title = sheet.substring(7).trim().toLowerCase();
+              createOrFind(Domain, {name: title}, function(err, domain){
+                var worksheet = workbook.Sheets[sheet];
+                var expanded = [];
+                for (z in worksheet) {
+                  if (z.indexOf("C") == 0 && z != "C1") {
+                    var r = corpus.processRow(D[title], worksheet[z].v);
+                    r.forEach(function (s) {
+                      expanded.push(s);
+                    });
+                  }
+                }
+                workLog('Ranking '+expanded.length+' lines for '+title+'.');
+                computeScript.ranked2(expanded, Number(job.data.kwargs.total), workLog, function (err, ranked) {
+                  var script = new Script({name: "generated "+title});
+                  utils.forEach(ranked, function(o, next){
+                    createOrFind(Utterance, {orthography: o.line, transcription: o.transcription, domain: domain}, function(err, utt){
+                      console.log(utt);
+                      script.utterances.push(utt);
+                      next();
+                    });
+                  }, function(){
+                    script.save(function(err, script){
+                      console.log(script);
+                      next();
+                    })
+                  })
+                })
+              })
+            }, next);
+          }, function(){
+            console.log("done")
+          })
+        })
+      }
+      if (job.data.kwargs.domains && job.data.kwargs.domains.length != 0) {
+        console.log("X")
+        // TODO return a cancelable worker
+        // var worker =
+        computeScript.ranked(Utterance, job, workLog, function (err, results) {
+          console.log("RESULTS", results.length);
+          Product.findOne({_id: job.data.refId}).exec(function(err, p){
+            var s = new Script({name: "generated script"});
+            results.forEach(function(l){
+              s.utterances.push(l.id);
+            });
+            s.save(function(err, s1){
+              p.scripts.push(s);
+              p.save(function(err,p1){
+                if (job.data.kwargs.templates) {
+                  processTemplates(done);
+                } else {
+                  work.complete = true;
+                  work.save(function(err, w1){
+                    done();
+                  });
+                }
+              });
+            });
+          })
+        });
+      } else if (job.data.kwargs.templates && job.data.kwargs.templates.length != 0) {
+        processTemplates(job.data.kwargs.templates, done);
+      } else {
+        console.log("NOTHING TO DO");
+      }
+    });
+  });
+
+   app.post('/cms/work', function(req, res, next){
+     find_work(req.body.type, req.body.id, false, function(err, w){
+       res.json(w);
+     });
+   });
+
+   app.post('/cms/work/:id/abort', function(req, res, next){
+     Work.findOne({_id:req.params.id}).exec(function(err, w){
+       if (err) return next(err);
+       //worker.terminate();
+       w.remove(function(err, i){
+         if (err) return next(err);
+         res.json(i);
+       })
+     })
+   });
+
+  app.post('/cms/product/:id/generate-script', function (req, res, next) {
+    jobs.create('generate-script', {
+      refType: 'Product',
+      refId: req.params.id,
+      userId: req.session.user._id,
+      kwargs: {
+        total: req.body.total,
+        domains: req.body.domains,
+        templates: req.body.templates
+      }
     }).attempts(1).save(function(){
-      res.json("ok");
+      res.json("Working...");
     });
   });
 
-  server.get('/cms/corpus/:id/is_trained', function (req, res, next) {
-    fs.exists(__dirname + "/../" + req.params.id + ".dat", function (b) {
-      res.json(b);
-    });
-  });
+  // global add transcript
 
-  server.get('/cms/corpus/:id/test/:text', function (req, res, next) {
-    var options = {
-      host: 'localhost',
-      port: 8080,
-      path: '/cms?id='+req.params.id+"&text="+encodeURIComponent(req.params.text)
-    };
-    http.get(options, function (hres) {
-      console.log("Got response: " + hres.statusCode);
-      hres.on("data", function(chunk) {
-        res.json(JSON.parse(chunk.toString()));
+  var addingTranscript = false;
+  app.get('/cms/utterances/add-transcription', function(req, res, next){
+    if (addingTranscript) {
+      return next(new Error('in progress'));
+    }
+    addingTranscript = true;
+    var stream = Utterance.find({transcription: null}).stream();
+
+    stream.on('data', function (doc) {
+      phoneDict.getTranscriptionInfo(doc.orthography, function (err, s) {
+        // console.log(s);
+        doc.transcription = s.transcription.join('  ');
+        doc.save(function(x,a){})
+        //console.log(doc);
       });
-    }).on('error', function (e) {
-      console.log("EERR",e)
-      next(e);
+    }).on('error', function (err) {
+      console.log("ERRROR add trans", err)
+    }).on('close', function () {
+      addingTranscript = false;
+      console.log("complete")
     });
+
+    res.json('working');
+
   });
 
-  jobs.process('train_ner', function (job, done) {
-    job.log('started ' + job);
-    var err = null;
-    var train_process    = spawn("python", [ "train1.py", job.data.id], {cwd: __dirname + "/../"});
-    train_process.stdout.on('data', function (data) {
-      job.log('stdout: ' + data);
-      console.log('stdout: ' + data);
-    });
-    train_process.stderr.on('data', function (data) {
-      job.log('stderr: ' + data);
-      console.log('stderr: ' + data);
-    });
-    train_process.on('error', function (code) {
-      job.log('errrrrrror ' + code);
-      err = code;
-    });
-    train_process.on('close', function (code) {
-      job.log('child process exited with code ' + code);
-      done(err);
-    });
-  });
+
+// start servin'
+
+
+  var server = app.listen(domain.config.serverPort);
+  // var io = require('socket.io').listen(server);
+  //
+  // var sockets = {};
+  // var socketIdToUserId = {};
+  // io.on('connection', function (socket) {
+  //   socket.on('disconnect', function () {
+  //     delete sockets[socketIdToUserId[socket.id]];
+  //   });
+  //   socket.on('user', function (data) {
+  //     socketIdToUserId[socket.id] = data;
+  //     sockets[data] = socket;
+  //   });
+  //   socket.on('get-work', function (data) {
+  //     find_work(data.type, data.id, false, function(err, w){
+  //       socket.emit('work', w);
+  //     })
+  //   });
+  // });
+
 
   kue.app.listen(3004);
 
 
 }
-

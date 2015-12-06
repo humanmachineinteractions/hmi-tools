@@ -56,6 +56,10 @@ function p2(s) {
 }
 
 function p3(props, s) {
+  if (s==null) {
+    console.log("?", props, s);
+    return [];
+  }
   var ps = p2(s);
   if (ps.length == 1)
     return ps.tokens;

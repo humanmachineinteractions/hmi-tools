@@ -1,0 +1,13 @@
+.logs {
+  font-size: 11px;
+  background-color: #385060;
+  color: #eee;
+  padding: 8px 18px 2px 10px;
+  margin: 3px;
+}
+.work-log-date{
+  color: #999;
+}
+.work-log-message {
+  padding: 0 0 6px 0;
+}

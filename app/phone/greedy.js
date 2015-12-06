@@ -68,6 +68,112 @@ function greedy(infile, outfile, options, complete) {
   }
 }
 
+var Worker = require('webworker-threads').Worker;
+
+function getBigStats(Utterance, q, workLog) {
+  var stream = Utterance.find(q).stream();
+  workLog("Collecting utterances.");
+  stream.on('data', function (doc) {
+    lines.push(lineFromUtt(doc));
+    if (lines.length % 10000 == 0) {
+      workLog("Collected "+lines.length+" lines.");
+    }
+  }).on('close', function () {
+    shuffle(lines);
+    workLog("Found "+lines.length+" utterances. Generating statistics.");
+    var unique = {};
+    for (var n = N; n < X; n++) {
+      _.assign(unique, stats.unique(lines, n));
+    }
+    complete(lines, unique);
+  });
+
+}
+function doCustomGreedy(Utterance, job, workLog, complete) {
+  var lines = [];
+  var q = {transcription: {$ne: null}, domain: {$in: job.data.kwargs.domains}};
+  var stream = Utterance.find(q).stream();
+  workLog("Collecting utterances.");
+  stream.on('data', function (doc) {
+    if (Math.random() > .2 && doc.orthography.length > 30 && doc.orthography.length < 145) {
+      lines.push(lineFromUtt(doc));
+      if (lines.length % 10000 == 0) {
+        workLog("Collected "+lines.length+" lines.");
+      }
+    }
+  }).on('close', function () {
+    shuffle(lines);
+    workLog("Found "+lines.length+" utterances. Generating statistics.");
+    var unique = {};
+    for (var n = N; n < X; n++) {
+      _.assign(unique, stats.unique(lines, n));
+    }
+    var results = [];
+    doGreedy(lines, unique, null, results, function(){
+      complete(null, results);
+    }, workLog, Number(job.data.kwargs.total));
+  });
+}
+
+function doCustomGreedy2(tlines, total, workLog, complete) {
+  var lines = [];
+  var d = new PhoneDict();
+  d.on('ready', function () {
+    workLog("Generating transcriptions.");
+    utils.forEach(tlines, function (line, next) {
+      d.getTranscriptionInfo(line, function (err, s) {
+        lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
+        if (lines.length % 1000 == 0) {
+          workLog("Transcribed "+lines.length+" lines.");
+        }
+        setTimeout(next,10);
+      });
+    }, function () {
+      shuffle(lines);
+      workLog("Generating statistics.");
+      var unique = {};
+      for (var n = N; n < X; n++) {
+        _.assign(unique, stats.unique(lines, n));
+      }
+      var results = [];
+      doGreedy(lines, unique, null, results, function(){
+        complete(null, results);
+      }, workLog, total);
+    });
+  });
+
+
+
+}
+
+function lineFromUtt(doc) {
+  return {
+    id: doc._id,
+    line: doc.orthography,
+    transcription:  doc.transcription,
+    phones: doc.transcription.split(' ')
+  };
+}
+
+
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex ;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
 
 /**
  * This is an optimization technique for constructing a subset of sentences from a large set of sentences
@@ -78,14 +184,20 @@ function greedy(infile, outfile, options, complete) {
  * example, contains a maximum of non−already covered units. The process stops when all units are covered.
  *
  * @param lines {Array} a list of objects {line: "text", transcription: "T EE S"}
+ * @param unique {Object}
  * @param covered {Object} a map of phones to ignore (optional)
  * @param out the output stream
  * @param complete
  */
 
 
-function doGreedy(lines, unique, covered, out, complete) {
 
+function doGreedy(lines, unique, covered, out, complete, workLog, max) {
+
+  if (max == null) max = 5000;
+  if (workLog) {
+    workLog("Ranking "+max+" of "+lines.length+" lines.");
+  }
 
   /**
    * Step 1: Generate a unique nphone list from the corpus.
@@ -124,7 +236,7 @@ function doGreedy(lines, unique, covered, out, complete) {
   }
 
   /**
-   * Step 4: Calculate a score for every sentence. The sentence score is defined by the equation.
+   * Step 4: Calculate a score for every sentence.
    * Step 5: Select the highest scored sentence.
    */
   function step_4_and_5() {
@@ -152,32 +264,43 @@ function doGreedy(lines, unique, covered, out, complete) {
   var c = 0;
 
   function step_2_through_7() {
-    step_2_and_3();
-    step_4_and_5();
-    //
-    var selected = lines.shift();
-    c++;
-    //var ph = translator.translate(selected.transcription, {from: "ARPABET", to: "IPA"}).replace(/_/g, ' ');
-    out.write(selected.line + "\t" + selected.transcription + "\n");
+    setTimeout(function(){
+      step_2_and_3();
+      setTimeout(function(){
+        step_4_and_5();
+        setTimeout(function(){
+          var selected = lines.shift();
+          c++;
 
-    for (var n = N; n < X; n++) {
-      stats.forNphone(n, selected.phones, function (nphone, aphone, idx, s) {
-        if (unique[nphone]) {
-          delete unique[nphone];
-        }
-      });
-    }
+          if (out.write) {
+            out.write(selected.line + "\t" + selected.transcription + "\n");
+          } else if (Array.isArray(out)){
+            out.push(selected);
+          }
+          for (var n = N; n < X; n++) {
+            stats.forNphone(n, selected.phones, function (nphone, aphone, idx, s) {
+              if (unique[nphone]) {
+                delete unique[nphone];
+              }
+            });
+          }
+          //
+          var phone_count = _.keys(unique).length;
+          console.log(phone_count + " " + lines.length + " " + c + "  " + selected.line);// + "\n        " + selected.transcription);
+          if (workLog != null) {
+            workLog("Line " + c + "  " + selected.line);
+          }
+          if (c >= max || phone_count == 0) {
+            if (out.end) {
+              out.end();
+            }
+            return complete(null, lines);
+          }
+          setTimeout(step_2_through_7, 200);
+        }, 200)
+      }, 200)
+    }, 200)
     //
-    var phone_count = _.keys(unique).length;
-    console.log(phone_count + " " + lines.length + " " + c + "  " + selected.line);// + "\n        " + selected.transcription);
-    if (c > 5000 || phone_count == 0) {
-      //step_1();
-      //step_2_and_3();
-      //step_4_and_5();
-      out.end();
-      return complete(null, lines);
-    }
-    process.nextTick(step_2_through_7);
   }
 
   step_1();
@@ -191,6 +314,8 @@ function doGreedy(lines, unique, covered, out, complete) {
 
 exports.greedy = greedy;
 exports.doGreedy = doGreedy;
+exports.ranked = doCustomGreedy;
+exports.ranked2 = doCustomGreedy2;
 
 
 if (!module.parent) {
@@ -211,6 +336,3 @@ if (!module.parent) {
   });
 
 }
-
-
-
