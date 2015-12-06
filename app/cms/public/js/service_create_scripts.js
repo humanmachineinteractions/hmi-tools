@@ -37,13 +37,9 @@ form_modules["create_scripts"] = function (form) {
         }
       });
     });
-    $p.append("<h4>Drop templated script below</h4>");
-    var up = new form_fields.upload_field({cellRenderer: upload_cell});
-    $p.append(up.$el());
-    up.$el().css({'margin-bottom': '15px'});
     $p.append("<h4>Total number of lines</h4>");
     var total_inp = new form_fields.input_field();
-    total_inp.data = 2500;
+    total_inp.data = 100;
     total_inp.$el().find("input").addClass("small");
     total_inp.$el().css({'margin-bottom': '15px'});
     $p.append(total_inp.$el())
@@ -59,8 +55,8 @@ form_modules["create_scripts"] = function (form) {
       var $pp = $$();
       $el.append($pp);
       $pp.text('working');
-      $$ajax('/cms/product/'+form.id+'/generate-script',
-        JSON.stringify({domains: domains, templates: up.data, total: total_inp.data}), "post").done(function(e){
+      $$ajax('/cms/product/'+form.id+'/generate-domain-script',
+        JSON.stringify({domains: domains, total: total_inp.data}), "post").done(function(e){
           $pp.text(JSON.stringify(e))
       })
     })
@@ -72,16 +68,5 @@ form_modules["create_scripts"] = function (form) {
     })
   }
 
-  function upload_cell(){
-    var self = this;
-    var $el = mixin_basic_component(self);
-    $el.css({'color': 'black'})
-    mixin_emitter(self);
-    mixin_data(self, update_ui, {});
-    function update_ui(){
-      $el.empty();
-      $el.append(self._data.name);
-    }
-  }
 
 };

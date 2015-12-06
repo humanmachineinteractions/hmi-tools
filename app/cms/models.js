@@ -106,9 +106,10 @@ exports = module.exports = {
     ],
     formModules: [
       {name: "Work", widget: "work", options: {}, async: true},
-      {name: "Create scripts", widget: "create_scripts", options: {}, async: true}
+      {name: "Generate script", widget: "create_scripts", options: {}, async: true},
+      {name: "Upload template", widget: "templated_scripts", options: {}, async: true}
     ],
-    includes: ["/js/service_work.js", "/css/work.css","/js/service_create_scripts.js"]
+    includes: ["/js/service_work.js", "/css/work.css","/js/service_create_scripts.js","/js/service_create_scripts0.js"]
 
   },
 
@@ -174,7 +175,7 @@ exports = module.exports = {
     form: [
       {name: "orthography", widget: "textarea", options: {className: "large"}},
       {name: "transcription", widget: "transcription", options: {className: "small"}},
-      {name: "meta", widget: "annotator"},
+      {name: "meta", widget: "json"},
       {name: "tags", widget: "input"},
       {name: "description", widget: "rich_text", options: {collapsable: true, collapsed: true}},
       {name: "domain", widget: "choose_create", options: {type: "Domain", array: false}}

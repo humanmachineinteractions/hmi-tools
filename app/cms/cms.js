@@ -100,92 +100,122 @@ if (useCluster && cluster.isMaster) {
   var XLSX = require('xlsx');
   var corpus = require('../corpus')
   var D = require('../corpus/dynamic');
-  jobs.process('generate-script', function (job, done) {
-    job.name = 'generate-script';
-    // create work for (job.data.type, job.data.id )
+  var getWorkLog = function(work) {
+    return function(msg){
+      work.logs.push({message: msg, timestamp: new Date()});
+      work.save(function(err, w){
+        console.log('save work',err)
+      });
+      // socket.emit('work-log', {id: work._id, message: msg});
+    }
+  }
+  jobs.process('generate-domain-script', function (job, done) {
+    job.name = 'generate-domain-script';
     new_work(job, function(err, work) {
-      // var socket = sockets[job.data.userId];
-      // socket.emit('work-new', work);
-      var workLog = function(msg) {
-        work.logs.push({message: msg, timestamp: new Date()});
-        work.save(function(err, w){
-          console.log('save work',err)
-        });
-        // socket.emit('work-log', {id: work._id, message: msg});
-      }
-      var processTemplates = function(templDone) {
-        Resource.find({_id: {$in: job.data.kwargs.templates}}).exec(function(err, templates){
-          utils.forEach(templates, function(t, next){
-            var workbook = XLSX.readFile(domain.config.fileConfig.basePath + '/' + t.path);
-            utils.forEach(workbook.SheetNames, function(sheet, next){
-              var title = sheet.substring(7).trim().toLowerCase();
-              createOrFind(Domain, {name: title}, function(err, domain){
-                var worksheet = workbook.Sheets[sheet];
-                var expanded = [];
-                for (z in worksheet) {
-                  if (z.indexOf("C") == 0 && z != "C1") {
-                    var r = corpus.processRow(D[title], worksheet[z].v);
-                    r.forEach(function (s) {
-                      expanded.push(s);
-                    });
-                  }
-                }
-                workLog('Ranking '+expanded.length+' lines for '+title+'.');
-                computeScript.ranked2(expanded, Number(job.data.kwargs.total), workLog, function (err, ranked) {
-                  var script = new Script({name: "generated "+title});
-                  utils.forEach(ranked, function(o, next){
-                    createOrFind(Utterance, {orthography: o.line, transcription: o.transcription, domain: domain}, function(err, utt){
-                      console.log(utt);
-                      script.utterances.push(utt);
-                      next();
-                    });
-                  }, function(){
-                    script.save(function(err, script){
-                      console.log(script);
-                      next();
-                    })
-                  })
-                })
-              })
-            }, next);
-          }, function(){
-            console.log("done")
-          })
+      var workLog = getWorkLog(work);
+
+      // TODO return a cancelable worker
+      // var worker =
+      computeScript.ranked(Utterance, job, workLog, function (err, results) {
+        console.log("domain script complete", results.length);
+        Product.findOne({_id: job.data.refId}).exec(function(err, p){
+          var s = new Script({name: "generated script"});
+          results.forEach(function(l){
+            s.utterances.push(l.id);
+          });
+          s.save(function(err, s1){
+            p.scripts.push(s);
+            p.save(function(err,p1){
+                work.complete = true;
+                work.save(function(err, w1){
+                  done();
+                });
+            });
+          });
         })
-      }
-      if (job.data.kwargs.domains && job.data.kwargs.domains.length != 0) {
-        console.log("X")
-        // TODO return a cancelable worker
-        // var worker =
-        computeScript.ranked(Utterance, job, workLog, function (err, results) {
-          console.log("RESULTS", results.length);
-          Product.findOne({_id: job.data.refId}).exec(function(err, p){
-            var s = new Script({name: "generated script"});
-            results.forEach(function(l){
-              s.utterances.push(l.id);
-            });
-            s.save(function(err, s1){
-              p.scripts.push(s);
-              p.save(function(err,p1){
-                if (job.data.kwargs.templates) {
-                  processTemplates(done);
-                } else {
-                  work.complete = true;
-                  work.save(function(err, w1){
-                    done();
-                  });
-                }
-              });
-            });
-          })
-        });
-      } else if (job.data.kwargs.templates && job.data.kwargs.templates.length != 0) {
-        processTemplates(job.data.kwargs.templates, done);
-      } else {
-        console.log("NOTHING TO DO");
-      }
+      });
     });
   });
+
+  function getWorksheetsAndDomains(job, it, complete) {
+    Resource.find({_id: {$in: job.data.kwargs.templates}}).exec(function(err, templates){
+      utils.forEach(templates, function(t, next){
+        var workbook = XLSX.readFile(domain.config.fileConfig.basePath + '/' + t.path);
+        utils.forEach(workbook.SheetNames, function(sheet, next){
+          var title = sheet;
+          var sidx = sheet.indexOf('-');
+          if (sidx != -1) {
+            title = title.substring(sidx+1).trim()
+          }
+          title = title.toLowerCase();
+          createOrFind(Domain, {name: title}, function(err, domain){
+            var worksheet = workbook.Sheets[sheet];
+            console.log(title, domain.name)
+            it(worksheet, domain, next)
+          });
+        }, function(){
+          console.log('sheets complete');
+          next();
+        });
+      }, function(){
+        console.log('templates complete');
+        complete();
+      });
+    });
+  }
+
+  function expandWorksheet(worksheet, domainName) {
+    var expanded = [];
+    for (z in worksheet) {
+      if (z.indexOf("C") == 0 && z != "C1") {
+        var r = corpus.processRow(D[domainName], worksheet[z].v);
+        r.forEach(function (s) {
+          expanded.push(s);
+        });
+      }
+    }
+    return expanded;
+  }
+
+  jobs.process('generate-templated-script', function (job, done) {
+    job.name = 'generate-templated-script';
+    new_work(job, function(err, work) {
+      var workLog = getWorkLog(work);
+      var scripts = [];
+      getWorksheetsAndDomains(job, function(worksheet, domain, next){
+        var expanded = expandWorksheet(worksheet, domain.name);
+        workLog('Ranking '+expanded.length+' lines for '+domain.name+'.');
+        computeScript.ranked2(Utterance, expanded, Number(job.data.kwargs.total), workLog, function (err, ranked) {
+          var script = new Script({name: "generated "+domain.name});
+          utils.forEach(ranked, function(o, next){
+            createOrFind(Utterance, {orthography: o.line, transcription: o.transcription, domain: domain}, function(err, utt){
+              console.log(utt);
+              script.utterances.push(utt);
+              next();
+            });
+          }, function(){
+            script.save(function(err, script){
+              scripts.push(script);
+              next();
+            })
+          })
+        })
+      }, function(){
+        Product.findOne({_id: job.data.refId}).exec(function(err, p){
+          scripts.forEach(function(s){
+            p.scripts.push(s);
+          });
+          p.save(function(err,p1){
+              work.complete = true;
+              work.save(function(err, w1){
+                done();
+              });
+          });
+        })
+      })
+    })
+  });
+
 
    app.post('/cms/work', function(req, res, next){
      find_work(req.body.type, req.body.id, false, function(err, w){
@@ -204,15 +234,28 @@ if (useCluster && cluster.isMaster) {
      })
    });
 
-  app.post('/cms/product/:id/generate-script', function (req, res, next) {
-    jobs.create('generate-script', {
+  app.post('/cms/product/:id/generate-templated-script', function (req, res, next) {
+    jobs.create('generate-templated-script', {
+      refType: 'Product',
+      refId: req.params.id,
+      userId: req.session.user._id,
+      kwargs: {
+        total: req.body.total,
+        templates: req.body.templates
+      }
+    }).attempts(1).save(function(){
+      res.json("Working...");
+    });
+  });
+
+  app.post('/cms/product/:id/generate-domain-script', function (req, res, next) {
+    jobs.create('generate-domain-script', {
       refType: 'Product',
       refId: req.params.id,
       userId: req.session.user._id,
       kwargs: {
         total: req.body.total,
         domains: req.body.domains,
-        templates: req.body.templates
       }
     }).attempts(1).save(function(){
       res.json("Working...");

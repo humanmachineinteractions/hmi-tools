@@ -68,28 +68,43 @@ function greedy(infile, outfile, options, complete) {
   }
 }
 
-var Worker = require('webworker-threads').Worker;
+// TODO use
+// var Worker = require('webworker-threads').Worker;
 
-function getBigStats(Utterance, q, workLog) {
-  var stream = Utterance.find(q).stream();
-  workLog("Collecting utterances.");
-  stream.on('data', function (doc) {
-    lines.push(lineFromUtt(doc));
-    if (lines.length % 10000 == 0) {
-      workLog("Collected "+lines.length+" lines.");
+function getBigStats(Utterance, q, workLog, complete) {
+  var bigStatsFile = __dirname + '/greedyStats.json';
+  fs.exists(bigStatsFile, function(b){
+    if (b) {
+      fs.readFile(bigStatsFile, function(err,data){
+        return complete(err, JSON.parse(data.toString()));
+      })
+    } else {
+      var lines = [];
+      var stream = Utterance.find(q).stream();
+      workLog("Gathering text for language statistics.");
+      stream.on('data', function (doc) {
+        if (Math.random()>.7) { // random sample
+          lines.push(lineFromUtt(doc));
+          if (lines.length % 10000 == 0) {
+            workLog("Found "+lines.length+" lines...");
+          }
+        }
+      }).on('close', function () {
+        shuffle(lines);
+        workLog("Found "+lines.length+" total lines. Generating statistics.");
+        var unique = {};
+        for (var n = N; n < X; n++) {
+          _.assign(unique, stats.unique(lines, n));
+        }
+        fs.writeFile(bigStatsFile, JSON.stringify(unique), function(err){
+          complete(lines, unique);
+        })
+      });
     }
-  }).on('close', function () {
-    shuffle(lines);
-    workLog("Found "+lines.length+" utterances. Generating statistics.");
-    var unique = {};
-    for (var n = N; n < X; n++) {
-      _.assign(unique, stats.unique(lines, n));
-    }
-    complete(lines, unique);
   });
 
 }
-function doCustomGreedy(Utterance, job, workLog, complete) {
+function prepareScript1(Utterance, job, workLog, complete) {
   var lines = [];
   var q = {transcription: {$ne: null}, domain: {$in: job.data.kwargs.domains}};
   var stream = Utterance.find(q).stream();
@@ -115,30 +130,28 @@ function doCustomGreedy(Utterance, job, workLog, complete) {
   });
 }
 
-function doCustomGreedy2(tlines, total, workLog, complete) {
+function prepareScript2(Utterance, tlines, total, workLog, complete) {
   var lines = [];
   var d = new PhoneDict();
   d.on('ready', function () {
-    workLog("Generating transcriptions.");
-    utils.forEach(tlines, function (line, next) {
-      d.getTranscriptionInfo(line, function (err, s) {
-        lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
-        if (lines.length % 1000 == 0) {
-          workLog("Transcribed "+lines.length+" lines.");
-        }
-        setTimeout(next,10);
+    getBigStats(Utterance, {transcription: {$ne: null}}, workLog, function(bigLines, unique){
+      workLog("Generating transcriptions.");
+      utils.forEach(tlines, function (line, next) {
+        d.getTranscriptionInfo(line, function (err, s) {
+          lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
+          if (lines.length % 1000 == 0) {
+            workLog("Transcribed "+lines.length+" lines.");
+          }
+          setTimeout(next,10);
+        });
+      }, function () {
+        shuffle(lines);
+        workLog("Generating statistics.");
+        var results = [];
+        doGreedy(lines, unique, null, results, function(){
+          complete(null, results);
+        }, workLog, total);
       });
-    }, function () {
-      shuffle(lines);
-      workLog("Generating statistics.");
-      var unique = {};
-      for (var n = N; n < X; n++) {
-        _.assign(unique, stats.unique(lines, n));
-      }
-      var results = [];
-      doGreedy(lines, unique, null, results, function(){
-        complete(null, results);
-      }, workLog, total);
     });
   });
 
@@ -314,8 +327,8 @@ function doGreedy(lines, unique, covered, out, complete, workLog, max) {
 
 exports.greedy = greedy;
 exports.doGreedy = doGreedy;
-exports.ranked = doCustomGreedy;
-exports.ranked2 = doCustomGreedy2;
+exports.ranked = prepareScript1;
+exports.ranked2 = prepareScript2;
 
 
 if (!module.parent) {

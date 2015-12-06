@@ -18,7 +18,7 @@ form_modules["work"] = function (form) {
       tid = setTimeout(get_work, 2500);
     })
   }
-  get_work();
+  tid = setTimeout(get_work, 200);
   self.destroy = function(){
     clearTimeout(tid);
   }
