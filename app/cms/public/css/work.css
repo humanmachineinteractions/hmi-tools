@@ -11,3 +11,19 @@
 .work-log-message {
   padding: 0 0 6px 0;
 }
+
+
+/* move */
+input[type=range] {
+    -webkit-appearance: none;
+    background-color: silver;
+    height:10px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+     -webkit-appearance: none;
+    background-color: #798ea1;
+    opacity: 0.5;
+    width: 10px;
+    height: 20px;
+}

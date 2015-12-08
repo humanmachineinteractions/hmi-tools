@@ -110,7 +110,8 @@ function prepareScript1(Utterance, job, workLog, complete) {
   var stream = Utterance.find(q).stream();
   workLog("Collecting utterances.");
   stream.on('data', function (doc) {
-    if (Math.random() > .2 && doc.orthography.length > 30 && doc.orthography.length < 145) {
+    console.log(job.data.sentenceLength)
+    if (Math.random() > .1 && doc.orthography.length > 20 && doc.orthography.length < job.data.kwargs.sentenceLength) {
       lines.push(lineFromUtt(doc));
       if (lines.length % 10000 == 0) {
         workLog("Collected "+lines.length+" lines.");
@@ -118,7 +119,11 @@ function prepareScript1(Utterance, job, workLog, complete) {
     }
   }).on('close', function () {
     shuffle(lines);
-    workLog("Found "+lines.length+" utterances. Generating statistics.");
+    workLog("Found "+lines.length+" utterances.");
+    if (lines.length == 0) {
+      return complete(null, []);
+    }
+    workLog("Generating statistics.");
     var unique = {};
     for (var n = N; n < X; n++) {
       _.assign(unique, stats.unique(lines, n));
@@ -138,7 +143,7 @@ function prepareScript2(Utterance, tlines, total, workLog, complete) {
       workLog("Generating transcriptions.");
       utils.forEach(tlines, function (line, next) {
         d.getTranscriptionInfo(line, function (err, s) {
-          lines.push({line: line, transcription: s.transcription, phones: s.phones.voiced()});
+          lines.push({line: line, transcription: s.transcription.join('  '), phones: s.phones.voiced()});
           if (lines.length % 1000 == 0) {
             workLog("Transcribed "+lines.length+" lines.");
           }

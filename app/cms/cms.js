@@ -256,6 +256,7 @@ if (useCluster && cluster.isMaster) {
       kwargs: {
         total: req.body.total,
         domains: req.body.domains,
+        sentenceLength: req.body.sentenceLength
       }
     }).attempts(1).save(function(){
       res.json("Working...");
@@ -271,13 +272,17 @@ if (useCluster && cluster.isMaster) {
     }
     addingTranscript = true;
     var stream = Utterance.find({transcription: null}).stream();
-
+    var c = 0;
     stream.on('data', function (doc) {
       phoneDict.getTranscriptionInfo(doc.orthography, function (err, s) {
         // console.log(s);
         doc.transcription = s.transcription.join('  ');
-        doc.save(function(x,a){})
-        //console.log(doc);
+        doc.save(function(x,a){
+          c++;
+          if (c%1000==0)
+            console.log('transcribed', c, doc);
+        })
+
       });
     }).on('error', function (err) {
       console.log("ERRROR add trans", err)
