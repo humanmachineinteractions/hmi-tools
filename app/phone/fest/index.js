@@ -134,6 +134,16 @@ function get_words_2(w) {
   return words;
 }
 
+function get_segs_2(w) {
+  var c = get_chunk(w, "Segments2");
+  var segs = [];
+  for (var i=0; i<c.length; i++) {
+    var ss = c[i];
+    segs.push({ph: ss[2], begin: Number(ss[0]), end: Number(ss[1])});
+  }
+  return segs;
+}
+
 
 function fest_word_feats_from_text(t, complete) {
   exec('/home/vagrant/sw/festival/bin/festival --script ~/app/phone/fest/wordtrans.scm "' + t + '"', function (error, stdout, stderr) {
@@ -171,7 +181,7 @@ function execFestvoxStream(dir, cmd, complete) {
     });
 
   fcmd.stdout.on('data', function (data) {
-    console.log(data + "");
+    console.log("!",data + "");
   });
 
   fcmd.stderr.on('data', function (data) {
@@ -192,6 +202,7 @@ exports.dumpFromText = fest_feats_from_text;
 exports.getWords = get_words;
 exports.getWordsD = get_words_2;
 exports.getSegments = get_segs;
+exports.getSegmentsD = get_segs_2;
 exports.getIntEvents = get_int_events;
 exports.getPhraseEvents = get_phrase_events;
 exports.execFestvox = execFestvox;

@@ -26,6 +26,10 @@
     (set! ll 0)
     (mapcar (lambda (seg) (rphrase fw seg)) (utt.relation.items u 'Phrase))
 
+    (format fw "# Segments2 \n" )
+    (set! ll 0)
+    (mapcar (lambda (seg) (rsegs1 fw seg)) (utt.relation.items u 'Segment))
+
     t
   )
 )
@@ -43,12 +47,19 @@
   )
 )
 
+(define (rsegs1 fw seg)
+  (set! n (item.feat seg 'name))
+  (set! b (item.feat seg 'segment_start))
+  (set! e (item.feat seg 'segment_end))
+  (format fw "%f %f %s \n" b e n)
+)
+
 (define (rwords fw seg)
   (set! n (item.feat seg 'name))
   (set! b (item.feat seg 'segment_start))
   (set! e (item.feat seg 'segment_end))
   (set! t (item.feat seg 'R:SylStructure.tobi_endtone))
-  (set! d (item.feat seg 'R:SylStructure.daughtern.daughtern.end))
+  (set! d (item.feat seg 'R:SylStructure.daughtern.daughtern.segment_end))
   (cond
     ((not (eq e 0)) (format fw "" ))
     ((not (eq d 0)) (format fw "%f %s \n" d n ))

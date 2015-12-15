@@ -726,33 +726,33 @@ function getTg(utt, next) {
   });
 }
 
-function clean_string(s) {
+function clean_string(s, r) {
   var cs = '';
   var sss = false;
-  for (var i=0; i< s.length; i++) {
+  for (var i = 0; i < s.length; i++) {
     var c = s.charAt(i);
-    if (is_clean(c)) {
+    if (is_clean(c, r)) {
       cs += c;
     } else {
-            sss = true;
-
+      sss = true;
     }
   }
-  if (sss)
-    console.log(cs);
+  //if (sss)
+  //  console.log(cs);
   return cs;
 }
-function is_clean(c) {
-  var b = c.match(/[\w\d\s\?\.\-\(\)%+$&/#*=,!:;'"’áñüéöô]/);
-  if (!b) console.log("*********** no clean "+c);
+function is_clean(c, r) {
+  var b = c.match(r ? r : /[\w\d\s\?\.\-\(\)%+$&/#*=,!:;'"’áñüéöô]/);
+  //if (!b) console.log("*********** no clean " + c);
   return b;
 }
 
 var iconv = require('iconv-lite');
 iconv.extendNodeEncodings();
 function createRelations(which) {
+  var lex = {};
   var wpetc = get_wp_etc();
-  var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
+  // var script_by_uid = JSON.parse(fs.readFileSync(__dirname + "/data/final.json"));
   translator.init(function () {
     exec("mkdir " + final_root + "/jibo_db/wrd; mkdir " + final_root + "/jibo_db/lab; mkdir " + final_root + "/jibo_db/wav", function () {
       new Stream(final_root + "/jibo_db/txt.done.data", function (txtdone) {
@@ -762,32 +762,67 @@ function createRelations(which) {
             utils.forEach(tgfiles, function (tgfile, next) {
               if (tgfile.match(/\d{4}\.TextGrid/)) {
                 // console.log("Processing " + dir + "/" + tgfile);
-                var data = praat.readTextGrid(jibo_repo + "/" + dir + "/" + tgfile, "utf16");
-                var words = data["ARPABET"];
-                if (words == null) {
-                  var data8 = praat.readTextGrid(jibo_repo + "/" + dir + "/" + tgfile, "utf8"); // try utf8
-                  words = data8["ARPABET"];
-                  if (words == null) {
-                    console.log("CANT READ FILE", jibo_repo + "/" + dir + "/" + tgfile);//dont know what to do now
-                    console.log(data);
-                    return next();
-                  }
-                }
-                var invalid = validateSegs(words);
-                if (invalid.length != 0) {
-                  console.log("Invalid phones", dir, tgfile, invalid);
-                  return next();
-                }
                 var script = dir;
                 var filename = tgfile;
                 var line = filename.substring(0, 4);
                 var uid = wpetc.getUid(script, line);
-                var ortho = script_by_uid[uid][1];
-                ortho = clean_string(ortho);
-                txtdone.writeln("( " + uid + " \"" + ortho + "\" )");
-                fs.writeFileSync(final_root + "/jibo_db/wrd/" + uid + ".wrd", createWordRelation(words, ortho), 'utf8');
-                fs.writeFileSync(final_root + "/jibo_db/lab/" + uid + ".lab", createSegRelation(words), 'utf8');
-                next();
+                var data = readcoded(jibo_repo + "/" + dir + "/" + tgfile);
+                var phones = data["ARPABET"];
+                var words = data["WORD"];
+                if (phones == null || words == null) {
+                  console.log("CANT READ FILE", jibo_repo + "/" + dir + "/" + tgfile, data);
+                  return next();
+                }
+                var invalid = validateSegs(phones);
+                if (invalid.length != 0) {
+                  console.log("Invalid phones", dir, tgfile, invalid);
+                  return next();
+                }
+                var ortho = "";
+                var idx = 0;
+                // assemble lexicon and orthography
+                words.forEach(function (w) {
+                  var t = w.text.substring(1, w.text.length - 1);
+                  if (t) {
+                    var T = clean_string(t.toUpperCase(), /[\w&#\+=']/);
+                    var p = phones[idx].text.substring(1, phones[idx].text.length - 1);
+                    var P = p.toUpperCase();
+                    if (!lex[T])
+                      lex[T] = [];
+                    if (lex[T].indexOf(P) == -1)
+                      lex[T].push(P);
+                    //if (lex[T].length>1)
+                    // console.log(t, lex[T]);
+                    ortho += t + " ";
+                    idx++;
+                  }
+                });
+                ortho = clean_string(ortho).trim();
+                // get original festival transcript and add pauses to word list
+                var utt_hmm_file = "/home/vagrant/jibo-training-data/utts_hmm/" + uid + ".utt";
+                fest.dumpFromUtterance(utt_hmm_file, function (err, w) {
+                  if (err) return next(err);
+                  var w2 = fest.getWordsD(w);
+                  var s2 = fest.getSegmentsD(w);
+                  console.log(ortho);
+                  //console.log(s2);
+                  s2.forEach(function(s2s){
+                    if (s2s.ph == 'pau') {
+                      for (var m=0; m<w2.length; m++) {
+                        if (w2[m].end == s2s.begin) {
+                          //console.log('pau after ', m, w2[m].word, phones[m]);
+                          phones[m].pause = true;
+                        }
+                      }
+                    }
+                  });
+
+                  //var orig_ortho = script_by_uid[uid][1];
+                  txtdone.writeln("( " + uid + " \"" + ortho + "\" )");
+                  fs.writeFileSync(final_root + "/jibo_db/wrd/" + uid + ".wrd", createWordRelation(phones, words), 'utf8');
+                  fs.writeFileSync(final_root + "/jibo_db/lab/" + uid + ".lab", createSegRelation(phones), 'utf8');
+                  next();
+                });
               } else {
                 next();
               }
@@ -795,7 +830,23 @@ function createRelations(which) {
           });
         }, function () {
           txtdone.end();
-          console.log("complete")
+          new Stream(final_root + "/jibo_db/lex", function (lexdone) {
+            var keys = [];
+            for (var p in lex) {
+              keys.push(p);
+            }
+            keys = keys.sort();
+            keys.forEach(function (p) {
+              if (!lex[p]) {
+                console.log("???", p)
+              } else {
+                lex[p].forEach(function (ph) {
+                  lexdone.writeln(p + "\t" + ph);
+                });
+              }
+            });
+            console.log("complete")
+          });
         });
       });
     });
@@ -821,32 +872,34 @@ function validateSegs(words) {
 function createWordRelation(phs, ortho) {
   var s = "#\n";
   for (var i = 0; i < phs.length; i++) {
-    s += Number(phs[i].xmax).toFixed(6) + " 121 " + ortho[i].text + " ; wordlab \"" + (i + 1) + "\" ;\n";
+    s += Number(phs[i].xmax).toFixed(6) + " 121 " + ortho[i].text + " ; wordlab \"" + (i + 1) + "\" ; phones " + phs[i].text + " ; \n";
   }
   return s;
 }
 
-function createSegRelation(words) {
+function createSegRelation(phones) {
   var t = "#\n";
   t += "0.300000 121 pau \n";
-  for (var i = 0; i < words.length; i++) {
-    var txt = words[i].text.substring(1, words[i].text.length - 1).trim();
-    var ss = txt.split(" ");
-    var m = (words[i].xmax - words[i].xmin) / ss.length;
-    for (var j = 0; j < ss.length; j++) {
-      var ff = (Number(words[i].xmin) + (j + 1) * m);
-      var sj = ss[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
-      if (sj == "") sj = "pau";
+  for (var i = 0; i < phones.length; i++) {
+    var txt = phones[i].text.substring(1, phones[i].text.length - 1).trim();
+    if (phones[i].pause) txt += " pau";
+    var segments = txt.split(" ");
+    var m = (phones[i].xmax - phones[i].xmin) / segments.length;
+    for (var j = 0; j < segments.length; j++) {
+      var ff = (Number(phones[i].xmin) + (j + 1) * m);
+      var seg = segments[j].toLowerCase().replace(/\.|\?|!|,|'|"|-|–|—/g, "");
+      if (seg == "") seg = "pau";
       // is sj a valid phone?
-      if (translator.isValid(sj, "FESTVOX")) {
-        t += ff.toFixed(6) + " 121 " + sj + " \n";
+      if (translator.isValid(seg, "FESTVOX")) {
+        t += ff.toFixed(6) + " 121 " + seg + " \n";
       } else {
-        console.log("!!!!!!!!!!!!!???? not a valid phone " + sj);
+        console.log("!!!!!!!!!!!!!???? not a valid phone " + seg);
       }
     }
   }
   var ls = ff + .3;
   t += ls.toFixed(6) + " 121 pau \n";
+  console.log(t);
   return t;
 }
 
@@ -944,8 +997,8 @@ function getTg3(lab_file, audio_end, next) {
   var segs = [];
   lab_lines.forEach(function (line) {
     var n = line.split(' ');
-    var begin = Number(n[0])/1E7;
-    var end = Number(n[1])/1E7;
+    var begin = Number(n[0]) / 1E7;
+    var end = Number(n[1]) / 1E7;
     if (n[2])
       segs.push([begin, end, n[2]]);
   });
@@ -1157,22 +1210,40 @@ function copyProsodicTgs(in_dir, repo_dir) {
   });
 }
 
+function find_text(a, t) {
+  for (var i = 0; i < a.length; i++) {
+    var ai = a[i];
+    //console.log(t, Number(ai.xmin), Number(ai.xmax));
+    if (Number(ai.xmin) < t && t < Number(ai.xmax))
+      return ai.text;
+  }
+  ;
+  return null;
+}
 function createProsodicRelations(tg_dir, out_dir) {
   fs.readdir(tg_dir, function (err, files) {
     utils.forEach(files, function (file, next) {
       if (!file.match(/\d{4}\.TextGrid/)) {
         next();
       } else {
+        console.log(file);
         var data = praat.readTextGrid(tg_dir + "/" + file, "utf8");
-        console.log(data);
+        if (!data['INT'])
+          data = praat.readTextGrid(tg_dir + "/" + file, "utf16");
+        if (!data['INT']) {
+          console.log('no data',data);
+          return next();
+        }
         var fname = file.substring(0, file.length - 9);
         new Stream(out_dir + '/' + fname + '.int', function (out) {
           out.writeln("#");
           data['INT'].forEach(function (int_event) {
             var time = int_event['time'] ? int_event['time'] : int_event['number'];
             var tobi = int_event['mark'].replace(/"/g, '');
-            tobi = tobi ? tobi : "NONE";
-            out.writeln(time + "  " + tobi);
+            var text = find_text(data['WORD'], time);
+            if (tobi && text) {
+              out.writeln(time + "  " + tobi + " " + text);
+            }
           });
           out.end();
           next();
@@ -1330,7 +1401,7 @@ else if (process.argv[2] == 'tgforutt')
   getTg(which[0], function () {
   });
 else if (process.argv[2] == 'relations')
-  createRelations(scriptTo(process.argv[3]));
+  createRelations(scriptTo(process.argv[3]));//[process.argv[3]]);//
 else if (process.argv[2] == 'boundaries')
   createBoundaryTGfromLabs(process.argv[3], process.argv[4]);
 else if (process.argv[2] == 'copyBoundaries')
