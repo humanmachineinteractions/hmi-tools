@@ -1,0 +1,18 @@
+.utterances .deletable-row {
+  border-bottom: 1px solid #eee;
+  width: 100%;
+  padding-top: 10px;
+}
+.utterances .comp {
+  width: 95%;
+  padding: 0 0 15px 0;
+  font-size: 19px;
+  color: #555;
+  cursor: pointer;
+}
+.comp:hover {
+  color: #111;
+}
+.utterances .deletable-row:hover {
+  background-color: #dbebf7;
+}

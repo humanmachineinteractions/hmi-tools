@@ -2,8 +2,8 @@ var config = {
   development: {
     name: 'HMI Aegis',
     serverPort: 3011,
-    mongoConnectString: 'mongodb://localhost/reader2',
-    sessionSecret: 'fdsdffdfdfds',
+    mongoConnectString: 'mongodb://localhost/aegis',
+    sessionSecret: 'sh89fuaflg347gargw8k-dsh8',
 
     kueConfigH: {
       redis: {
@@ -12,8 +12,8 @@ var config = {
       }
     },
 
-    storage: "cloudinary",
-    cloudinaryConfig: { cloud_name: 'hmi', api_key: '', api_secret: '' }
+    storage: 'file',
+    fileConfig: { basePath: '/Users/david/hmi-www-audio' }
   },
   production: {
 //

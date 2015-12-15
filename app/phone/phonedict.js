@@ -14,7 +14,7 @@ function PhoneDict(options, complete) {
   var self = this;
   self.entries = {};
   self.numberOfEntries = 0;
-  self.phonesaurus = true;
+  self.phonesaurus = options ? options.phonesaurus != null ? options.phonesaurus : true : true;
   utils.readLines(__dirname + '/cmu/cmudict.0.7a', function (data) {
     if (data.indexOf(";;;") == 0 || data.indexOf("#") == 0)
       return;
@@ -61,12 +61,13 @@ PhoneDict.prototype.getTranscriptionInfo = function (sentence, complete) {
   var phs = new model.SymbolList();
   var wordInSentence;
   var nextNe = null;
-  if (sentence.charAt(0) == '[')
-    sentence = JSON.parse(sentence);
+  // if (sentence.charAt(0) == '[')
+  //   sentence = JSON.parse(sentence);
   if (Array.isArray(sentence)) {
     wordInSentence = sentence;
   } else {
-    wordInSentence = tokenize(/[ |–|—|\?|!|"|;|…]/g, sentence);
+    sentence = sentence.replace(/’/, "'");
+    wordInSentence = tokenize(/[ |–|—|\?|!|"|;|:|,|…|\(|)|“|”]/g, sentence);
   }
   utils.forEach(wordInSentence, function (wordInfo, next) {
     if (!wordInfo.word) return next();

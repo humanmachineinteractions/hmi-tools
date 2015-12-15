@@ -1,0 +1,6 @@
+rain
+snow
+sleet
+hail
+ice
+sun

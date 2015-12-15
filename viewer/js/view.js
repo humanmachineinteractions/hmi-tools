@@ -275,15 +275,15 @@ $(document).ready(function () {
             if (word.syllables && word.syllables[0]) {
               var begin = word.syllables[0][0].begin;
               var r = getRegionAtTime(begin);
-              var $a = $("<span>" + word.text + "</span>").addClass("medium");
-              r.data.$ui = $a;
-              $ov_info.append($a);
-              $ov_info.append(" ");
-              $a.click(function () {
-                var r = getRegionAtTime(begin);
-                r.data.$ui = $a;
-                selectRegion(r, true);
-              });
+              // var $a = $("<span>" + JSON.stringify(word) + "</span>");//.addClass("medium");
+              // r.data.$ui = $a;
+              // $ov_info.append($a);
+              // $ov_info.append(" ");
+              // $a.click(function () {
+              //   var r = getRegionAtTime(begin);
+              //   r.data.$ui = $a;
+              //   selectRegion(r, true);
+              // });
             } else {
               var $a = $("<span><em>" + word.text + "</em></span>").addClass("medium");
               $ov_info.append($a);

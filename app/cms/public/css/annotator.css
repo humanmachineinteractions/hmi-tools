@@ -6,17 +6,22 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    padding: 0 0 15px 0;
 }
 
 .token {
-    font-size: 23px;
+    font-size: 18px;
     border-radius: 3px;
-    border: 1px solid #888;
     color: #444;
     float: left;
-    padding: 5px;
     margin: 0 5px 5px 0;
     cursor: pointer;
+    height: 40px;
+}
+.token .pos {
+  font-size:8px;
+}
+.token .word {
 }
 
 .token.select {
@@ -62,7 +67,7 @@
 }
 
 .deletable-row .model{
-    height: 80px;
+  height: 35px;
     background-color:#fff;
     color: #111;
 }
