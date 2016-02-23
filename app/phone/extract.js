@@ -8,8 +8,8 @@ iconv.extendNodeEncodings();
 var utils = require('../utils');
 var translator = require('./translate');
 
-var input_dir = '/Users/david/Data--CorporaImposing/tom/rawdata';
-var output_dir = '/Users/david/adapt/MIN';
+var input_dir = '/Users/...';
+var output_dir = '/Users/...';
 var text_out = fs.createWriteStream(output_dir + '/txt.done.data');
 var phseq_out = fs.createWriteStream(output_dir + '/txt.phseq.data');
 
